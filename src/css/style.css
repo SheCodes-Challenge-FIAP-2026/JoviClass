@@ -1,0 +1,211 @@
+:root{
+    --bg-color1: #000fb0;
+    --bg-color2: #ffffff; 
+    --bg-color3: #4e6fb6;
+    --bg-color4: #1466ff;
+    --bg-color5: #888;
+    --bg-colorFundo: #f0f0f5;
+
+
+}
+ 
+ 
+ * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+ 
+    body {
+      background-color: var(--bg-colorFundo);
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+    
+    #logoJovi{
+      display: flex;
+    }
+    
+    #logo{
+      width: 150px;
+      height: 130px;
+    }
+
+    .menu {
+      background-color: var(--bg-color1);
+      color: white;
+      padding: 25px;
+      display: flex;
+      flex-direction: column;
+    }
+
+ 
+    .menu h2 {
+      font-size: 18px;
+      color: var(--bg-color2);
+      margin-bottom: 12px;
+      padding: 25px;
+    }
+ 
+    .menu-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin: 20px;
+    }
+ 
+    .menu a {
+      color: var(--bg-color2);
+      text-decoration: none;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 13px;
+      background-color: var(--bg-color3);
+      display: flex;
+      justify-content: center;
+
+    }
+ 
+    .menu a.ativo {
+      background-color: var(--bg-color4);
+    }
+ 
+   
+    .conteudo {
+      flex: 1;
+      padding: 20px 15px;
+    }
+ 
+    .conteudo h1 {
+      font-size: 22px;
+      margin-bottom: 4px;
+    }
+ 
+    .conteudo p {
+      color: var(--bg-color5);
+      margin-bottom: 20px;
+      font-size: 14px;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+ 
+    .card {
+      background: var(--bg-color2);
+      padding: 15px;
+      border-radius: 10px;
+      text-align: center;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+ 
+    .card span {
+      font-size: 12px;
+      color: var(--bg-color5);
+    }
+ 
+    .card p {
+      font-size: 24px;
+      font-weight: bold;
+      color: var(--bg-color1);
+      margin-top: 5px;
+    }
+ 
+
+    .secoes {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+ 
+    .secao {
+      background: var(--bg-color2);
+      border-radius: 10px;
+      padding: 15px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+ 
+    .secao h3 {
+      font-size: 15px;
+      margin-bottom: 12px;
+      color: var(--bg-color1);
+    }
+ 
+    .item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid #eee;
+      font-size: 14px;
+    }
+ 
+    .item:last-of-type {
+      border-bottom: none;
+    }
+ 
+    .item .nome {
+      font-weight: bold;
+      color: #333;
+    }
+ 
+    .item .detalhe {
+      font-size: 12px;
+      color: var(--bg-color5);
+    }
+ 
+    .badge {
+      background-color: var(--bg-color1);
+      color: white;
+      padding: 3px 10px;
+      border-radius: 10px;
+      font-size: 12px;
+      white-space: nowrap;
+    }
+ 
+    .ver-todos {
+      display: inline-block;
+      margin-top: 10px;
+      color: var(--bg-color1);
+      font-size: 13px;
+      text-decoration: none;
+    }
+ 
+    @media (min-width: 700px) {
+      body {
+        flex-direction: row;
+      }
+ 
+      .menu {
+        width: 250px;
+        flex-direction: column;
+        padding: 30px 20px;
+      }
+ 
+      .menu-links {
+        flex-direction: column;
+        gap: 8px;
+      }
+ 
+      .menu a {
+        border-radius: 5px;
+        padding: 10px;
+      }
+ 
+      .cards {
+        grid-template-columns: repeat(4, 1fr);
+      }
+ 
+      .secoes {
+        flex-direction: row;
+      }
+ 
+      .secao {
+        flex: 1;
+      }
+    }
