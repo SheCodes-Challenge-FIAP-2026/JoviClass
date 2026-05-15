@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href= "../css/style.css">
+    <link rel="stylesheet" href= "../css/comunidade.css">
     <title>Comunidade</title>
 </head>
 <body>
@@ -24,11 +24,20 @@
     </div>
 
     <div id="comunidade">
-        <h1>Comunidades</h1>
-        <p>Participe de grupos de estudo e colabore com outros estudantes.</p>
-        <button onclick="abrirFormulario()">+ Nova Comunidade</button>
+        <div class="topoComunidade">
+            <div>
+            <h1>Comunidades</h1>
+            <p>Participe de grupos de estudo e colabore com outros estudantes.</p>
+            </div>
+
+            <button type="button" onclick="abrirFormulario()">+ Nova Comunidade</button>        
+
+        </div>
+
+
         <div id="formulario">
             <form action="">
+                <button onclick="fecharAba()" id="fechar">X</button>   
                 <h2>Nova Comunidade</h2>
                 <label for="nomeComunidade">Nome da Comunidade:</label>
                 <input type="text" placeholder="Ex.Cálculo" id="nomeComunidade">
@@ -47,8 +56,11 @@
                     <option value="privacidade">Pública</option>
                     <option value="privacidade">Privada</option>
                 </select>
-                <button>Criar comunidade</button>
+                <button type="button" onclick="criarComunidade()">Criar comunidade</button>
             </form>
+
+        </div>
+        <div id="listadeComunidades">
 
         </div>
     </div>
