@@ -1,0 +1,73 @@
+:root{
+    --bg-color1: #000fb0;
+    --bg-color2: #ffffff; 
+    --bg-color3: #4e6fb6;
+    --bg-color4: #1466ff;
+    --bg-color5: #888;
+    --bg-colorFundo: #f0f0f5;
+
+
+}
+ 
+ 
+ * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+ 
+    body {
+      background-color: var(--bg-colorFundo);
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+    
+    #logoJovi{
+      display: flex;
+    }
+    
+    #logo{
+      width: 150px;
+      height: 130px;
+    }
+
+    .menu {
+      background-color: var(--bg-color1);
+      color: white;
+      padding: 25px;
+      display: flex;
+      flex-direction: column;
+    }
+
+ 
+    .menu h2 {
+      font-size: 18px;
+      color: var(--bg-color2);
+      margin-bottom: 12px;
+      padding: 25px;
+    }
+ 
+    .menu-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin: 20px;
+    }
+ 
+    .menu a {
+      color: var(--bg-color2);
+      text-decoration: none;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 13px;
+      background-color: var(--bg-color3);
+      display: flex;
+      justify-content: center;
+
+    }
+ 
+    .menu a.ativo {
+      background-color: var(--bg-color4);
+    }
