@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href= "../css/comunidade.css">
+    <link rel="stylesheet" href="../css/comunidade.css">
     <title>Comunidade</title>
 </head>
 <body>
@@ -12,8 +12,8 @@
         <div class="logoJovi">
             <img src="../assets/img/logo.png" alt="" id="logo">    
             <h2>JoviClass</h2>
-
         </div>
+
         <div class="menu-links">
             <a href="#" class="ativo">Início</a>
             <a href="#">Matérias</a>
@@ -24,48 +24,107 @@
     </div>
 
     <div id="comunidade">
+
         <div class="topoComunidade">
             <div>
-            <h1>Comunidades</h1>
-            <p>Participe de grupos de estudo e colabore com outros estudantes.</p>
+                <h1>Comunidades</h1>
+                <p>Participe de grupos de estudo e colabore com outros estudantes.</p>
             </div>
 
-            <button type="button" onclick="abrirFormulario()">+ Nova Comunidade</button>        
-
+            <button type="button" onclick="abrirFormulario()">
+                + Nova Comunidade
+            </button>
         </div>
 
-
+        <!-- FORMULÁRIO -->
         <div id="formulario">
-            <form action="">
-                <button onclick="fecharAba()" id="fechar">X</button>   
+
+            <form>
+
+                <button type="button" onclick="fecharAba()" id="fechar">
+                    X
+                </button>
+
                 <h2>Nova Comunidade</h2>
-                <label for="nomeComunidade">Nome da Comunidade:</label>
-                <input type="text" placeholder="Ex.Cálculo" id="nomeComunidade">
-                <label for="descricao">Descrição:</label>
-                <input type="text" placeholder="Descreva o objetivo da comunidade...">
-                <label for="categoria">Categoria: </label>
-                <select name="categoria" id="categoria">
-                    <option value="categoria">Estudo</option>
-                    <option value="categoria">Projeto</option>
-                    <option value="categoria">Discussão</option>
-                    <option value="categoria">Tutoria</option>
-                    <option value="categoria">Social</option>
+
+                <label for="nomeComunidade">
+                    Nome da Comunidade:
+                </label>
+
+                <input 
+                    type="text" 
+                    placeholder="Ex. Cálculo"
+                    id="nomeComunidade"
+                >
+
+                <label for="descricao">
+                    Descrição:
+                </label>
+
+                <input 
+                    type="text" 
+                    placeholder="Descreva o objetivo da comunidade..."
+                    id="descricao"
+                >
+
+                <label for="categoria">
+                    Categoria:
+                </label>
+
+                <select id="categoria">
+
+                    <option value="Estudo">
+                        Estudo
+                    </option>
+
+                    <option value="Projeto">
+                        Projeto
+                    </option>
+
+                    <option value="Discussão">
+                        Discussão
+                    </option>
+
+                    <option value="Tutoria">
+                        Tutoria
+                    </option>
+
+                    <option value="Social">
+                        Social
+                    </option>
+
                 </select>
-                <label for="privacidade">Categoria: </label>
-                <select name="privacidade" id="privacidade">
-                    <option value="privacidade">Pública</option>
-                    <option value="privacidade">Privada</option>
+
+                <label for="privacidade">
+                    Privacidade:
+                </label>
+
+                <select id="privacidade">
+
+                    <option value="Pública">
+                        Pública
+                    </option>
+
+                    <option value="Privada">
+                        Privada
+                    </option>
+
                 </select>
-                <button type="button" onclick="criarComunidade()">Criar comunidade</button>
+
+                <button type="button" onclick="criarComunidade()">
+                    Criar comunidade
+                </button>
+
             </form>
 
         </div>
-        <div id="listadeComunidades">
 
-        </div>
+        <!-- LISTA -->
+        <div id="listadeComunidades"></div>
+
     </div>
 
-
     <script src="../js/comunidade.js"></script>
+
 </body>
 </html>

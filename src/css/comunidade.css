@@ -81,36 +81,40 @@ body{
     margin-bottom: 20px;
 }
 
-#comunidade p {
+#comunidade p{
     color: grey;
 }
 
 #comunidade button{
     margin-top: 15px;
-    padding: 10px 15px;
-    border: none;
-    background-color: var(--bg-color4);
-    color: white;
-    border-radius: 8px;
-    cursor: pointer;
-    margin-right: 20px;
 
+    padding: 10px 15px;
+
+    border: none;
+
+    background-color: var(--bg-color4);
+
+    color: white;
+
+    border-radius: 8px;
+
+    cursor: pointer;
 }
+
 .topoComunidade{
     display: flex;
 
     justify-content: space-between;
 
     align-items: center;
-
-    width: 100%;
 }
+
 .topoComunidade div{
     display: flex;
     flex-direction: column;
 }
 
-
+/* FORMULÁRIO */
 
 #formulario{
     display: none;
@@ -133,27 +137,6 @@ body{
     box-shadow: 0px 0px 20px rgba(0,0,0,0.2);
 }
 
-#formulario #fechar{
-    width: 30px;
-    height: 30px;
-
-    border-radius: 50%;
-
-    background-color: var(--bg-color4);
-    color: white;
-
-    cursor: pointer;
-
-    position: absolute;
-
-    top: 10px;
-    right: 10px;
-
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
 #formulario form{
     display: flex;
     flex-direction: column;
@@ -170,5 +153,67 @@ body{
     border: 1px solid #ccc;
 }
 
+#fechar{
+    width: 30px;
+    height: 30px;
 
+    border-radius: 50%;
 
+    position: absolute;
+
+    top: 10px;
+    right: 10px;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* CARDS */
+
+#listadeComunidades{
+    display: flex;
+    flex-wrap: wrap;
+
+    gap: 20px;
+
+    margin-top: 30px;
+}
+
+.cardComunidade{
+    width: 260px;
+
+    background-color: white;
+
+    border-radius: 12px;
+
+    padding: 20px;
+
+    box-shadow: 0px 2px 10px rgba(0,0,0,0.1);
+}
+
+.cardComunidade h3{
+    margin-bottom: 10px;
+
+    color: #222;
+}
+
+.cardComunidade p{
+    font-size: 14px;
+
+    margin-bottom: 15px;
+
+    color: #666;
+}
+
+.infoComunidade{
+    display: flex;
+
+    justify-content: space-between;
+
+    margin-top: 15px;
+
+    font-size: 13px;
+
+    color: #555;
+}
