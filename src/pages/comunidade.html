@@ -8,23 +8,52 @@
 </head>
 <body>
 
-  <header>
     <div class="menu">
-    <div class="logoJovi">
-      <img src="../assets/img/logo.png" alt="" id="logo">    
-      <h2>JoviClass</h2>
+        <div class="logoJovi">
+            <img src="../assets/img/logo.png" alt="" id="logo">    
+            <h2>JoviClass</h2>
 
+        </div>
+        <div class="menu-links">
+            <a href="#" class="ativo">Início</a>
+            <a href="#">Matérias</a>
+            <a href="#">Resumos</a>
+            <a href="#">Flashcards</a>
+            <a href="#">Provas</a>
+        </div>
     </div>
-    <div class="menu-links">
-      <a href="#" class="ativo">Início</a>
-      <a href="#">Matérias</a>
-      <a href="#">Resumos</a>
-      <a href="#">Flashcards</a>
-      <a href="#">Provas</a>
-    </div>
-  </div>
 
-  </header>
+    <div id="comunidade">
+        <h1>Comunidades</h1>
+        <p>Participe de grupos de estudo e colabore com outros estudantes.</p>
+        <button onclick="abrirFormulario()">+ Nova Comunidade</button>
+        <div id="formulario">
+            <form action="">
+                <h2>Nova Comunidade</h2>
+                <label for="nomeComunidade">Nome da Comunidade:</label>
+                <input type="text" placeholder="Ex.Cálculo" id="nomeComunidade">
+                <label for="descricao">Descrição:</label>
+                <input type="text" placeholder="Descreva o objetivo da comunidade...">
+                <label for="categoria">Categoria: </label>
+                <select name="categoria" id="categoria">
+                    <option value="categoria">Estudo</option>
+                    <option value="categoria">Projeto</option>
+                    <option value="categoria">Discussão</option>
+                    <option value="categoria">Tutoria</option>
+                    <option value="categoria">Social</option>
+                </select>
+                <label for="privacidade">Categoria: </label>
+                <select name="privacidade" id="privacidade">
+                    <option value="privacidade">Pública</option>
+                    <option value="privacidade">Privada</option>
+                </select>
+                <button>Criar comunidade</button>
+            </form>
+
+        </div>
+    </div>
+
+
     <script src="../js/comunidade.js"></script>
 </body>
 </html>
