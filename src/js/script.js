@@ -32,8 +32,21 @@ criarMateria.addEventListener('click', () => {
         <p>Criada agora</p>
         <button class="btnExcluir">Excluir</button>
     `;
-
+    
     cardsMaterias.appendChild(card);
     fecharFormulario();
     alert(Matéria "${nome}" criada com sucesso!);
+});
+
+const btnExcluir = card.querySelector('.btnExcluir');
+btnExcluir.addEventListener('click', () => {
+    const resposta = prompt('Deseja excluir a matéria? Digite sim ou não:');
+
+    if (resposta === null) {
+        return;
+    } else if (resposta.trim().toLowerCase() === 'sim') {
+        card.remove();
+    } else {
+        alert('A matéria não foi excluída.');
+    }
 });
