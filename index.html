@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -12,17 +13,23 @@
 <body>
  
   <div class="menu">
-    <div class="logoJovi">
-      <img src="./src/assets/img/logo.png" alt="" id="logo">    
-      <h2>JoviClass</h2>
-
+    <div class="menu-header">
+      <div class="logoJovi">
+        <img src="./src/assets/img/logo.png" alt="" id="logo">    
+        <h2>JoviClass</h2>
+      </div>
+      <div class="hamburger" id="hamburger">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
     </div>
-    <div class="menu-links">
+   
+    <div class="menu-links" id="menuLinks">
       <a href="#" class="ativo">Início</a>
       <a href="#">Matérias</a>
-      <a href="#">Resumos</a>
-      <a href="./src/pages/comunidade.html">Flashcards</a>
-      <a href="#">Provas</a>
+      <a href="#">Calendário</a>
+      <a href="./src/pages/comunidade.html">Comunidades</a>
     </div>
   </div>
  
@@ -36,16 +43,16 @@
         <p>6</p>
       </div>
       <div class="card">
-        <span>Resumos</span>
+        <span>Arquivos</span>
         <p>24</p>
       </div>
       <div class="card">
-        <span>Flashcards</span>
+        <span>Anotações</span>
         <p>136</p>
       </div>
       <div class="card">
-        <span>Horas de estudo</span>
-        <p>18h 30m</p>
+        <span>Tarefas</span>
+        <p>8</p>
       </div>
     </div>
  
@@ -113,5 +120,7 @@
  
     </div>
   </div>
+
+  <script src="./src/js/script.js"></script>
 </body>
 </html>
