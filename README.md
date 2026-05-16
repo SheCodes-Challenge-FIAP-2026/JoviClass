@@ -1,4 +1,4 @@
-Olá, esta é a SPRINT2 de Web Development.
+Seja bem vindo ao JoviClass - Projeto Acadêmico da FIAP
 
 SheCodes
 
