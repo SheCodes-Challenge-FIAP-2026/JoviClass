@@ -123,18 +123,6 @@ body{
     gap: 20px;
 }
 
-.cardMateria{
-    width: 220px;
-
-    background-color: white;
-
-    padding: 20px;
-
-    border-radius: 16px;
-
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-}
-
 .cardMateria img{
     width: 55px;
 }
@@ -247,7 +235,7 @@ body{
     gap: 10px;
 }
 
-#acancelar{
+#cancelar{
     background: #ddd;
     color: #333;
 }

@@ -34,7 +34,7 @@ criarMateria.addEventListener('click', () => {
     }
 
 
-    const card = document.createElement('a');
+    const card = document.createElement('div');
     card.classList.add('cardMateria');
 
 
