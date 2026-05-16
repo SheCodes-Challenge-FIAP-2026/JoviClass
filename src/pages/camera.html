@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Câmera JOVI</title>
+    <link rel="stylesheet" href="../css/camera.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+    >
+</head>
+<body>
+
+<header>
+    <h1>Câmera JOVI</h1>
+</header>
+
+
+<main>
+    <div class="container">
+
+
+        <img
+            src="../assets/img/logo.png"
+            alt="Logo"
+            class="camera-logo"
+            id="logoBtn"
+        />
+
+
+        <div class="dropdown-menu" id="dropdownMenu">
+            <button>Português</button>
+            <button>Matemática</button>
+            <button>História</button>
+            <button>Geografia</button>
+            <button>Ciências</button>
+            <button><a href="./index.html">Abrir app</a></button>
+        </div>
+
+
+        <div class="camera-top-bar">
+            <span>HDR</span>
+            <span>AUTO</span>
+            <span>12 MP</span>
+        </div>
+
+        <video id="video" autoplay playsinline></video>
+        <canvas id="canvas"></canvas>
+
+
+        <div id="saida">Aponte a câmera para um texto</div>
+
+
+        <button id="btn-texto"></button>
+
+
+        <button id="confirmBtn" class="confirm-btn">✔</button>
+
+
+        <div id="overlay" class="overlay">
+    <div class="overlay-box">
+        <h2>Deseja salvar?</h2>
+
+
+        <div class="overlay-buttons">
+            <a href="./index.html" id="okBtn" class="ok-btn">OK</a>
+
+            <button
+                id="cancelBtn"
+                class="cancel-btn"
+                type="button"
+            >
+                Cancelar
+            </button>
+        </div>
+    </div>
+</div>
+
+
+        <div class="camera-bottom-bar">
+            <i class="fa-regular fa-image"></i>
+            <span class="modo ativo">Texto</span>
+            <i class="fa-solid fa-rotate"></i>
+        </div>
+        </div>
+</main>
+
+<footer>
+    <p>&copy; 2026 - Todos os direitos reservados.</p>
+</footer>
+
+
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+<script src="../js/camera.js"></script>
+
+
+</body>
+</html>
