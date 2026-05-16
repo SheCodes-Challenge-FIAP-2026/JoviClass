@@ -30,3 +30,8 @@ function abrirFormulario(){
 function fecharFormulario(){
     overlay.style.display = 'none';
 }
+
+
+
+fecharModal.addEventListener('click', fecharFormulario);
+cancelar.addEventListener('click', fecharFormulario);
