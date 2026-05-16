@@ -1,0 +1,269 @@
+:root{
+    --bg-color1: #000fb0;
+    --bg-color2: #ffffff;
+    --bg-color3: #4e6fb6;
+    --bg-color4: #1466ff;
+    --bg-colorFundo: #f0f0f5;
+}
+
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+body{
+    background-color: var(--bg-colorFundo);
+    display: flex;
+}
+
+
+
+.menu{
+    width: 250px;
+    min-height: 100vh;
+
+    background-color: var(--bg-color1);
+
+    padding: 20px;
+}
+
+.logoJovi{
+    text-align: center;
+}
+
+#logo{
+    width: 120px;
+}
+
+.logoJovi h2{
+    color: white;
+    margin-top: 10px;
+}
+
+.menu-links{
+    margin-top: 40px;
+
+    display: flex;
+    flex-direction: column;
+
+    gap: 10px;
+}
+
+.menu a{
+    text-decoration: none;
+
+    color: white;
+
+    background-color: var(--bg-color3);
+
+    padding: 12px;
+
+    border-radius: 8px;
+
+    text-align: center;
+}
+
+.menu a.ativo{
+    background-color: var(--bg-color4);
+}
+
+
+.materias{
+    padding: 30px;
+    width: 100%;
+}
+
+.materias h1{
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+.materias p{
+    color: grey;
+}
+
+.materias button{
+    margin-top: 15px;
+
+    padding: 10px 15px;
+
+    border: none;
+
+    background-color: var(--bg-color4);
+
+    color: white;
+
+    border-radius: 8px;
+
+    cursor: pointer;
+}
+
+.headerMaterias{
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+}
+
+.headerMaterias div{
+    display: flex;
+    flex-direction: column;
+}
+
+
+.cardsMaterias{
+    margin-top: 40px;
+
+    display: flex;
+    flex-wrap: wrap;
+
+    gap: 20px;
+}
+
+.cardMateria{
+    width: 220px;
+
+    background-color: white;
+
+    padding: 20px;
+
+    border-radius: 16px;
+
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.cardMateria img{
+    width: 55px;
+}
+
+.cardMateria h3{
+    margin-top: 15px;
+}
+
+.cardMateria p{
+    margin-top: 8px;
+    font-size: 14px;
+}
+.cardMateria{
+    width: 220px;
+
+    background-color: white;
+
+    padding: 20px;
+
+    border-radius: 16px;
+
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+
+    text-decoration: none;
+
+    color: black;
+
+    transition: 0.2s;
+}
+
+.cardMateria:hover{
+    transform: translateY(-3px);
+
+    box-shadow: 0 6px 15px rgba(0,0,0,0.12);
+}
+
+/* MODAL */
+
+.overlay{
+    position: fixed;
+
+    inset: 0;
+
+    background: rgba(0,0,0,0.4);
+
+    display: none;
+
+    align-items: center;
+    justify-content: center;
+}
+
+.modal{
+    width: 420px;
+
+    background: white;
+
+    border-radius: 20px;
+
+    padding: 30px;
+}
+
+.topoModal{
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+}
+
+.topoModal button{
+    border: none;
+
+    width: 35px;
+    height: 35px;
+
+    border-radius: 50%;
+
+    cursor: pointer;
+
+    background: #eee;
+
+    color: #333;
+}
+
+.campo{
+    margin-top: 25px;
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 10px;
+}
+
+.campo input{
+    padding: 14px;
+
+    border: 1px solid #ccc;
+
+    border-radius: 10px;
+}
+
+.acoesModal{
+    margin-top: 30px;
+
+    display: flex;
+
+    justify-content: flex-end;
+
+    gap: 10px;
+}
+
+#acancelar{
+    background: #ddd;
+    color: #333;
+}
+
+.btnExcluir{
+    margin-top: 15px;
+    padding: 8px 12px;
+    border: none;
+    background-color: #ff3b3b;
+    color: white;
+    border-radius: 8px;
+    cursor: pointer;
+    width: 100%;
+    transition: 0.2s;
+}
+
+.btnExcluir:hover{
+    background-color: #cc0000;
+}
