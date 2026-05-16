@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../css/materias.css">
+    <title>Comunidade</title>
+</head>
+<body>
+
+
+    <div class="menu">
+        <div class="logoJovi">
+            <img src="../assets/img/logo.png" alt="" id="logo">    
+            <h2>JoviClass</h2>
+        </div>
+
+
+        <div class="menu-links">
+            <a href="#" class="ativo">Início</a>
+            <a href="#">Matérias</a>
+            <a href="#">Resumos</a>
+            <a href="#">Flashcards</a>
+            <a href="#">Provas</a>
+        </div>
+    </div>
+
+
+    <div class="materias" >
+
+
+        <div class="headerMaterias">
+            <div>
+                <h1>Matérias</h1>
+                <p>Organize suas matérias para fácil acesso</p>
+            </div>
+
+
+            <button type="button" onclick="abrirFormulario()">
+                + Nova Materia
+            </button>
+        </div>
+
+
+        <div class="cardsMaterias" id="cardsMaterias">
+
+
+</div>
+
+
+<div class="overlay" id="overlay">
+
+
+    <div class="modal">
+
+
+        <div class="topoModal">
+
+
+            <h2>Nova Matéria</h2>
+
+
+            <button id="fecharModal">X</button>
+
+
+        </div>
+
+
+        <div class="campo">
+
+
+            <label>Nome da matéria</label>
+
+
+            <input type="text" id="nomeMateria" placeholder="Ex: Matemática">
+
+
+        </div>
+
+
+        <div class="acoesModal">
+
+
+            <button id="cancelar">
+                Cancelar
+            </button>
+
+
+            <button id="criarMateria">
+                Criar Matéria
+            </button>
+
+
+        </div>
+
+
+    </div>
+
+
+</div>
+
+
+    </div>  
+
+
+    <script src="../js/materias.js"></script>
+
+
+</body>
+</html>
