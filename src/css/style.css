@@ -1,211 +1,398 @@
-:root{
-    --bg-color1: #000fb0;
-    --bg-color2: #ffffff; 
-    --bg-color3: #4e6fb6;
-    --bg-color4: #1466ff;
-    --bg-color5: #888;
-    --bg-colorFundo: #f0f0f5;
+:root {
+  --bg-color1: #000fb0;
+  --bg-color2: #ffffff;
+  --bg-color3: rgba(255, 255, 255, 0.18);
+  --bg-color4: #1466ff;
+  --bg-color5: #888;
+  --bg-colorFundo: #f0f0f5;
+}
+
+
+/* =========================
+   RESET
+========================= */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Manrope", Arial, sans-serif;
+}
+
+
+body {
+  background-color: var(--bg-colorFundo);
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+
+/* =========================
+   LOGO
+========================= */
+.logoJovi {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+
+#logo {
+  width: 90px;
+  height: auto;
+}
+
+
+.menu h2 {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--bg-color2);
+  margin: 0;
+}
+
+
+/* =========================
+   MENU
+========================= */
+.menu {
+  background: linear-gradient(180deg, #0015d6 0%, #000fb0 100%);
+  color: white;
+  padding: 25px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 4px 0 20px rgba(0, 0, 0, 0.15);
+}
+
+
+.menu-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+
+/* =========================
+   BOTÃO HAMBÚRGUER
+========================= */
+.hamburger {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  cursor: pointer;
+}
+
+
+.hamburger span {
+  width: 28px;
+  height: 3px;
+  background-color: white;
+  border-radius: 3px;
+  transition: 0.3s;
+}
+
+
+/* =========================
+   LINKS DO MENU
+========================= */
+.menu-links {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 30px;
+}
+
+
+.menu a {
+  color: #ffffff;
+  text-decoration: none;
+  padding: 14px 18px;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  background: var(--bg-color3);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  text-align: center;
+}
+
+
+.menu a:hover {
+  background: rgba(255, 255, 255, 0.28);
+  transform: translateX(5px);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.2);
+}
+
+
+.menu a.ativo {
+  background: linear-gradient(135deg, #1466ff, #4da3ff);
+  box-shadow: 0 6px 18px rgba(20, 102, 255, 0.4);
+}
+
+
+/* =========================
+   CONTEÚDO
+========================= */
+.conteudo {
+  flex: 1;
+  padding: 30px 25px;
+}
+
+
+.conteudo h1 {
+  font-size: 2rem;
+  margin-bottom: 6px;
+  color: #111;
+  margin-top: 25px;
+}
+
+
+.conteudo p {
+  color: var(--bg-color5);
+  margin-bottom: 25px;
+  font-size: 15px;
+}
+
+
+/* =========================
+   CARDS
+========================= */
+.cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 25px;
+}
+
+
+.card {
+  background: var(--bg-color2);
+  padding: 20px;
+  border-radius: 16px;
+  text-align: center;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+}
+
+
+.card span {
+  font-size: 13px;
+  color: var(--bg-color5);
+}
+
+
+.card p {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--bg-color1);
+  margin-top: 8px;
+}
+
+
+/* =========================
+   SEÇÕES
+========================= */
+.secoes {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+
+.secao {
+  background: var(--bg-color2);
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+}
+
+
+.secao h3 {
+  font-size: 1rem;
+  margin-bottom: 15px;
+  color: var(--bg-color1);
+}
+
+
+.item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid #eee;
+  font-size: 14px;
+}
+
+
+.item:last-of-type {
+  border-bottom: none;
+}
+
+
+.item .nome {
+  font-weight: 700;
+  color: #333;
+}
+
+
+.item .detalhe {
+  font-size: 12px;
+  color: var(--bg-color5);
+}
+
+
+.badge {
+  background-color: var(--bg-color1);
+  color: white;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+
+.ver-todos {
+  display: inline-block;
+  margin-top: 12px;
+  color: var(--bg-color1);
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+
+/* =========================
+   MOBILE
+========================= */
+@media (max-width: 699px) {
+  .menu {
+    width: 100%;
+    padding: 20px;
+  }
+
+
+  #logo {
+    width: 70px;
+  }
+
+
+  .menu h2 {
+    font-size: 1.8rem;
+  }
+
+
+  /* Mostra botão hamburguer */
+  .hamburger {
+    display: flex;
+  }
+
+
+  /* Links escondidos inicialmente */
+  .menu-links {
+    display: none;
+    flex-direction: column;
+    width: 100%;
+    margin-top: 20px;
+    gap: 10px;
+  }
+
+
+  /* Mostra quando clicar */
+  .menu-links.active {
+    display: flex;
+  }
+
+
+  .menu a {
+    width: 100%;
+    border-radius: 10px;
+    padding: 12px;
+    font-size: 15px;
+  }
+
+
+  .cards {
+    grid-template-columns: 1fr 1fr;
+  }
+
+
 
 
 }
- 
- 
- * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: Arial, sans-serif;
-    }
- 
-    body {
-      background-color: var(--bg-colorFundo);
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
-    }
-    
-    #logoJovi{
-      display: flex;
-    }
-    
-    #logo{
-      width: 150px;
-      height: 130px;
-    }
 
-    .menu {
-      background-color: var(--bg-color1);
-      color: white;
-      padding: 25px;
-      display: flex;
-      flex-direction: column;
-    }
 
- 
-    .menu h2 {
-      font-size: 18px;
-      color: var(--bg-color2);
-      margin-bottom: 12px;
-      padding: 25px;
-    }
- 
-    .menu-links {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      margin: 20px;
-    }
- 
-    .menu a {
-      color: var(--bg-color2);
-      text-decoration: none;
-      padding: 6px 12px;
-      border-radius: 20px;
-      font-size: 13px;
-      background-color: var(--bg-color3);
-      display: flex;
-      justify-content: center;
+/* =========================
+   DESKTOP
+========================= */
+@media (min-width: 700px) {
+  body {
+    flex-direction: row;
+  }
 
-    }
- 
-    .menu a.ativo {
-      background-color: var(--bg-color4);
-    }
- 
+
+  .menu {
+    width: 320px;
+    min-height: 100vh;
+    padding: 30px 20px;
+  }
+
+
+  .menu-header {
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+
+
+  /* Logo menor no desktop */
+  #logo {
+    width: 110px;
+  }
+
+
+  .menu h2 {
+    font-size: 1.9rem;
+    text-align: center;
+  }
+
+
+  /* Esconde hamburguer */
+  .hamburger {
+    display: none;
+  }
+
+
+  /* Links sempre visíveis */
+  .menu-links {
+    display: flex !important;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 120px;
+    margin-right: 30px;
+    margin-left: 30px;
+  }
+
+
+  .menu a {
+    border-radius: 12px;
+    padding: 14px;
+    font-size: 15px;
    
-    .conteudo {
-      flex: 1;
-      padding: 20px 15px;
-    }
- 
-    .conteudo h1 {
-      font-size: 22px;
-      margin-bottom: 4px;
-    }
- 
-    .conteudo p {
-      color: var(--bg-color5);
-      margin-bottom: 20px;
-      font-size: 14px;
-    }
+  }
 
-    .cards {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin-bottom: 20px;
-    }
- 
-    .card {
-      background: var(--bg-color2);
-      padding: 15px;
-      border-radius: 10px;
-      text-align: center;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    }
- 
-    .card span {
-      font-size: 12px;
-      color: var(--bg-color5);
-    }
- 
-    .card p {
-      font-size: 24px;
-      font-weight: bold;
-      color: var(--bg-color1);
-      margin-top: 5px;
-    }
- 
 
-    .secoes {
-      display: flex;
-      flex-direction: column;
-      gap: 15px;
-    }
+  .cards {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+
+  .secoes {
+    flex-direction: row;
+  }
+
+
+  .secao {
+    flex: 1;
+  }
  
-    .secao {
-      background: var(--bg-color2);
-      border-radius: 10px;
-      padding: 15px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    }
- 
-    .secao h3 {
-      font-size: 15px;
-      margin-bottom: 12px;
-      color: var(--bg-color1);
-    }
- 
-    .item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 10px 0;
-      border-bottom: 1px solid #eee;
-      font-size: 14px;
-    }
- 
-    .item:last-of-type {
-      border-bottom: none;
-    }
- 
-    .item .nome {
-      font-weight: bold;
-      color: #333;
-    }
- 
-    .item .detalhe {
-      font-size: 12px;
-      color: var(--bg-color5);
-    }
- 
-    .badge {
-      background-color: var(--bg-color1);
-      color: white;
-      padding: 3px 10px;
-      border-radius: 10px;
-      font-size: 12px;
-      white-space: nowrap;
-    }
- 
-    .ver-todos {
-      display: inline-block;
-      margin-top: 10px;
-      color: var(--bg-color1);
-      font-size: 13px;
-      text-decoration: none;
-    }
- 
-    @media (min-width: 700px) {
-      body {
-        flex-direction: row;
-      }
- 
-      .menu {
-        width: 250px;
-        flex-direction: column;
-        padding: 30px 20px;
-      }
- 
-      .menu-links {
-        flex-direction: column;
-        gap: 8px;
-      }
- 
-      .menu a {
-        border-radius: 5px;
-        padding: 10px;
-      }
- 
-      .cards {
-        grid-template-columns: repeat(4, 1fr);
-      }
- 
-      .secoes {
-        flex-direction: row;
-      }
- 
-      .secao {
-        flex: 1;
-      }
-    }
+}
