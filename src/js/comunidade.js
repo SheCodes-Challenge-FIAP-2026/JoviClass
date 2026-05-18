@@ -1,20 +1,33 @@
+/* MENU MOBILE */
+
 const hamburger = document.getElementById("hamburger");
+
 const menuLinks = document.getElementById("menuLinks");
 
-hamburger.addEventListener("click", () => {
+hamburger.addEventListener("click", function () {
+
     menuLinks.classList.toggle("active");
+
 });
 
+
 /* FORMULÁRIO */
+
 function abrirFormulario() {
+
     document.getElementById("formulario").style.display = "block";
+
 }
 
 function fecharAba() {
+
     document.getElementById("formulario").style.display = "none";
+
 }
 
+
 /* CRIAR COMUNIDADE */
+
 function criarComunidade() {
 
     let nome = document.getElementById("nomeComunidade").value;
@@ -25,12 +38,22 @@ function criarComunidade() {
 
     let privacidade = document.getElementById("privacidade").value;
 
+
+    if (nome == "" || descricao == "") {
+
+        alert("Preencha todos os campos!");
+
+        return;
+    }
+
+
     let card = document.createElement("div");
 
     card.classList.add("cardComunidade");
 
+
     card.innerHTML = `
-    
+
         <div class="topoCard">
             📚
         </div>
@@ -50,8 +73,9 @@ function criarComunidade() {
             </div>
 
         </div>
-    
+
     `;
+
 
     card.onclick = function () {
 
@@ -68,18 +92,24 @@ function criarComunidade() {
         document.getElementById("subtituloComunidade").style.display = "none";
 
         document.getElementById("btnNovaComunidade").style.display = "none";
+
     };
 
+
     document.getElementById("listadeComunidades").appendChild(card);
+
 
     document.getElementById("nomeComunidade").value = "";
 
     document.getElementById("descricao").value = "";
 
+
     fecharAba();
 }
 
+
 /* VOLTAR */
+
 function voltarComunidades() {
 
     document.getElementById("paginaComunidade").style.display = "none";
@@ -89,10 +119,14 @@ function voltarComunidades() {
     document.getElementById("subtituloComunidade").style.display = "block";
 
     document.getElementById("btnNovaComunidade").style.display = "block";
+
 }
 
-/* UPLOAD */
+
+/* UPLOAD DE ARQUIVO */
+
 const uploadArquivo = document.getElementById("uploadArquivo");
+
 
 uploadArquivo.addEventListener("change", function () {
 
@@ -111,5 +145,38 @@ uploadArquivo.addEventListener("change", function () {
         `;
 
         document.getElementById("listaArquivos").appendChild(item);
+
     }
+
 });
+
+
+/* CHAT DE MENSAGEM */
+
+function enviarMensagem() {
+
+    let input = document.getElementById("inputMensagem");
+
+    let texto = input.value;
+
+
+    if (texto == "") {
+
+        return;
+
+    }
+
+
+    let mensagem = document.createElement("div");
+
+    mensagem.classList.add("mensagem");
+
+    mensagem.innerText = texto;
+
+
+    document.getElementById("mensagensChat").appendChild(mensagem);
+
+
+    input.value = "";
+
+}
