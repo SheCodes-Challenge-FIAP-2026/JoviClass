@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="../assets/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="/src/css/calendario.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400..900&family=Manrope:wght@200..800&display=swap" rel="stylesheet">
+    <title>Calendário</title>
+</head>
+<body>
+
+    <div class="menu">
+        <div class="menu-header">
+            <div class="logoJovi">
+                <img src="../assets/img/logo.png" alt="" id="logo">
+                <h2>JoviClass</h2>
+            </div>
+            <div class="hamburger" id="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+
+        <div class="menu-links" id="menuLinks">
+        <a href="../../index.html">Início</a>
+        <a href="./materias.html">Matérias</a>
+        <a href="./calendario.html" class="ativo">Calendário</a>
+        <a href="./comunidade.html">Comunidades</a>
+        </div>
+    </div>
+
+    <div class="calendario">
+        <div class="header">
+            <div id="voltar" class="btn"><img class="arrow-mes" src="/src/assets/img/arrowLeft.png" alt="mês_anterior"></div>
+            <div id="mes-ano"></div>
+            <div id="prox" class="btn"><img class="arrow-mes" src="/src/assets/img/arrowRight.png" alt="proximo_mês"></div>
+        </div>
+        <div class="dias-semana">
+            <span>Dom</span>
+            <span>Seg</span>
+            <span>Ter</span>
+            <span>Qua</span>
+            <span>Qui</span>
+            <span>Sex</span>
+            <span>Sáb</span>
+        </div>
+
+        <div class="dias" id="dias">
+        </div>
+
+    </div>
+
+    <!-- FORMULÁRIO EVENTO -->
+
+    <div id="formularioEvento">
+
+        <form>
+
+            <button type="button" onclick="fecharFormularioEvento()" id="fecharEvento">
+                X
+            </button>
+
+            <h2>Novo Evento</h2>
+
+            <label for="tituloEvento">
+                Título:
+            </label>
+
+            <input 
+                type="text"
+                id="tituloEvento"
+                placeholder="Ex. Trabalho de matemática"
+            >
+
+            <label for="categoria">
+                    Categoria:
+                </label>
+
+                <select id="categoria">
+
+                    <option value="Projeto">Projeto</option>
+
+                    <option value="Tutoria">Tutoria</option>
+
+                    <option value="Prova">Prova</option>
+
+                    <option value="Outros">Outros</option>
+
+                </select>
+
+            <label for="descricaoEvento">
+                Descrição:
+            </label>
+
+            <textarea 
+                id="descricaoEvento"
+                placeholder="Descreva o evento..."
+            ></textarea>
+
+            <button type="button" onclick="salvarEvento()">
+                Salvar Evento
+            </button>
+
+        </form>
+
+    </div>
+
+    <script src="/src/js/calendario.js"></script>
+</body>
+</html>
