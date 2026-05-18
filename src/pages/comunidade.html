@@ -1,39 +1,87 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
+
     <meta charset="UTF-8">
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <link rel="stylesheet" href="../css/comunidade.css">
+
+    <link rel="shortcut icon" href="../assets/favicon.ico" type="image/x-icon">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400..900&family=Manrope:wght@200..800&display=swap"
+        rel="stylesheet">
+
     <title>Comunidade</title>
+
 </head>
+
 <body>
 
+    <!-- MENU -->
     <div class="menu">
-        <div class="logoJovi">
-            <img src="../assets/img/logo.png" alt="" id="logo">    
-            <h2>JoviClass</h2>
+
+        <div class="menu-header">
+
+            <div class="logoJovi">
+
+                <img src="../assets/img/logo.png" alt="logo" id="logo">
+
+                <h2>JoviClass</h2>
+
+            </div>
+
+            <div class="hamburger" id="hamburger">
+
+                <span></span>
+
+                <span></span>
+
+                <span></span>
+
+            </div>
+
         </div>
 
-        <div class="menu-links">
-            <a href="../../index.html" class="ativo">Início</a>
-            <a href="#">Matérias</a>
-            <a href="#">Resumos</a>
-            <a href="#">Flashcards</a>
-            <a href="#">Provas</a>
+        <div class="menu-links" id="menuLinks">
+
+            <a href="../../index.html">Início</a>
+
+            <a href="./materias.html">Matérias</a>
+
+            <a href="#">Calendário</a>
+
+            <a href="#" class="ativo">Comunidades</a>
+
         </div>
+
     </div>
 
+    <!-- CONTEÚDO -->
     <div id="comunidade">
 
         <div class="topoComunidade">
+
             <div>
+
                 <h1>Comunidades</h1>
-                <p>Participe de grupos de estudo e colabore com outros estudantes.</p>
+
+                <p id="subtituloComunidade">
+                    Participe de grupos de estudo e colabore com outros estudantes.
+                </p>
+
             </div>
 
-            <button type="button" onclick="abrirFormulario()">
+            <button type="button" onclick="abrirFormulario()" id="btnNovaComunidade">
                 + Nova Comunidade
             </button>
+
         </div>
 
         <!-- FORMULÁRIO -->
@@ -51,21 +99,13 @@
                     Nome da Comunidade:
                 </label>
 
-                <input 
-                    type="text" 
-                    placeholder="Ex. Cálculo"
-                    id="nomeComunidade"
-                >
+                <input type="text" placeholder="Ex. Cálculo" id="nomeComunidade">
 
                 <label for="descricao">
                     Descrição:
                 </label>
 
-                <input 
-                    type="text" 
-                    placeholder="Descreva o objetivo da comunidade..."
-                    id="descricao"
-                >
+                <input type="text" placeholder="Descreva o objetivo da comunidade..." id="descricao">
 
                 <label for="categoria">
                     Categoria:
@@ -73,25 +113,15 @@
 
                 <select id="categoria">
 
-                    <option value="Estudo">
-                        Estudo
-                    </option>
+                    <option value="Estudo">Estudo</option>
 
-                    <option value="Projeto">
-                        Projeto
-                    </option>
+                    <option value="Projeto">Projeto</option>
 
-                    <option value="Discussão">
-                        Discussão
-                    </option>
+                    <option value="Discussão">Discussão</option>
 
-                    <option value="Tutoria">
-                        Tutoria
-                    </option>
+                    <option value="Tutoria">Tutoria</option>
 
-                    <option value="Social">
-                        Social
-                    </option>
+                    <option value="Social">Social</option>
 
                 </select>
 
@@ -101,13 +131,9 @@
 
                 <select id="privacidade">
 
-                    <option value="Pública">
-                        Pública
-                    </option>
+                    <option value="Pública">Pública</option>
 
-                    <option value="Privada">
-                        Privada
-                    </option>
+                    <option value="Privada">Privada</option>
 
                 </select>
 
@@ -119,12 +145,54 @@
 
         </div>
 
-        <!-- LISTA -->
+        <!-- LISTA DE COMUNIDADES -->
         <div id="listadeComunidades"></div>
 
-    </div>
+        <!-- PÁGINA DA COMUNIDADE -->
+        <div id="paginaComunidade">
 
-    <script src="../js/comunidade.js"></script>
+            <div class="topoPagina">
+
+                <div class="caminho">
+
+                    <span onclick="voltarComunidades()" id="setaVoltar">
+                        ←
+                    </span>
+
+                    <p>
+                        Comunidades › <span id="NomeDiferenciado"></span>
+                    </p>
+
+                </div>
+
+                <div>
+                    <h1 id="tituloComunidade"></h1>
+                    <p id="descricaoComunidade"></p>
+                </div>
+
+            </div>
+
+            <!-- ARQUIVOS -->
+            <div id="arquivoArea" class="conteudoAba">
+
+                <h2 class="tituloArquivos">
+                    📁 Arquivos
+                </h2>
+
+                <div class="uploadBox">
+
+                    <input type="file" id="uploadArquivo">
+
+                </div>
+
+                <div id="listaArquivos"></div>
+
+            </div>
+
+        </div>
+
+        <script src="../js/comunidade.js"></script>
 
 </body>
+
 </html>
