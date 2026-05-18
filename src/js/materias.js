@@ -1,18 +1,21 @@
 const overlay = document.getElementById('overlay');
 const fecharModal = document.getElementById('fecharModal');
-const cancelar = document.getElementById('cancelar');
-const criarMateria = document.getElementById('criarMateria');
+const cancelar = document.getElementById('btnCancelar');
+const criarMateria = document.getElementById('btnCriarMateria');
 const nomeMateria = document.getElementById('nomeMateria');
 const cardsMaterias = document.getElementById('cardsMaterias');
 
+hamburger.addEventListener("click", () => {
+    menuLinks.classList.toggle("active");
+});
 
 function abrirFormulario(){
-    overlay.style.display = 'flex';
+    overlay.classList.add("aberto");
 }
 
 
 function fecharFormulario(){
-    overlay.style.display = 'none';
+    overlay.classList.remove("aberto");
 }
 
 
@@ -23,20 +26,16 @@ cancelar.addEventListener('click', fecharFormulario);
 
 
 criarMateria.addEventListener('click', () => {
-
-
     const nome = nomeMateria.value.trim();
-
 
     if(nome === ''){
         alert('Digite um nome para a matéria');
         return;
     }
 
-
-    const card = document.createElement('div');
+    const card = document.createElement('a');
     card.classList.add('cardMateria');
-
+    card.href = `./paginaMateria.html?materia=${encodeURIComponent(nome)}`;
 
     card.innerHTML = `
         <img src="../assets/img/imgPasta.png" alt="Pasta">

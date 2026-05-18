@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="../css/materias.css">
+  <link rel="stylesheet" href="../css/paginaMateria.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400..900&family=Manrope:wght@200..800&display=swap"
@@ -29,7 +29,7 @@
 
     <div class="menu-links" id="menuLinks">
       <a href="../../index.html">Início</a>
-      <a href="./src/pages/materias.html" class="ativo">Matérias</a>
+      <a href="./materias.html" class="ativo">Matérias</a>
       <a href="#">Calendário</a>
       <a href="./src/pages/comunidade.html">Comunidades</a>
     </div>
@@ -39,38 +39,17 @@
 
         <div class="headerMaterias">
             <div >
-                <h1>Matérias</h1>
-                <p>Organize suas matérias para fácil acesso</p>
-            </div>
-            <button id="btnMateria" type="button" onclick="abrirFormulario()">+ Nova Matéria</button>
+                <h1>Matéria</h1>
+                </div>
+            
         </div>
 
-        <div class="cardsMaterias" id="cardsMaterias"></div>
-
+        <p class="semArquivos">Ainda não há arquivos.</p>
     </div>
     
 
 
-    <div class="overlay" id="overlay">
-        <div class="modal">
-
-            <div class="topoModal">
-                <p id="tituloModal">Nova Matéria</p>
-                <button id="fecharModal">✕</button>
-            </div>
-
-            <div class="campo">    
-                <label for="nomeMateria">Nome da matéria</label>
-                <input type="text" id="nomeMateria" placeholder="Ex: Matemática">
-            </div>
-
-            <div class="acoesModal">
-                <button id="btnCancelar">Cancelar</button>
-                <button id="btnCriarMateria">Criar Matéria</button>
-            </div>
-
-        </div>
-    </div> 
+    
 
 
   <script src="../js/materias.js"></script>

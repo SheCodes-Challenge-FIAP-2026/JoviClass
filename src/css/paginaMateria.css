@@ -131,7 +131,7 @@ body {
 }
 
 
-/* ########## */
+/* Conteudo */
 .materias {
     padding: 30px;
     width: 100%;
@@ -143,22 +143,6 @@ body {
     margin-bottom: 20px;
 }
 
-.materias p{
-    color: var(--bg-color5);
-}
-
-
-.headerMaterias #btnMateria{
-    padding: 10px 15px;
-    border: none;
-    background-color: var(--bg-color4);
-    color: var(--bg-color2);
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background-color 0.2s;
-    white-space: nowrap;
-
-}
 
 .headerMaterias{
     display: flex;
@@ -168,156 +152,14 @@ body {
     gap: 15px;
 }
 
-.headerMaterias div{
+.semArquivos{
     display: flex;
-    flex-direction: column;
-}
-
-
-.cardsMaterias{
-    margin-top: 40px;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px;
-}
-
-.cardMateria img{
-    width: 55px;
-}
-
-.cardMateria h3{
-    margin-top: 15px;
-}
-
-.cardMateria p{
-    margin-top: 8px;
-    font-size: 14px;
-}
-.cardMateria{
-    width: 220px;
-    background-color: var(--bg-color2);
-    padding: 20px;
-    border-radius: 16px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-    text-decoration: none;
-    color: black;
-    transition: 0.2s;
-    cursor: pointer;
-}
-
-.cardMateria:hover{
-    transform: translateY(-3px);
-    box-shadow: 0 6px 15px rgba(0,0,0,0.12);
-}
-
-/* MODAL */
-
-.overlay{
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.4);
-    display: none;
-    align-items: center;
     justify-content: center;
-    padding: 16px;
-}
-
-.overlay.aberto {
-    display: flex;
-}
-
-.modal{
-    width: 100%;
-    max-width: 420px;
-    background: var(--bg-color2);
-    border-radius: 20px;
-    padding: 30px;
-}
-
-.topoModal{
-    display: flex;
-    justify-content: space-between;
     align-items: center;
-    font-size: 16px;
-    /* transition: background 0.2s; */
+    height: 70vh;
+    color: var(--bg-color5);
+    font-size: 25px;
 }
-
-.topoModal button{
-    border: none;
-
-    width: 35px;
-    height: 35px;
-
-    border-radius: 50%;
-
-    cursor: pointer;
-
-    background: #eee;
-
-    color: #333;
-}
-
-.campo{
-    margin-top: 25px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.campo input{
-    padding: 14px;
-    border: 1px solid #ccc;
-    border-radius: 10px;
-    /* outline: none;
-    transition: border-color 0.2s; */
-}
-
-.acoesModal{
-    margin-top: 30px;
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-}
-
-.acoesModal button {
-    padding: 10px 18px;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: 600;
-    transition: background-color 0.2s;
-}
-
-#btnCriarMateria{
-    background: var(--bg-color4);
-    color: var(--bg-color2);
-}
-
-#btnCancelar{
-    background: #9d9d9d ;
-    color: #383838;
-}
-
-.btnExcluir{
-    margin-top: 15px;
-    padding: 8px 12px;
-    border: none;
-    background-color: #ff3b3b;
-    color: white;
-    border-radius: 8px;
-    cursor: pointer;
-    width: 100%;
-    transition: 0.2s;
-}
-
-.btnExcluir:hover{
-    background-color: #cc0000;
-}
-
-
-
-
-
 
 
 /* =========================
@@ -380,14 +222,7 @@ body {
     gap: 20px;
   }
 
-  .acoesModal {
-    flex-direction: column;
-  }
-
-    .acoesModal button {
-        width: 100%;
-        text-align: center;
-    }
+  
 }
 
 
@@ -451,10 +286,7 @@ body {
    
   }
 
-  .cardMateria {
-    width: 220px;
-    
-  }
+
 
 
   
