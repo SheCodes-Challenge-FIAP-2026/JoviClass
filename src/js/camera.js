@@ -45,3 +45,60 @@ botaoScanear.onclick = async () => {
         botaoScanear.disabled = false;
     }
 }
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+
+const logoBtn = document.getElementById("logoBtn");
+const dropdownMenu = document.getElementById("dropdownMenu");
+const confirmBtn = document.getElementById("confirmBtn");
+
+let materiasSelecionada = false;
+
+if (logoBtn && dropdownMenu) {
+    logoBtn.addEventListener("click", function (e) {
+        e.stopPropagation();
+        dropdownMenu.classList.toggle("show");
+        materiasSelecionada = false; // reset ao abrir de novo
+        confirmBtn.style.display = "none";
+    });
+
+    // Clique em qualquer item do dropdown (exceto "Abrir App")
+    dropdownMenu.querySelectorAll(".dropdown-item").forEach(function (item) {
+        item.addEventListener("click", function (e) {
+            e.stopPropagation();
+            materiasSelecionada = true;
+            dropdownMenu.classList.remove("show");
+            confirmBtn.style.display = "block"; // ou "flex", dependendo do seu CSS
+        });
+    });
+
+    document.addEventListener("click", function () {
+        dropdownMenu.classList.remove("show");
+    });
+}
+
+document.getElementById('confirmBtn').addEventListener('click', () => {
+  document.getElementById('overlay').classList.add('show');
+});
+
+document.getElementById('cancelBtn').addEventListener('click', () => {
+  document.getElementById('overlay').classList.remove('show');
+});
+
+document.getElementById('salvarBtn').addEventListener('click', function () {
+  const nome = document.getElementById('nomeArquivo').value.trim() || 'AulaX_DataX';
+  const salvarNoApp = document.getElementById('salvarApp').checked;
+
+  // gerarPDF(nome, salvarNoApp);
+
+  this.textContent = '✔ Salvo!';
+  this.style.background = '#16a34a';
+  this.disabled = true;
+
+  setTimeout(() => {
+    this.textContent = 'Salvar PDF';
+    this.style.background = '';
+    this.disabled = false;
+    document.getElementById('overlay').classList.remove('show');
+  }, 2000);
+});

@@ -1,3 +1,12 @@
+:root{
+  --pink:   #e040bb;
+  --purple: #6c4fcf;
+  --green:  #2e7d32;
+  --orange: #e67e22;
+  --blue:   #2979ff;
+}
+
+
 * {
     margin: 0;
     padding: 0;
@@ -70,49 +79,83 @@ main {
     cursor: pointer;
     backdrop-filter: blur(10px);
 }
+.abrirLogo {
+    position: absolute;
+    
+    width: 43px;
+    height: 43px;
+    
+    background: rgba(0,0,0,0.4);
+    padding: 4px;
+    margin-left: 1px;
+    border-radius: 8px;
+    cursor: pointer;
+    backdrop-filter: blur(10px);
+}
 
 .dropdown-menu {
-    position: absolute;
-    top: 3.5rem;
-    left: 1rem;
-    background: rgba(0,0,0,0.85);
-    backdrop-filter: blur(12px);
-    border: 1px solid rgba(255,255,255,0.15);
-    border-radius: 14px;
-    padding: 0.5rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.4rem;
-    z-index: 80;
-    opacity: 0;
-    transform: translateY(-10px);
-    pointer-events: none;
-    transition: 0.25s ease;
+  display: none;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px;
+  border-radius: 20px;
+  position: absolute;
+  top: 60px;
+  left: 0;
+  z-index: 100;
+  min-width: 280px;
 }
-
 
 .dropdown-menu.show {
-    opacity: 1;
-    transform: translateY(0);
-    pointer-events: auto;
+  display: flex;
 }
 
-
-.dropdown-menu button {
-    background: transparent;
-    border: none;
-    color: #fff;
-    padding: 0.5rem 0.8rem;
-    text-align: left;
-    cursor: pointer;
-    border-radius: 8px;
-    font-size: 0.85rem;
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 18px 10px 8px;
+  border-radius: 50px;
+  text-decoration: none;
+  font-size: 15px;
+  font-weight: 600;
+  color: #fff;
+  cursor: pointer;
+  transition: opacity 0.2s;
 }
 
-
-.dropdown-menu button:hover {
-    background: rgba(255,255,255,0.1);
+.dropdown-item:hover {
+  opacity: 0.85;
 }
+
+.dropdown-item-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 20px;
+}
+
+.dropdown-item.pink   {
+     background: var(--pink);
+}
+.dropdown-item.purple { 
+    background: var(--purple); 
+}
+.dropdown-item.green  { 
+    background: var(--green); 
+}
+.dropdown-item.orange {
+    background: var(--orange); 
+}
+.dropdown-item.blue{ 
+    background: var(--blue);
+}
+
 
 .camera-top-bar {
     position: absolute;
@@ -167,6 +210,7 @@ main {
     cursor: pointer;
     z-index: 90;
     display: flex;
+    display: none;
     align-items: center;
     justify-content: center;
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
@@ -185,85 +229,148 @@ main {
 
 
 .overlay {
-    position: absolute;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.72);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    opacity: 0;
-    visibility: hidden;
-    pointer-events: none;
-    transition: 0.3s ease;
-    z-index: 200;
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(6px);
+  z-index: 999;
+  align-items: center;
+  justify-content: center;
 }
-
 
 .overlay.show {
-    opacity: 1;
-    visibility: visible;
-    pointer-events: auto;
+  display: flex;
 }
 
-
-.overlay-box {
-    width: 85%;
-    max-width: 300px;
-    background: #111;
-    border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 18px;
-    padding: 1.5rem;
-    text-align: center;
-    box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+.overlay-card {
+  background: #fff;
+  border-radius: 24px;
+  width: 90%;
+  max-width: 340px;
+  overflow: hidden;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.35);
+  animation: popIn 0.25s cubic-bezier(0.34,1.56,0.64,1);
 }
 
-
-.overlay-box h2 {
-    color: #fff;
-    font-size: 1.1rem;
-    margin-bottom: 1.2rem;
+@keyframes popIn {
+  from { transform: scale(0.85); opacity: 0; }
+  to   { transform: scale(1);    opacity: 1; }
 }
 
-
-.overlay-buttons {
-    display: flex;
-    gap: 0.8rem;
+.overlay-banner {
+  background: linear-gradient(135deg, #1a56db, #6c4fcf);
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
+.overlay-banner img {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.2);
+  padding: 4px;
+}
 
-.overlay-buttons a,
-.overlay-buttons button {
-    flex: 1;
-    padding: 0.7rem;
-    border-radius: 10px;
-    font-weight: 600;
-    font-size: 0.9rem;
-    cursor: pointer;
-    text-align: center;
+.overlay-banner h2 {
+  font-size: 17px;
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 2px;
+}
+
+.overlay-banner p {
+  font-size: 12px;
+  color: rgba(255,255,255,0.75);
+  margin: 0;
+}
+
+.overlay-body {
+  padding: 20px;
+}
+
+.overlay-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 8px;
+}
+
+.overlay-input {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1.5px solid #d1d5db;
+  border-radius: 12px;
+  font-size: 15px;
+  outline: none;
+  box-sizing: border-box;
+  margin-bottom: 8px;
+  font-family: inherit;
+}
+
+.overlay-input:focus {
+  border-color: #1a56db;
+}
+
+.overlay-hint {
+  font-size: 12px;
+  color: #aaa;
+  margin-bottom: 16px;
+}
+
+.overlay-check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #333;
+  cursor: pointer;
+  margin-bottom: 20px;
+}
+
+.overlay-check input {
+  width: 18px;
+  height: 18px;
+  accent-color: #1a56db;
+  cursor: pointer;
+}
+
+.overlay-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.btn-cancelar {
+  flex: 1;
+  padding: 13px;
+  border: none;
+  border-radius: 50px;
+  font-size: 15px;
+  font-weight: 700;
+  background: #fef2f2;
+  color: #b91c1c;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.btn-salvar {
+  flex: 1.4;
+  padding: 13px;
+  border: none;
+  border-radius: 50px;
+  font-size: 15px;
+  font-weight: 700;
+  background: linear-gradient(135deg, #1a56db, #6c4fcf);
+  color: #fff;
+  cursor: pointer;
+  font-family: inherit;
+}
+.btn-salvar a{
     text-decoration: none;
-    border: none;
+    color: inherit;
 }
 
-
-.ok-btn {
-    background: #00c853;
-    color: #fff;
-}
-
-
-.cancel-btn {
-    background: #ff3b30;
-    color: #fff;
-}
-
-.camera-bottom-bar {
-    position: absolute;
-    bottom: 1rem;
-    width: 100%;
-    display: flex;
-    justify-content: space-between;
-    padding: 0 1rem;
-    font-size: 1.2rem;
-}
