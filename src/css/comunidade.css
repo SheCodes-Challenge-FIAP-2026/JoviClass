@@ -170,7 +170,7 @@ body {
   background-color: white;
   padding: 25px;
   border-radius: 15px;
-  box-shadow: 0px 0px 20px rgba(0,0,0,0.2);
+  box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.2);
   z-index: 1000;
 }
 
@@ -221,7 +221,7 @@ body {
   overflow: hidden;
   cursor: pointer;
   transition: 0.3s;
-  box-shadow: 0px 4px 15px rgba(0,0,0,0.08);
+  box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.08);
 }
 
 .cardComunidade:hover {
@@ -294,6 +294,52 @@ body {
   color: #4b4dff;
 }
 
+/* CHAT */
+
+#chatArea {
+  margin-top: 30px;
+}
+
+#mensagensChat {
+  background-color: white;
+  height: 300px;
+  border-radius: 10px;
+  padding: 15px;
+  overflow-y: auto;
+  margin-top: 15px;
+}
+
+.mensagem {
+  background-color: #dbe7ff;
+  padding: 10px;
+  border-radius: 10px;
+  margin-bottom: 10px;
+  width: fit-content;
+  max-width: 70%;
+}
+
+.chatInput {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.chatInput input {
+  flex: 1;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+}
+
+.chatInput button {
+  padding: 12px 18px;
+  border: none;
+  background-color: #1466ff;
+  color: white;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
 /* =========================
    ARQUIVOS
 ========================= */
@@ -310,7 +356,7 @@ body {
   padding: 25px;
   border-radius: 15px;
   margin-bottom: 20px;
-  box-shadow: 0px 2px 10px rgba(0,0,0,0.08);
+  box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.08);
 }
 
 #uploadArquivo {
@@ -322,7 +368,7 @@ body {
   padding: 15px;
   border-radius: 12px;
   margin-bottom: 12px;
-  box-shadow: 0px 2px 10px rgba(0,0,0,0.08);
+  box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.08);
 }
 
 /* =========================
@@ -379,6 +425,18 @@ body {
 
   .cardComunidade {
     width: 100%;
+  }
+
+  .chatInput {
+    flex-direction: column;
+  }
+
+  .chatInput button {
+    width: 100%;
+  }
+
+  .mensagem {
+    max-width: 100%;
   }
 }
 
@@ -437,84 +495,84 @@ body {
    RESPONSIVIDADE
 ========================= */
 
-@media (max-width: 699px){
+@media (max-width: 699px) {
 
-  body{
+  body {
     flex-direction: column;
   }
 
   /* MENU */
-  .menu{
+  .menu {
     width: 100%;
     min-height: auto;
     padding: 20px;
   }
 
-  .menu-header{
+  .menu-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
   }
 
-  .hamburger{
+  .hamburger {
     display: flex;
   }
 
-  .menu-links{
+  .menu-links {
     display: none;
     width: 100%;
     margin-top: 20px;
   }
 
-  .menu-links.active{
+  .menu-links.active {
     display: flex;
   }
 
-  .menu a{
+  .menu a {
     width: 100%;
   }
 
   /* CONTEÚDO */
-  #comunidade{
+  #comunidade {
     padding: 20px;
   }
 
-  .topoComunidade{
+  .topoComunidade {
     flex-direction: column;
     align-items: flex-start;
     gap: 15px;
   }
 
-  #btnNovaComunidade{
+  #btnNovaComunidade {
     width: 100%;
   }
 
   /* FORMULÁRIO */
-  #formulario{
+  #formulario {
     width: 95%;
   }
 
   /* CARDS */
-  #listadeComunidades{
+  #listadeComunidades {
     flex-direction: column;
   }
 
-  .cardComunidade{
+  .cardComunidade {
     width: 100%;
   }
 
   /* TOPO DA COMUNIDADE */
-  .caminho{
+  .caminho {
     flex-wrap: wrap;
   }
 
   /* ABAS */
-  .abas{
+  .abas {
     overflow-x: auto;
   }
 
   /* UPLOAD */
-  .uploadBox{
+  .uploadBox {
     padding: 20px;
   }
 
@@ -524,22 +582,22 @@ body {
    DESKTOP
 ========================= */
 
-@media (min-width: 700px){
+@media (min-width: 700px) {
 
-  body{
+  body {
     flex-direction: row;
   }
 
-  .menu{
+  .menu {
     width: 320px;
     min-height: 100vh;
   }
 
-  .hamburger{
+  .hamburger {
     display: none;
   }
 
-  .menu-links{
+  .menu-links {
     display: flex !important;
   }
 
