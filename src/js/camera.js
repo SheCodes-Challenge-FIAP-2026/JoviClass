@@ -31,22 +31,19 @@ botaoScanear.onclick = async () => {
 
     context.setTransform(1, 0, 0, 1, 0, 0);
     context.filter = 'contrast(1.3) grayscale(1)';
-
     context.drawImage(videoElemento, 0, 0, canvas.width, canvas.height);
-    
+
     try {
         const { data: { text } } = await Tesseract.recognize(canvas, 'por');
         const textoFinal = text.trim();
-        resultado.innerText = textoFinal.length > 0 ? textoFinal : "Não foi possivel identificar o texto";
+        resultado.innerText = textoFinal.length > 0 ? textoFinal : "Não foi possível identificar o texto";
     } catch (erro) {
         console.error(erro);
         resultado.innerText = `Erro ao processar: ${erro.message}`;
     } finally {
         botaoScanear.disabled = false;
     }
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////
+};
 
 const logoBtn = document.getElementById("logoBtn");
 const dropdownMenu = document.getElementById("dropdownMenu");
@@ -67,7 +64,7 @@ if (logoBtn && dropdownMenu) {
             e.stopPropagation();
             materiasSelecionada = true;
             dropdownMenu.classList.remove("show");
-            confirmBtn.style.display = "block"; 
+            confirmBtn.style.display = "block";
         });
     });
 
@@ -77,26 +74,23 @@ if (logoBtn && dropdownMenu) {
 }
 
 document.getElementById('confirmBtn').addEventListener('click', () => {
-  document.getElementById('overlay').classList.add('show');
+    document.getElementById('overlay').classList.add('show');
 });
 
 document.getElementById('cancelBtn').addEventListener('click', () => {
-  document.getElementById('overlay').classList.remove('show');
+    document.getElementById('overlay').classList.remove('show');
 });
 
 document.getElementById('salvarBtn').addEventListener('click', function () {
-  const nome = document.getElementById('nomeArquivo').value.trim() || 'AulaX_DataX';
-  const salvarNoApp = document.getElementById('salvarApp').checked;
+    const nome = document.getElementById('nomeArquivo').value.trim() || 'AulaX_DataX';
+    const salvarNoApp = document.getElementById('salvarApp').checked;
 
+    this.textContent = '✔ Salvo!';
+    this.style.background = '#16a34a';
+    this.disabled = true;
 
-  this.textContent = '✔ Salvo!';
-  this.style.background = '#16a34a';
-  this.disabled = true;
-
-  setTimeout(() => {
-    this.textContent = 'Salvar PDF';
-    this.style.background = '';
-    this.disabled = false;
-    document.getElementById('overlay').classList.remove('show');
-  }, 2000);
+    setTimeout(() => {
+        document.getElementById('overlay').classList.remove('show');
+        window.location.href = '../../index.html';
+    }, 2000);
 });
