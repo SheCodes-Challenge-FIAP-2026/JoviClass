@@ -511,4 +511,11 @@ body {
         padding: 2px 3px;
         border-radius: 4px;
     }
+
+    #formularioEvento {
+    width: 95%;
+    max-height: 90vh;      
+    overflow-y: auto;      
+    padding: 12px;
+  }
 }
