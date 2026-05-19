@@ -58,17 +58,16 @@ if (logoBtn && dropdownMenu) {
     logoBtn.addEventListener("click", function (e) {
         e.stopPropagation();
         dropdownMenu.classList.toggle("show");
-        materiasSelecionada = false; // reset ao abrir de novo
+        materiasSelecionada = false;
         confirmBtn.style.display = "none";
     });
 
-    // Clique em qualquer item do dropdown (exceto "Abrir App")
     dropdownMenu.querySelectorAll(".dropdown-item").forEach(function (item) {
         item.addEventListener("click", function (e) {
             e.stopPropagation();
             materiasSelecionada = true;
             dropdownMenu.classList.remove("show");
-            confirmBtn.style.display = "block"; // ou "flex", dependendo do seu CSS
+            confirmBtn.style.display = "block"; 
         });
     });
 
@@ -89,7 +88,6 @@ document.getElementById('salvarBtn').addEventListener('click', function () {
   const nome = document.getElementById('nomeArquivo').value.trim() || 'AulaX_DataX';
   const salvarNoApp = document.getElementById('salvarApp').checked;
 
-  // gerarPDF(nome, salvarNoApp);
 
   this.textContent = '✔ Salvo!';
   this.style.background = '#16a34a';
