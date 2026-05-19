@@ -259,7 +259,7 @@ main {
 }
 
 .overlay-banner {
-  background: linear-gradient(135deg, #1a56db, #6c4fcf);
+  background: linear-gradient(135deg, #1a56db, #5e8aeb);
   padding: 20px;
   display: flex;
   align-items: center;
@@ -364,7 +364,7 @@ main {
   border-radius: 50px;
   font-size: 15px;
   font-weight: 700;
-  background: linear-gradient(135deg, #1a56db, #6c4fcf);
+  background: linear-gradient(135deg, #1a56db, #5e8aeb);
   color: #fff;
   cursor: pointer;
   font-family: inherit;
