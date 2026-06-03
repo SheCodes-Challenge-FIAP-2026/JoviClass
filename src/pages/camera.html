@@ -6,102 +6,119 @@
     <title>Câmera JOVI</title>
     <link rel="stylesheet" href="../css/camera.css">
     <link rel="shortcut icon" href="../src/assets/favicon.ico" type="image/x-icon">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
-    >
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 <body>
-<header>
-    <h1>Câmera JOVI</h1>
-</header>
-<main>
-    <div class="container">
-        <img src="../assets/img/logo.png" alt="Logo" class="camera-logo" id="logoBtn"/>
-       <div class="dropdown-menu" id="dropdownMenu">
-  <a class="dropdown-item pink" href="#">
-    <span class="dropdown-item-icon">📘</span>
-    Introdução ao Estudo da Língua Portuguesa I
-  </a>
-  <a class="dropdown-item purple" href="#">
-    <span class="dropdown-item-icon">📘</span>
-    Introdução aos Estudos Clássicos I
-  </a>
-  <a class="dropdown-item green" href="#">
-    <span class="dropdown-item-icon">📗</span>
-    Introdução aos Estudos Literários I
-  </a>
-  <a class="dropdown-item orange" href="#">
-    <span class="dropdown-item-icon">📙</span>
-    Elementos de Linguística I
-  </a>
-  <a class="dropdown-item blue" href="index.html">
-    <span class="dropdown-item-icon"><img class="abrirLogo" src="../assets/img/logo.png" alt=""></span>
-    Abrir App
-  </a>
+
+<div class="phone-wrapper">
+
+  <div class="top-status-bar">
+    <div class="logo-btn" id="logoBtn">
+      <img src="../assets/img/logo.png" alt="JOVI Logo" class="logo-img" />
+    </div>
+    <div class="top-icons">
+      <i class="fa-solid fa-person-running-fast icon-off"></i>
+      <i class="fa-regular fa-circle-dot icon-off"></i>
+      <span class="zeiss-label">ZEISS</span>
+      <i class="fa-solid fa-camera-rotate icon-off"></i>
+      <i class="fa-regular fa-circle icon-off"></i>
+    </div>
+  </div>
+
+  <div class="camera-viewport">
+
+    <div class="dropdown-menu" id="dropdownMenu">
+      <a class="dropdown-item pink" href="#">
+        <span class="dropdown-item-icon">📖</span>
+        Introdução ao Estudo da Língua Portuguesa I
+      </a>
+      <a class="dropdown-item purple" href="#">
+        <span class="dropdown-item-icon">📖</span>
+        Introdução aos Estudos Clássicos I
+      </a>
+      <a class="dropdown-item green" href="#">
+        <span class="dropdown-item-icon">📖</span>
+        Introdução aos Estudos Literários I
+      </a>
+      <a class="dropdown-item orange" href="#">
+        <span class="dropdown-item-icon">📖</span>
+        Elementos de Linguística I
+      </a>
+      <a class="dropdown-item blue" href="index.html">
+        <span class="dropdown-item-icon app-icon">
+          <img src="../assets/img/logo.png" alt="JOVI Logo" class="dropdown-logo-img" />
+        </span>
+        Abrir App
+      </a>
+    </div>
+
+    <video id="video" autoplay playsinline></video>
+    <canvas id="canvas"></canvas>
+
+    <div class="zoom-bar">
+      <span class="zoom-opt">0.6</span>
+      <span class="zoom-opt active">1×</span>
+      <span class="zoom-opt">2</span>
+      <button class="zoom-extra"><i class="fa-solid fa-wand-magic-sparkles"></i></button>
+    </div>
+
+    <div id="saida" class="hidden">Aponte a câmera para um texto</div>
+
+    <button id="confirmBtn" class="confirm-btn">✔</button>
+
+  </div>
+
+  <div class="bottom-bar">
+    <div class="modes-row">
+      <span class="mode">Noite</span>
+      <span class="mode">Retrato</span>
+      <span class="mode active">Foto</span>
+      <span class="mode">Vídeo</span>
+      <span class="mode">Microfilme</span>
+    </div>
+    <div class="controls-row">
+      <button class="ctrl-btn gallery-btn">
+        <i class="fa-regular fa-image"></i>
+      </button>
+      <button id="btn-texto" class="shutter-btn">
+        <span class="shutter-inner"></span>
+      </button>
+      <button class="ctrl-btn rotate-btn">
+        <i class="fa-solid fa-rotate"></i>
+      </button>
+    </div>
+  </div>
+
 </div>
 
-        <div class="camera-top-bar">
-            <span>HDR</span>
-            <span>AUTO</span>
-            <span>12 MP</span>
-        </div>
-
-        <video id="video" autoplay playsinline></video>
-        <canvas id="canvas"></canvas>
-
-
-        <div id="saida">Aponte a câmera para um texto</div>
-
-
-        <button id="btn-texto"></button>
-
-
-        <button id="confirmBtn" class="confirm-btn">✔</button>
-
-
-        <div class="overlay" id="overlay">
+<div class="overlay" id="overlay">
   <div class="overlay-card">
-
     <div class="overlay-banner">
-      <img src="../assets/img/logo.png" alt="Logo" />
+      <div class="overlay-logo">
+        <img src="../assets/img/logo.png" alt="JOVI Logo" class="overlay-logo-img" />
+      </div>
       <div>
         <h2>JoviClass</h2>
         <p>Salvar anotações em PDF</p>
       </div>
     </div>
-
     <div class="overlay-body">
       <p class="overlay-label">Nome do arquivo</p>
       <input class="overlay-input" type="text" id="nomeArquivo" placeholder="AulaX_DataX" />
       <p class="overlay-hint">O arquivo será salvo em PDF na sua galeria.</p>
-
       <label class="overlay-check">
         <input type="checkbox" id="salvarApp" checked />
         Salvar na galeria e no App JoviClass
       </label>
-
       <div class="overlay-actions">
         <button class="btn-cancelar" id="cancelBtn">Cancelar</button>
         <button class="btn-salvar" id="salvarBtn">Salvar PDF</button>
       </div>
     </div>
-
   </div>
 </div>
-        <div class="camera-bottom-bar">
-            <i class="fa-regular fa-image"></i>
-            <span class="modo ativo">Texto</span>
-            <i class="fa-solid fa-rotate"></i>
-        </div>
-        </div>
-</main>
-<footer>
-    <p>&copy; 2026 - Todos os direitos reservados.</p>
-</footer>
-
 
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 <script src="../js/camera.js"></script>
-
-
 </body>
 </html>

@@ -1,8 +1,9 @@
 const videoElemento = document.getElementById("video");
-const botaoScanear = document.getElementById("btn-texto");
-const resultado = document.getElementById("saida");
-const canvas = document.getElementById("canvas");
+const botaoScanear  = document.getElementById("btn-texto");
+const resultado     = document.getElementById("saida");
+const canvas        = document.getElementById("canvas");
 
+/* ── Câmera ── */
 async function configurarCamera() {
     try {
         const midia = await navigator.mediaDevices.getUserMedia({
@@ -10,10 +11,9 @@ async function configurarCamera() {
             audio: false
         });
         videoElemento.srcObject = midia;
-        videoElemento.onloadedmetadata = () => {
-            videoElemento.play();
-        };
+        videoElemento.onloadedmetadata = () => videoElemento.play();
     } catch (erro) {
+        resultado.classList.remove("hidden");
         resultado.innerText = `Erro ao acessar a câmera: ${erro.message}`;
     }
 }
@@ -22,21 +22,24 @@ configurarCamera();
 
 botaoScanear.onclick = async () => {
     botaoScanear.disabled = true;
-    resultado.innerText = "Fazendo a leitura...aguarde";
+    resultado.classList.remove("hidden");
+    resultado.innerText = "Fazendo a leitura... aguarde";
 
     const context = canvas.getContext("2d");
 
-    canvas.width = videoElemento.videoWidth || 640;
+    canvas.width  = videoElemento.videoWidth  || 640;
     canvas.height = videoElemento.videoHeight || 480;
 
     context.setTransform(1, 0, 0, 1, 0, 0);
-    context.filter = 'contrast(1.3) grayscale(1)';
+    context.filter = "contrast(1.3) grayscale(1)";
     context.drawImage(videoElemento, 0, 0, canvas.width, canvas.height);
 
     try {
-        const { data: { text } } = await Tesseract.recognize(canvas, 'por');
+        const { data: { text } } = await Tesseract.recognize(canvas, "por");
         const textoFinal = text.trim();
-        resultado.innerText = textoFinal.length > 0 ? textoFinal : "Não foi possível identificar o texto";
+        resultado.innerText = textoFinal.length > 0
+            ? textoFinal
+            : "Não foi possível identificar o texto";
     } catch (erro) {
         console.error(erro);
         resultado.innerText = `Erro ao processar: ${erro.message}`;
@@ -45,26 +48,27 @@ botaoScanear.onclick = async () => {
     }
 };
 
-const logoBtn = document.getElementById("logoBtn");
+/*  Dropdown das matérias  */
+const logoBtn      = document.getElementById("logoBtn");
 const dropdownMenu = document.getElementById("dropdownMenu");
-const confirmBtn = document.getElementById("confirmBtn");
+const confirmBtn   = document.getElementById("confirmBtn");
 
-let materiasSelecionada = false;
+let materiaSelecionada = false;
 
 if (logoBtn && dropdownMenu) {
     logoBtn.addEventListener("click", function (e) {
         e.stopPropagation();
         dropdownMenu.classList.toggle("show");
-        materiasSelecionada = false;
+        materiaSelecionada = false;
         confirmBtn.style.display = "none";
     });
 
     dropdownMenu.querySelectorAll(".dropdown-item").forEach(function (item) {
         item.addEventListener("click", function (e) {
             e.stopPropagation();
-            materiasSelecionada = true;
+            materiaSelecionada = true;
             dropdownMenu.classList.remove("show");
-            confirmBtn.style.display = "block";
+            confirmBtn.style.display = "flex";
         });
     });
 
@@ -73,24 +77,25 @@ if (logoBtn && dropdownMenu) {
     });
 }
 
-document.getElementById('confirmBtn').addEventListener('click', () => {
-    document.getElementById('overlay').classList.add('show');
+/* Overlay */
+confirmBtn.addEventListener("click", () => {
+    document.getElementById("overlay").classList.add("show");
 });
 
-document.getElementById('cancelBtn').addEventListener('click', () => {
-    document.getElementById('overlay').classList.remove('show');
+document.getElementById("cancelBtn").addEventListener("click", () => {
+    document.getElementById("overlay").classList.remove("show");
 });
 
-document.getElementById('salvarBtn').addEventListener('click', function () {
-    const nome = document.getElementById('nomeArquivo').value.trim() || 'AulaX_DataX';
-    const salvarNoApp = document.getElementById('salvarApp').checked;
+document.getElementById("salvarBtn").addEventListener("click", function () {
+    const nome        = document.getElementById("nomeArquivo").value.trim() || "AulaX_DataX";
+    const salvarNoApp = document.getElementById("salvarApp").checked;
 
-    this.textContent = '✔ Salvo!';
-    this.style.background = '#16a34a';
+    this.textContent = "✔ Salvo!";
+    this.style.background = "#16a34a";
     this.disabled = true;
 
     setTimeout(() => {
-        document.getElementById('overlay').classList.remove('show');
-        window.location.href = '../../index.html';
+        document.getElementById("overlay").classList.remove("show");
+        window.location.href = "../../index.html";
     }, 2000);
 });
