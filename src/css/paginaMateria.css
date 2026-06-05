@@ -7,7 +7,6 @@
   --bg-colorFundo: #f0f0f5;
 }
 
-
 /* =========================
    RESET
 ========================= */
@@ -18,14 +17,12 @@
   font-family: "Manrope", Arial, sans-serif;
 }
 
-
 body {
   background-color: var(--bg-colorFundo);
   display: flex;
   flex-direction: column;
   min-height: 100vh;
 }
-
 
 /* =========================
    LOGO
@@ -36,12 +33,10 @@ body {
   gap: 12px;
 }
 
-
 #logo {
   width: 90px;
   height: auto;
 }
-
 
 .menu h2 {
   font-size: 2rem;
@@ -49,7 +44,6 @@ body {
   color: var(--bg-color2);
   margin: 0;
 }
-
 
 /* =========================
    MENU
@@ -63,24 +57,18 @@ body {
   box-shadow: 4px 0 20px rgba(0, 0, 0, 0.15);
 }
 
-
 .menu-header {
   display: flex;
   justify-content: space-around;
   align-items: center;
 }
 
-
-/* =========================
-   BOTÃO HAMBÚRGUER
-========================= */
 .hamburger {
   display: none;
   flex-direction: column;
   gap: 5px;
   cursor: pointer;
 }
-
 
 .hamburger span {
   width: 28px;
@@ -90,17 +78,12 @@ body {
   transition: 0.3s;
 }
 
-
-/* =========================
-   LINKS DO MENU
-========================= */
 .menu-links {
   display: flex;
   flex-direction: column;
   gap: 12px;
   margin-top: 30px;
 }
-
 
 .menu a {
   color: #ffffff;
@@ -117,50 +100,384 @@ body {
   text-align: center;
 }
 
-
 .menu a:hover {
   background: rgba(255, 255, 255, 0.28);
   transform: translateX(5px);
   box-shadow: 0 6px 14px rgba(0, 0, 0, 0.2);
 }
 
-
 .menu a.ativo {
   background: linear-gradient(135deg, #1466ff, #4da3ff);
   box-shadow: 0 6px 18px rgba(20, 102, 255, 0.4);
 }
 
-
-/* Conteudo */
+/* =========================
+   CONTEÚDO
+========================= */
 .materias {
-    padding: 30px;
-    width: 100%;
-    min-width: 0;
+  padding: 30px;
+  width: 100%;
+  min-width: 0;
 }
 
-.materias h1{
-    margin-top: 20px;
-    margin-bottom: 20px;
+.materias h1 {
+  margin-top: 10px;
+  margin-bottom: 20px;
 }
 
-
-.headerMaterias{
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 15px;
+.headerMaterias {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 15px;
 }
 
-.semArquivos{
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 70vh;
-    color: var(--bg-color5);
-    font-size: 25px;
+.headerMaterias > div {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
+.voltarBtn {
+  font-size: 13px;
+  color: var(--bg-color4);
+  text-decoration: none;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: opacity 0.2s;
+}
+
+.voltarBtn:hover {
+  opacity: 0.7;
+}
+
+/* =========================
+   BOTÕES AÇÕES CABEÇALHO
+========================= */
+.acoesCabecalho {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.btnPrimario {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border: none;
+  background-color: var(--bg-color4);
+  color: var(--bg-color2);
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+  transition: background-color 0.2s;
+  white-space: nowrap;
+}
+
+.btnPrimario:hover {
+  background-color: #0d55e0;
+}
+
+.btnSecundario {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border: 2px solid var(--bg-color4);
+  background: transparent;
+  color: var(--bg-color4);
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.btnSecundario:hover {
+  background: var(--bg-color4);
+  color: white;
+}
+
+/* =========================
+   LISTA DE ARQUIVOS
+========================= */
+.listaArquivos {
+  margin-top: 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.itemArquivo {
+  background: var(--bg-color2);
+  border-radius: 12px;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
+  transition: box-shadow 0.2s;
+}
+
+.itemArquivo:hover {
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+}
+
+.arquivoInfo {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  overflow: hidden;
+}
+
+.arquivoIcone {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: #eef2ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: var(--bg-color4);
+}
+
+.arquivoTexto {
+  overflow: hidden;
+}
+
+.arquivoNome {
+  font-weight: 700;
+  font-size: 14px;
+  color: #222;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 300px;
+}
+
+.arquivoMeta {
+  font-size: 12px;
+  color: var(--bg-color5);
+  margin-top: 2px;
+}
+
+.btnOpcoesArquivo {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px 8px;
+  border-radius: 6px;
+  color: var(--bg-color5);
+  font-size: 18px;
+  letter-spacing: 1px;
+  transition: background 0.2s;
+  flex-shrink: 0;
+}
+
+.btnOpcoesArquivo:hover {
+  background: #f0f0f5;
+  color: #333;
+}
+
+/* =========================
+   SEM ARQUIVOS
+========================= */
+.semArquivos {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 60vh;
+  color: var(--bg-color5);
+  font-size: 22px;
+}
+
+/* =========================
+   ÁREA DE ANOTAÇÃO
+========================= */
+.areaAnotacao {
+  background: var(--bg-color2);
+  border-radius: 16px;
+  padding: 28px;
+  margin-top: 30px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.anotacaoHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.anotacaoHeader h2 {
+  font-size: 18px;
+  color: #222;
+}
+
+.btnFecharAnotacao {
+  background: #f0f0f5;
+  border: none;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #555;
+  transition: background 0.2s;
+}
+
+.btnFecharAnotacao:hover {
+  background: #e0e0e5;
+}
+
+.inputAnotacao {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.inputAnotacao:focus {
+  border-color: var(--bg-color4);
+}
+
+.textareaAnotacao {
+  width: 100%;
+  padding: 14px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  font-size: 14px;
+  min-height: 200px;
+  resize: vertical;
+  outline: none;
+  line-height: 1.6;
+  transition: border-color 0.2s;
+}
+
+.textareaAnotacao:focus {
+  border-color: var(--bg-color4);
+}
+
+.acoesAnotacao {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+/* =========================
+   DROPDOWN CONTEXTUAL
+========================= */
+.dropdownMenu {
+  position: fixed;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+  padding: 6px;
+  min-width: 210px;
+  display: none;
+  z-index: 200;
+  animation: fadeInDrop 0.15s ease;
+}
+
+.dropdownMenu.visivel {
+  display: block;
+}
+
+@keyframes fadeInDrop {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.dropHeader {
+  font-size: 11px;
+  font-weight: 700;
+  color: #999;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 6px 14px 4px;
+}
+
+.dropItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 14px;
+  background: none;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s;
+}
+
+.dropItem:hover {
+  background: #f0f0f5;
+}
+
+/* =========================
+   BADGE ANOTAÇÃO
+========================= */
+.badgeTipo {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 20px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.badgeTipo.anotacao {
+  background: #fff3cd;
+  color: #8a6200;
+}
+
+.badgeTipo.arquivo {
+  background: #eef2ff;
+  color: #3d5af1;
+}
+
+/* =========================
+   TOAST NOTIFICAÇÃO
+========================= */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: #222;
+  color: #fff;
+  padding: 12px 20px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: all 0.3s ease;
+  z-index: 500;
+  pointer-events: none;
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateY(0);
+}
 
 /* =========================
    MOBILE
@@ -171,24 +488,10 @@ body {
     padding: 20px;
   }
 
+  #logo { width: 70px; }
+  .menu h2 { font-size: 1.8rem; }
+  .hamburger { display: flex; }
 
-  #logo {
-    width: 70px;
-  }
-
-
-  .menu h2 {
-    font-size: 1.8rem;
-  }
-
-
-  /* Mostra botão hamburguer */
-  .hamburger {
-    display: flex;
-  }
-
-
-  /* Links escondidos inicialmente */
   .menu-links {
     display: none;
     flex-direction: column;
@@ -197,12 +500,7 @@ body {
     gap: 10px;
   }
 
-
-  /* Mostra quando clicar */
-  .menu-links.active {
-    display: flex;
-  }
-
+  .menu-links.active { display: flex; }
 
   .menu a {
     width: 100%;
@@ -211,30 +509,41 @@ body {
     font-size: 15px;
   }
 
-
-  .cardMateria {
-    width: 100%;
-  }
-
   .headerMaterias {
     flex-direction: column;
     align-items: flex-start;
     gap: 20px;
   }
 
-  
+  .acoesCabecalho {
+    width: 100%;
+  }
+
+  .btnPrimario,
+  .btnSecundario {
+    flex: 1;
+    justify-content: center;
+  }
+
+  .arquivoNome {
+    max-width: 180px;
+  }
+
+  .acoesAnotacao {
+    flex-direction: column;
+  }
+
+  .acoesAnotacao button {
+    width: 100%;
+    justify-content: center;
+  }
 }
-
-
 
 /* =========================
    DESKTOP
 ========================= */
 @media (min-width: 700px) {
-  body {
-    flex-direction: row;
-  }
-
+  body { flex-direction: row; }
 
   .menu {
     width: 320px;
@@ -242,33 +551,21 @@ body {
     padding: 30px 20px;
   }
 
-
   .menu-header {
     flex-direction: column;
     align-items: center;
     gap: 12px;
   }
 
-
-  /* Logo menor no desktop */
-  #logo {
-    width: 110px;
-  }
-
+  #logo { width: 110px; }
 
   .menu h2 {
     font-size: 1.9rem;
     text-align: center;
   }
 
+  .hamburger { display: none; }
 
-  /* Esconde hamburguer */
-  .hamburger {
-    display: none;
-  }
-
-
-  /* Links sempre visíveis */
   .menu-links {
     display: flex !important;
     flex-direction: column;
@@ -278,17 +575,9 @@ body {
     margin-left: 30px;
   }
 
-
   .menu a {
     border-radius: 12px;
     padding: 14px;
     font-size: 15px;
-   
   }
-
-
-
-
-  
- 
 }

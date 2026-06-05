@@ -7,7 +7,6 @@
   --bg-colorFundo: #f0f0f5;
 }
 
-
 /* =========================
    RESET
 ========================= */
@@ -18,14 +17,12 @@
   font-family: "Manrope", Arial, sans-serif;
 }
 
-
 body {
   background-color: var(--bg-colorFundo);
   display: flex;
   flex-direction: column;
   min-height: 100vh;
 }
-
 
 /* =========================
    LOGO
@@ -36,12 +33,10 @@ body {
   gap: 12px;
 }
 
-
 #logo {
   width: 90px;
   height: auto;
 }
-
 
 .menu h2 {
   font-size: 2rem;
@@ -49,7 +44,6 @@ body {
   color: var(--bg-color2);
   margin: 0;
 }
-
 
 /* =========================
    MENU
@@ -63,13 +57,11 @@ body {
   box-shadow: 4px 0 20px rgba(0, 0, 0, 0.15);
 }
 
-
 .menu-header {
   display: flex;
   justify-content: space-around;
   align-items: center;
 }
-
 
 /* =========================
    BOTÃO HAMBÚRGUER
@@ -81,7 +73,6 @@ body {
   cursor: pointer;
 }
 
-
 .hamburger span {
   width: 28px;
   height: 3px;
@@ -89,7 +80,6 @@ body {
   border-radius: 3px;
   transition: 0.3s;
 }
-
 
 /* =========================
    LINKS DO MENU
@@ -100,7 +90,6 @@ body {
   gap: 12px;
   margin-top: 30px;
 }
-
 
 .menu a {
   color: #ffffff;
@@ -117,203 +106,278 @@ body {
   text-align: center;
 }
 
-
 .menu a:hover {
   background: rgba(255, 255, 255, 0.28);
   transform: translateX(5px);
   box-shadow: 0 6px 14px rgba(0, 0, 0, 0.2);
 }
 
-
 .menu a.ativo {
   background: linear-gradient(135deg, #1466ff, #4da3ff);
   box-shadow: 0 6px 18px rgba(20, 102, 255, 0.4);
 }
 
-
 /* ########## */
 .materias {
-    padding: 30px;
-    width: 100%;
-    min-width: 0;
+  padding: 30px;
+  width: 100%;
+  min-width: 0;
 }
 
-.materias h1{
-    margin-top: 20px;
-    margin-bottom: 20px;
+.materias h1 {
+  margin-top: 20px;
+  margin-bottom: 20px;
 }
 
-.materias p{
-    color: var(--bg-color5);
+.materias p {
+  color: var(--bg-color5);
 }
 
-
-.headerMaterias #btnMateria{
-    padding: 10px 15px;
-    border: none;
-    background-color: var(--bg-color4);
-    color: var(--bg-color2);
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background-color 0.2s;
-    white-space: nowrap;
-
+.headerMaterias #btnMateria {
+  padding: 10px 15px;
+  border: none;
+  background-color: var(--bg-color4);
+  color: var(--bg-color2);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  white-space: nowrap;
+  font-weight: 600;
+  font-size: 14px;
 }
 
-.headerMaterias{
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 15px;
+.headerMaterias #btnMateria:hover {
+  background-color: #0d55e0;
 }
 
-.headerMaterias div{
-    display: flex;
-    flex-direction: column;
+.headerMaterias {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 15px;
 }
 
-
-.cardsMaterias{
-    margin-top: 40px;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px;
+.headerMaterias div {
+  display: flex;
+  flex-direction: column;
 }
 
-.cardMateria img{
-    width: 55px;
+.cardsMaterias {
+  margin-top: 40px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
 }
 
-.cardMateria h3{
-    margin-top: 15px;
+.cardMateria img {
+  width: 55px;
 }
 
-.cardMateria p{
-    margin-top: 8px;
-    font-size: 14px;
-}
-.cardMateria{
-    width: 220px;
-    background-color: var(--bg-color2);
-    padding: 20px;
-    border-radius: 16px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-    text-decoration: none;
-    color: black;
-    transition: 0.2s;
-    cursor: pointer;
+.cardMateria h3 {
+  margin-top: 15px;
 }
 
-.cardMateria:hover{
-    transform: translateY(-3px);
-    box-shadow: 0 6px 15px rgba(0,0,0,0.12);
+.cardMateria p {
+  margin-top: 8px;
+  font-size: 14px;
+}
+
+/* Card com linha superior para posicionar os 3 pontinhos */
+.cardMateria {
+  width: 220px;
+  background-color: var(--bg-color2);
+  padding: 20px;
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  text-decoration: none;
+  color: black;
+  transition: 0.2s;
+  cursor: pointer;
+  position: relative;
+}
+
+.cardMateria:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.12);
+}
+
+/* Cabeçalho do card com botão de 3 pontinhos */
+.cardTopoRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.btnOpcoes {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 6px;
+  color: var(--bg-color5);
+  font-size: 18px;
+  line-height: 1;
+  transition: background 0.2s;
+  letter-spacing: 1px;
+  margin-top: -4px;
+  margin-right: -6px;
+}
+
+.btnOpcoes:hover {
+  background: #f0f0f5;
+  color: #333;
 }
 
 /* MODAL */
-
-.overlay{
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.4);
-    display: none;
-    align-items: center;
-    justify-content: center;
-    padding: 16px;
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  z-index: 100;
 }
 
 .overlay.aberto {
-    display: flex;
+  display: flex;
 }
 
-.modal{
-    width: 100%;
-    max-width: 420px;
-    background: var(--bg-color2);
-    border-radius: 20px;
-    padding: 30px;
+.modal {
+  width: 100%;
+  max-width: 420px;
+  background: var(--bg-color2);
+  border-radius: 20px;
+  padding: 30px;
 }
 
-.topoModal{
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 16px;
-    /* transition: background 0.2s; */
+.topoModal {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 16px;
+  font-weight: 700;
 }
 
-.topoModal button{
-    border: none;
-    width: 30px;
-    height: 30px;
-    border-radius: 8px;
-    cursor: pointer;
-    background: var(--bg-color4);
-    color: white;
+.topoModal button {
+  border: none;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  cursor: pointer;
+  background: var(--bg-color4);
+  color: white;
+  font-size: 14px;
 }
 
-.campo{
-    margin-top: 25px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
+.campo {
+  margin-top: 25px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
-.campo input{
-    padding: 14px;
-    border: 1px solid #ccc;
-    border-radius: 10px;
-    /* outline: none;
-    transition: border-color 0.2s; */
+.campo input {
+  padding: 14px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  font-size: 15px;
+  outline: none;
+  transition: border-color 0.2s;
 }
 
-.acoesModal{
-    margin-top: 30px;
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
+.campo input:focus {
+  border-color: var(--bg-color4);
+}
+
+.acoesModal {
+  margin-top: 30px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
 }
 
 .acoesModal button {
-    padding: 10px 18px;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: 600;
-    transition: background-color 0.2s;
+  padding: 10px 18px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background-color 0.2s;
 }
 
-#btnCriarMateria{
-    background: var(--bg-color4);
-    color: var(--bg-color2);
+#btnCriarMateria {
+  background: var(--bg-color4);
+  color: var(--bg-color2);
 }
 
-#btnCancelar{
-    background: #9d9d9d ;
-    color: #383838;
+#btnCriarMateria:hover {
+  background: #0d55e0;
 }
 
-.btnExcluir{
-    margin-top: 15px;
-    padding: 8px 12px;
-    border: none;
-    background-color: #ff3b3b;
-    color: white;
-    border-radius: 8px;
-    cursor: pointer;
-    width: 100%;
-    transition: 0.2s;
+#btnCancelar {
+  background: #e0e0e0;
+  color: #383838;
 }
 
-.btnExcluir:hover{
-    background-color: #cc0000;
+#btnCancelar:hover {
+  background: #ccc;
 }
 
+/* =========================
+   DROPDOWN CONTEXTUAL
+========================= */
+.dropdownMenu {
+  position: fixed;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+  padding: 6px;
+  min-width: 210px;
+  display: none;
+  z-index: 200;
+  animation: fadeInDrop 0.15s ease;
+}
 
+.dropdownMenu.visivel {
+  display: block;
+}
 
+@keyframes fadeInDrop {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
 
+.dropItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 14px;
+  background: none;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s;
+}
 
+.dropItem:hover {
+  background: #f0f0f5;
+}
 
+.dropDanger {
+  color: #cc0000;
+}
+
+.dropDanger:hover {
+  background: #fff0f0;
+}
 
 /* =========================
    MOBILE
@@ -324,24 +388,18 @@ body {
     padding: 20px;
   }
 
-
   #logo {
     width: 70px;
   }
-
 
   .menu h2 {
     font-size: 1.8rem;
   }
 
-
-  /* Mostra botão hamburguer */
   .hamburger {
     display: flex;
   }
 
-
-  /* Links escondidos inicialmente */
   .menu-links {
     display: none;
     flex-direction: column;
@@ -350,12 +408,9 @@ body {
     gap: 10px;
   }
 
-
-  /* Mostra quando clicar */
   .menu-links.active {
     display: flex;
   }
-
 
   .menu a {
     width: 100%;
@@ -363,7 +418,6 @@ body {
     padding: 12px;
     font-size: 15px;
   }
-
 
   .cardMateria {
     width: 100%;
@@ -379,13 +433,11 @@ body {
     flex-direction: column;
   }
 
-    .acoesModal button {
-        width: 100%;
-        text-align: center;
-    }
+  .acoesModal button {
+    width: 100%;
+    text-align: center;
+  }
 }
-
-
 
 /* =========================
    DESKTOP
@@ -395,13 +447,11 @@ body {
     flex-direction: row;
   }
 
-
   .menu {
     width: 320px;
     min-height: 100vh;
     padding: 30px 20px;
   }
-
 
   .menu-header {
     flex-direction: column;
@@ -409,26 +459,19 @@ body {
     gap: 12px;
   }
 
-
-  /* Logo menor no desktop */
   #logo {
     width: 110px;
   }
-
 
   .menu h2 {
     font-size: 1.9rem;
     text-align: center;
   }
 
-
-  /* Esconde hamburguer */
   .hamburger {
     display: none;
   }
 
-
-  /* Links sempre visíveis */
   .menu-links {
     display: flex !important;
     flex-direction: column;
@@ -438,20 +481,13 @@ body {
     margin-left: 30px;
   }
 
-
   .menu a {
     border-radius: 12px;
     padding: 14px;
     font-size: 15px;
-   
   }
 
   .cardMateria {
     width: 220px;
-    
   }
-
-
-  
- 
 }
