@@ -26,6 +26,41 @@ body {
 }
 
 /* =========================
+   CONTEÚDO PRINCIPAL
+========================= */
+
+.conteudo-principal {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    padding: 0;
+}
+
+/* =========================
+   TÍTULO DA PÁGINA
+========================= */
+
+.pagina-titulo {
+    background: linear-gradient(135deg, #000fb0 0%, #1466ff 100%);
+    color: white;
+    padding: 32px 30px 28px;
+}
+
+.pagina-titulo h1 {
+    font-size: 2rem;
+    font-weight: 800;
+    margin-bottom: 4px;
+    letter-spacing: -0.5px;
+}
+
+.pagina-titulo p {
+    font-size: 0.9rem;
+    opacity: 0.8;
+    font-weight: 500;
+}
+
+/* =========================
    CALENDÁRIO
 ========================= */
 
@@ -35,18 +70,15 @@ body {
     align-items: center;
     background-color: var(--bg-color2);
     width: 100%;
-    
     padding: 30px;
     margin: auto;
 }
 
 .header{
     width: 100%;
-
     display: flex;
     justify-content: space-between;
     align-items: center;
-
     margin-bottom: 30px;
 }
 
@@ -116,7 +148,6 @@ body {
     width: 30px;
     height: 30px;
 }
-
 
 /* =========================
    MOBILE - CALENDÁRIO
@@ -300,6 +331,14 @@ body {
   .dias-semana span{
     font-size: 12px;
   }
+
+  .pagina-titulo {
+    padding: 22px 20px 18px;
+  }
+
+  .pagina-titulo h1 {
+    font-size: 1.5rem;
+  }
 }
 
 /* =========================
@@ -316,6 +355,7 @@ body {
     width: 320px;
     min-height: 100vh;
     padding: 30px 20px;
+    flex-shrink: 0;
   }
 
   .menu-header {
@@ -366,8 +406,8 @@ body {
     position: relative;
     overflow: hidden; 
     height: 90px;
-    
 }
+
 .numero-dia{
     font-weight: bold;
     margin-bottom: 5px;
@@ -398,7 +438,9 @@ body {
    FORMULÁRIO EVENTO
 ========================= */
 
-#formularioEvento {
+#formularioEvento,
+#formularioEntrega,
+#formularioTarefa {
     display: none;
     position: fixed;
     top: 50%;
@@ -412,21 +454,27 @@ body {
     z-index: 1000;
 }
 
-#formularioEvento form {
+#formularioEvento form,
+#formularioEntrega form,
+#formularioTarefa form {
     display: flex;
     flex-direction: column;
     gap: 12px;
     width: 100%;
 }
 
-#formularioEvento form h2 {
+#formularioEvento form h2,
+#formularioEntrega form h2,
+#formularioTarefa form h2 {
     color: black;
     font-size: 1.3rem;
     font-weight: 700;
     margin-bottom: 4px;
 }
 
-#formularioEvento label {
+#formularioEvento label,
+#formularioEntrega label,
+#formularioTarefa label {
     color: #333;
     font-size: 0.85rem;
     font-weight: 600;
@@ -435,13 +483,18 @@ body {
 
 #formularioEvento input,
 #formularioEvento select,
-#formularioEvento textarea {
+#formularioEvento textarea,
+#formularioEntrega input,
+#formularioEntrega select,
+#formularioEntrega textarea,
+#formularioTarefa input,
+#formularioTarefa select,
+#formularioTarefa textarea {
     padding: 10px;
     border-radius: 8px;
     border: 1px solid #ccc;
     font-size: 0.9rem;
     outline: none;
-    width: 100%;
     width: 100%;
     box-sizing: border-box;
     background-color: white;
@@ -449,7 +502,13 @@ body {
 
 #formularioEvento input:focus,
 #formularioEvento select:focus,
-#formularioEvento textarea:focus {
+#formularioEvento textarea:focus,
+#formularioEntrega input:focus,
+#formularioEntrega select:focus,
+#formularioEntrega textarea:focus,
+#formularioTarefa input:focus,
+#formularioTarefa select:focus,
+#formularioTarefa textarea:focus {
     border-color: var(--bg-color4);
 }
 
@@ -458,7 +517,9 @@ body {
     height: 90px;
 }
 
-#formularioEvento form > button:last-child {
+#formularioEvento form > button:last-child,
+#formularioEntrega form > button:last-child,
+#formularioTarefa form > button:last-child {
     padding: 12px;
     border: none;
     border-radius: 8px;
@@ -471,11 +532,15 @@ body {
     transition: background-color 0.2s;
 }
 
-#formularioEvento form > button:last-child:hover {
+#formularioEvento form > button:last-child:hover,
+#formularioEntrega form > button:last-child:hover,
+#formularioTarefa form > button:last-child:hover {
     background-color: var(--bg-color1);
 }
 
-#fecharEvento {
+#fecharEvento,
+#fecharEntrega,
+#fecharTarefa {
     width: 30px;
     height: 30px;
     border-radius: 8px;
@@ -493,9 +558,242 @@ body {
     cursor: pointer;
 }
 
-/*============
-    MOBILE
-=============*/
+/* =========================
+   SEÇÕES (ENTREGAS + CHECKLIST)
+========================= */
+
+.secao-entregas,
+.secao-checklist {
+    background-color: var(--bg-color2);
+    margin-top: 16px;
+    padding: 28px 30px;
+}
+
+.secao-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.secao-titulo {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #111;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.secao-icone {
+    font-size: 1.1rem;
+}
+
+.btn-add-entrega,
+.btn-add-tarefa {
+    background-color: var(--bg-color4);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 9px 16px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    white-space: nowrap;
+}
+
+.btn-add-entrega:hover,
+.btn-add-tarefa:hover {
+    background-color: var(--bg-color1);
+}
+
+.lista-vazia {
+    color: #999;
+    font-size: 0.9rem;
+    text-align: center;
+    padding: 24px 0;
+}
+
+/* =========================
+   PRÓXIMAS ENTREGAS
+========================= */
+
+.entregas-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.entrega-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: var(--bg-colorFundo);
+    border-radius: 10px;
+    padding: 14px 16px;
+    gap: 12px;
+    flex-wrap: wrap;
+    border-left: 4px solid var(--bg-color4);
+    transition: box-shadow 0.2s;
+}
+
+.entrega-item:hover {
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+}
+
+.entrega-item.prioridade-alta {
+    border-left-color: #e53935;
+}
+
+.entrega-item.prioridade-media {
+    border-left-color: #fb8c00;
+}
+
+.entrega-item.prioridade-baixa {
+    border-left-color: #43a047;
+}
+
+.entrega-info {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    flex: 1;
+}
+
+.entrega-titulo-texto {
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: #111;
+}
+
+.entrega-meta {
+    font-size: 0.8rem;
+    color: #666;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.tag-prioridade {
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+
+.tag-alta  { background-color: #fde8e8; color: #c62828; }
+.tag-media { background-color: #fff3e0; color: #e65100; }
+.tag-baixa { background-color: #e8f5e9; color: #2e7d32; }
+
+.btn-remover-entrega,
+.btn-remover-tarefa {
+    background: none;
+    border: none;
+    color: #bbb;
+    font-size: 1.1rem;
+    cursor: pointer;
+    padding: 4px 6px;
+    border-radius: 6px;
+    transition: color 0.2s, background-color 0.2s;
+    flex-shrink: 0;
+}
+
+.btn-remover-entrega:hover,
+.btn-remover-tarefa:hover {
+    color: #e53935;
+    background-color: #fde8e8;
+}
+
+/* =========================
+   CHECKLIST
+========================= */
+
+.checklist-barra-progresso {
+    margin-bottom: 18px;
+}
+
+.progresso-texto {
+    font-size: 0.82rem;
+    color: #666;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.barra-fundo {
+    background-color: #e0e0e0;
+    border-radius: 20px;
+    height: 8px;
+    overflow: hidden;
+}
+
+.barra-preenchida {
+    background: linear-gradient(90deg, var(--bg-color1), var(--bg-color4));
+    height: 100%;
+    border-radius: 20px;
+    transition: width 0.4s ease;
+}
+
+.checklist-lista {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.tarefa-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background-color: var(--bg-colorFundo);
+    border-radius: 10px;
+    padding: 12px 16px;
+    transition: opacity 0.2s;
+}
+
+.tarefa-item.concluida {
+    opacity: 0.55;
+}
+
+.tarefa-item.concluida .tarefa-texto {
+    text-decoration: line-through;
+    color: #999;
+}
+
+.tarefa-checkbox {
+    width: 20px;
+    height: 20px;
+    accent-color: var(--bg-color4);
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.tarefa-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.tarefa-texto {
+    font-size: 0.92rem;
+    font-weight: 600;
+    color: #111;
+}
+
+.tarefa-materia {
+    font-size: 0.78rem;
+    color: #888;
+}
+
+/* =========================
+   MOBILE - SEÇÕES
+========================= */
+
 @media (max-width: 699px) {
     .dia-card {
         height: 55px;
@@ -512,10 +810,21 @@ body {
         border-radius: 4px;
     }
 
-    #formularioEvento {
-    width: 95%;
-    max-height: 90vh;      
-    overflow-y: auto;      
-    padding: 12px;
-  }
+    #formularioEvento,
+    #formularioEntrega,
+    #formularioTarefa {
+        width: 95%;
+        max-height: 90vh;
+        overflow-y: auto;
+        padding: 12px;
+    }
+
+    .secao-entregas,
+    .secao-checklist {
+        padding: 20px 16px;
+    }
+
+    .secao-titulo {
+        font-size: 1.05rem;
+    }
 }
