@@ -12,8 +12,11 @@
 </head>
 <body>
 
-    <!-- OVERLAY -->
+    <!-- OVERLAY FORMULÁRIO -->
     <div id="overlay" onclick="fecharAba()"></div>
+
+    <!-- OVERLAY MENU DE OPÇÕES -->
+    <div id="overlayMenu" onclick="fecharMenuOpcoes()"></div>
 
     <!-- MENU -->
     <div class="menu">
@@ -48,7 +51,7 @@
             </button>
         </div>
 
-        <!-- FORMULÁRIO -->
+        <!-- FORMULÁRIO CRIAR COMUNIDADE -->
         <div id="formulario">
             <form>
                 <button type="button" onclick="fecharAba()" id="fechar">✕</button>
@@ -89,6 +92,44 @@
             </form>
         </div>
 
+        <!-- MENU DE TRÊS PONTINHOS (dropdown) -->
+        <div id="menuOpcoes">
+            <button onclick="acaoMenuOpcoes('convidar')">🔗 Convidar membros</button>
+            <button onclick="acaoMenuOpcoes('editar')">✏️ Editar comunidade</button>
+            <button onclick="acaoMenuOpcoes('excluir')" class="btnExcluir">🗑️ Excluir comunidade</button>
+        </div>
+
+        <!-- MODAL CONVIDAR -->
+        <div id="modalConvidar">
+            <div id="conteudoConvidar">
+                <button type="button" onclick="fecharModalConvidar()" id="fecharConvidar">✕</button>
+                <h2>Convidar para a Comunidade</h2>
+                <p class="subtituloConvidar">Compartilhe o link abaixo para convidar outros estudantes.</p>
+
+                <div class="linkConvite">
+                    <input type="text" id="inputLinkConvite" readonly>
+                    <button type="button" onclick="copiarLink()" id="btnCopiarLink">Copiar</button>
+                </div>
+
+                <div id="statusCopiar"></div>
+
+                <div class="divisorConvidar">
+                    <span>ou convide por e-mail</span>
+                </div>
+
+                <label for="emailConvite">E-mail do estudante:</label>
+                <div class="emailRow">
+                    <input type="email" id="emailConvite" placeholder="exemplo@email.com">
+                    <button type="button" onclick="enviarConviteEmail()">Enviar convite</button>
+                </div>
+
+                <div id="listaConvidados">
+                    <p class="labelConvidados">Convites enviados:</p>
+                    <div id="convidadosItens"></div>
+                </div>
+            </div>
+        </div>
+
         <!-- LISTA DE COMUNIDADES -->
         <div id="listadeComunidades"></div>
 
@@ -98,11 +139,16 @@
                 <div class="caminho">
                     <span onclick="voltarComunidades()" id="setaVoltar">←</span>
                     <p>Comunidades › <span id="NomeDiferenciado"></span></p>
+
+                    <!-- TRÊS PONTINHOS na página da comunidade -->
+                    <button class="btnTresPontos" id="btnTresPontosPagina" onclick="abrirMenuOpcoesPagina(event)">
+                        <span></span><span></span><span></span>
+                    </button>
                 </div>
 
                 <!-- BANNER -->
                 <div class="bannerComunidade" id="bannerComunidade">
-                    <span class="semFotoBanner" id="bannerEmoji">📚</span>
+                    <span class="semFotoBanner" id="bannerEmoji"></span>
                 </div>
 
                 <div>
