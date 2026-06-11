@@ -8,12 +8,12 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400..900&family=Manrope:wght@200..800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../css/comunidade.css">
-    <title>Comunidade</title>   
+    <title>Comunidade</title>
 </head>
 <body>
 
     <!-- OVERLAY FORMULÁRIO -->
-    <div id="overlay" onclick="fecharAba()"></div>
+    <div id="overlay"></div>
 
     <!-- OVERLAY MENU DE OPÇÕES -->
     <div id="overlayMenu" onclick="fecharMenuOpcoes()"></div>
@@ -51,11 +51,11 @@
             </button>
         </div>
 
-        <!-- FORMULÁRIO CRIAR COMUNIDADE -->
+        <!-- FORMULÁRIO CRIAR / EDITAR COMUNIDADE -->
         <div id="formulario">
             <form>
                 <button type="button" onclick="fecharAba()" id="fechar">✕</button>
-                <h2 style="margin-bottom:8px;">Nova Comunidade</h2>
+                <h2 id="tituloFormulario" style="margin-bottom:8px;">Nova Comunidade</h2>
 
                 <!-- FOTO -->
                 <div class="fotoPreviewBox">
@@ -88,7 +88,7 @@
                     <option value="Privada">Privada</option>
                 </select>
 
-                <button type="button" onclick="criarComunidade()">Criar comunidade</button>
+                <button type="button" id="btnConfirmarForm" onclick="criarComunidade()">Criar comunidade</button>
             </form>
         </div>
 

@@ -12,14 +12,36 @@ const cards       = document.getElementById('cardsMaterias');
 const dropdown    = document.getElementById('dropdownMenu');
 const hamburger   = document.getElementById('hamburger');
 const menuLinks   = document.getElementById('menuLinks');
+const seletorCores = document.getElementById('seletorCores');
 
 let materias = JSON.parse(localStorage.getItem('materias') || '[]');
-let editandoId = null;       // id da matéria sendo renomeada
-let dropdownAlvoId = null;   // id da matéria cujo dropdown está aberto
+let editandoId = null;
+let dropdownAlvoId = null;
+let corSelecionada = '#1466ff'; // padrão
+
+// Gera a cor de fundo do ícone (versão clara da cor principal)
+function corFundo(hex) {
+  // Converte hex para RGB e clareia misturando com branco (15% opacidade)
+  const r = parseInt(hex.slice(1,3), 16);
+  const g = parseInt(hex.slice(3,5), 16);
+  const b = parseInt(hex.slice(5,7), 16);
+  const mix = (c) => Math.round(c * 0.15 + 255 * 0.85);
+  return `rgb(${mix(r)}, ${mix(g)}, ${mix(b)})`;
+}
 
 // ── Hamburger ──────────────────────────────────────────────
 hamburger.addEventListener('click', () => {
   menuLinks.classList.toggle('active');
+});
+
+// ── Seletor de cores ───────────────────────────────────────
+seletorCores.addEventListener('click', (e) => {
+  const btn = e.target.closest('.btnCor');
+  if (!btn) return;
+
+  document.querySelectorAll('.btnCor').forEach(b => b.classList.remove('selecionada'));
+  btn.classList.add('selecionada');
+  corSelecionada = btn.dataset.cor;
 });
 
 // ── Renderizar cards ───────────────────────────────────────
@@ -31,15 +53,18 @@ function renderizarCards() {
   }
 
   materias.forEach(m => {
+    const cor = m.cor || '#1466ff';
+    const bg  = corFundo(cor);
+
     const card = document.createElement('div');
     card.className = 'cardMateria';
     card.dataset.id = m.id;
 
     card.innerHTML = `
       <div class="cardTopoRow">
-        <svg width="42" height="42" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect width="48" height="48" rx="12" fill="#EEF2FF"/>
-          <path d="M14 34V16a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v18l-6-3-4 3-4-3-6 3z" fill="#1466ff"/>
+        <svg class="iconeMateria" width="42" height="42" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect width="48" height="48" rx="12" fill="${bg}"/>
+          <path d="M14 34V16a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v18l-6-3-4 3-4-3-6 3z" fill="${cor}"/>
         </svg>
         <button class="btnOpcoes" data-id="${m.id}" title="Opções">&#8942;</button>
       </div>
@@ -47,7 +72,6 @@ function renderizarCards() {
       <p>${m.arquivos || 0} arquivo(s)</p>
     `;
 
-    // Clicar no card vai para a página da matéria (exceto no botão de opções)
     card.addEventListener('click', (e) => {
       if (e.target.closest('.btnOpcoes')) return;
       window.location.href = `./paginaMateria.html?id=${m.id}&nome=${encodeURIComponent(m.nome)}`;
@@ -56,12 +80,10 @@ function renderizarCards() {
     cards.appendChild(card);
   });
 
-  // Evento nos botões de opções
   document.querySelectorAll('.btnOpcoes').forEach(btn => {
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
-      const id = btn.dataset.id;
-      abrirDropdown(id, btn);
+      abrirDropdown(btn.dataset.id, btn);
     });
   });
 }
@@ -76,7 +98,6 @@ function abrirDropdown(id, btnRef) {
 
   dropdown.classList.add('visivel');
 
-  // Ajuste pós-renderização (largura real)
   requestAnimationFrame(() => {
     dropdown.style.left = `${rect.left - dropdown.offsetWidth + btnRef.offsetWidth}px`;
   });
@@ -108,6 +129,13 @@ document.getElementById('dropRenomear').addEventListener('click', () => {
   inputNome.value = m.nome;
   tituloModal.textContent = 'Renomear Matéria';
   btnCriar.textContent = 'Salvar';
+
+  // Pré-seleciona a cor atual da matéria
+  corSelecionada = m.cor || '#1466ff';
+  document.querySelectorAll('.btnCor').forEach(b => {
+    b.classList.toggle('selecionada', b.dataset.cor === corSelecionada);
+  });
+
   overlay.classList.add('aberto');
   inputNome.focus();
 });
@@ -130,6 +158,13 @@ function abrirFormulario() {
   inputNome.value = '';
   tituloModal.textContent = 'Nova Matéria';
   btnCriar.textContent = 'Criar Matéria';
+
+  // Reseta para a cor padrão
+  corSelecionada = '#1466ff';
+  document.querySelectorAll('.btnCor').forEach(b => {
+    b.classList.toggle('selecionada', b.dataset.cor === corSelecionada);
+  });
+
   overlay.classList.add('aberto');
   inputNome.focus();
 }
@@ -156,10 +191,19 @@ btnCriar.addEventListener('click', () => {
 
   if (editandoId !== null) {
     const m = materias.find(x => x.id == editandoId);
-    if (m) m.nome = nome;
+    if (m) {
+      m.nome = nome;
+      m.cor  = corSelecionada;
+    }
     mostrarToast('✏️ Matéria renomeada!');
   } else {
-    materias.push({ id: Date.now(), nome, arquivos: 0, compartilhada: false });
+    materias.push({
+      id: Date.now(),
+      nome,
+      arquivos: 0,
+      compartilhada: false,
+      cor: corSelecionada
+    });
     mostrarToast('✅ Matéria criada!');
   }
 

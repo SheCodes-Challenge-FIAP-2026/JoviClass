@@ -34,20 +34,6 @@ document.getElementById("inputFoto").addEventListener("change", function () {
 
 
 /* =====================
-   FORMULÁRIO
-===================== */
-function abrirFormulario() {
-    document.getElementById("formulario").style.display = "block";
-    document.getElementById("overlay").style.display = "block";
-}
-
-function fecharAba() {
-    document.getElementById("formulario").style.display = "none";
-    document.getElementById("overlay").style.display = "none";
-}
-
-
-/* =====================
    SALAS PADRÃO
 ===================== */
 const salasPadrao = [
@@ -68,29 +54,69 @@ let comunidadeAtiva = null;
 
 
 /* =====================
-   CRIAR COMUNIDADE
+   LOCAL STORAGE
 ===================== */
-function criarComunidade() {
-    const nome = document.getElementById("nomeComunidade").value.trim();
-    const descricao = document.getElementById("descricao").value.trim();
-    const categoria = document.getElementById("categoria").value;
-    const privacidade = document.getElementById("privacidade").value;
-    const foto = fotoDataURL;
+function salvarNoStorage() {
+    try {
+        // Salvar comunidades (sem foto para economizar espaço)
+        const comunidadesSemFoto = {};
+        Object.values(dadosComunidades).forEach(com => {
+            comunidadesSemFoto[com.id] = {
+                id: com.id,
+                nome: com.nome,
+                descricao: com.descricao,
+                categoria: com.categoria,
+                privacidade: com.privacidade,
+                convidados: com.convidados
+            };
+        });
+        localStorage.setItem("joviclass_comunidades", JSON.stringify(comunidadesSemFoto));
 
-    if (!nome || !descricao) {
-        alert("Preencha todos os campos!");
-        return;
+        // Salvar salas (mensagens e nomes de arquivos)
+        localStorage.setItem("joviclass_salas", JSON.stringify(dadosSalas));
+
+        // Salvar fotos separadamente (são base64, podem ser grandes)
+        const fotos = {};
+        Object.values(dadosComunidades).forEach(com => {
+            fotos[com.id] = com.foto || null;
+        });
+        localStorage.setItem("joviclass_fotos", JSON.stringify(fotos));
+    } catch (e) {
+        console.warn("Erro ao salvar no localStorage:", e);
     }
+}
 
-    // ID único para a comunidade
-    const id = "com_" + Date.now();
-    dadosSalas[id] = {};
-    salasPadrao.forEach(s => {
-        dadosSalas[id][s.nome] = { mensagens: [], arquivos: [] };
-    });
+function carregarDoStorage() {
+    try {
+        const comunidades = localStorage.getItem("joviclass_comunidades");
+        const salas = localStorage.getItem("joviclass_salas");
+        const fotos = localStorage.getItem("joviclass_fotos");
 
-    // Guardar dados da comunidade
-    dadosComunidades[id] = { id, nome, descricao, categoria, privacidade, foto, convidados: [] };
+        if (comunidades) {
+            Object.assign(dadosComunidades, JSON.parse(comunidades));
+        }
+        if (salas) {
+            Object.assign(dadosSalas, JSON.parse(salas));
+        }
+        if (fotos) {
+            const fotosObj = JSON.parse(fotos);
+            Object.keys(fotosObj).forEach(id => {
+                if (dadosComunidades[id]) {
+                    dadosComunidades[id].foto = fotosObj[id];
+                }
+            });
+        }
+    } catch (e) {
+        console.warn("Erro ao carregar do localStorage:", e);
+    }
+}
+
+
+/* =====================
+   RENDERIZAR CARD
+===================== */
+function renderizarCard(com) {
+    const { id, nome, descricao, categoria, privacidade, foto } = com;
 
     const card = document.createElement("div");
     card.classList.add("cardComunidade");
@@ -98,7 +124,7 @@ function criarComunidade() {
 
     const topoHTML = foto
         ? `<img src="${foto}" alt="foto">`
-        : `<span class="semFoto"></span>`;
+        : `<span class="semFoto">🏫</span>`;
 
     card.innerHTML = `
         <div class="topoCard">${topoHTML}</div>
@@ -117,27 +143,175 @@ function criarComunidade() {
         </div>
     `;
 
-    // Clicar no card (exceto no botão de opções) abre a comunidade
     card.addEventListener("click", function (e) {
         if (e.target.closest(".btnTresPontosCard")) return;
         abrirComunidade(id, nome, descricao, foto);
     });
 
     document.getElementById("listadeComunidades").appendChild(card);
+}
 
-    // Limpar form
+
+/* =====================
+   FORMULÁRIO — ABRIR / FECHAR / RESETAR
+===================== */
+function abrirFormulario() {
+    resetarFormulario();
+    document.getElementById("formulario").style.display = "block";
+    document.getElementById("overlay").style.display = "block";
+}
+
+function fecharAba() {
+    document.getElementById("formulario").style.display = "none";
+    document.getElementById("overlay").style.display = "none";
+    resetarFormulario();
+}
+
+function resetarFormulario() {
     document.getElementById("nomeComunidade").value = "";
     document.getElementById("descricao").value = "";
+    document.getElementById("categoria").value = "Estudo";
+    document.getElementById("privacidade").value = "Pública";
     document.getElementById("fotoPreview").style.display = "none";
     document.getElementById("fotoPlaceholder").style.display = "flex";
+    document.getElementById("inputFoto").value = "";
     fotoDataURL = null;
+
+    // Voltar ao modo "criar"
+    document.getElementById("tituloFormulario").innerText = "Nova Comunidade";
+    const btn = document.getElementById("btnConfirmarForm");
+    btn.innerText = "Criar comunidade";
+    btn.onclick = criarComunidade;
+}
+
+
+/* =====================
+   CRIAR COMUNIDADE
+===================== */
+function criarComunidade() {
+    const nome = document.getElementById("nomeComunidade").value.trim();
+    const descricao = document.getElementById("descricao").value.trim();
+    const categoria = document.getElementById("categoria").value;
+    const privacidade = document.getElementById("privacidade").value;
+    const foto = fotoDataURL;
+
+    if (!nome || !descricao) {
+        alert("Preencha todos os campos!");
+        return;
+    }
+
+    const id = "com_" + Date.now();
+
+    // Inicializar salas da comunidade
+    dadosSalas[id] = {};
+    salasPadrao.forEach(s => {
+        dadosSalas[id][s.nome] = { mensagens: [], arquivos: [] };
+    });
+
+    // Guardar dados da comunidade
+    dadosComunidades[id] = { id, nome, descricao, categoria, privacidade, foto, convidados: [] };
+
+    // Renderizar card
+    renderizarCard(dadosComunidades[id]);
+
+    // Persistir
+    salvarNoStorage();
 
     fecharAba();
 }
 
 
 /* =====================
-   MENU TRÊS PONTINHOS — CARD (lista de comunidades)
+   EDITAR COMUNIDADE
+===================== */
+function abrirFormularioEdicao(id) {
+    const com = dadosComunidades[id];
+    if (!com) return;
+
+    // Popular campos com dados atuais
+    document.getElementById("nomeComunidade").value = com.nome;
+    document.getElementById("descricao").value = com.descricao;
+    document.getElementById("categoria").value = com.categoria;
+    document.getElementById("privacidade").value = com.privacidade;
+
+    // Foto
+    fotoDataURL = com.foto || null;
+    const preview = document.getElementById("fotoPreview");
+    const placeholder = document.getElementById("fotoPlaceholder");
+    if (com.foto) {
+        preview.src = com.foto;
+        preview.style.display = "block";
+        placeholder.style.display = "none";
+    } else {
+        preview.style.display = "none";
+        placeholder.style.display = "flex";
+    }
+
+    // Mudar título e botão para modo edição
+    document.getElementById("tituloFormulario").innerText = "Editar Comunidade";
+    const btn = document.getElementById("btnConfirmarForm");
+    btn.innerText = "Salvar alterações";
+    btn.onclick = function () { salvarEdicao(id); };
+
+    document.getElementById("formulario").style.display = "block";
+    document.getElementById("overlay").style.display = "block";
+}
+
+function salvarEdicao(id) {
+    const nome = document.getElementById("nomeComunidade").value.trim();
+    const descricao = document.getElementById("descricao").value.trim();
+    const categoria = document.getElementById("categoria").value;
+    const privacidade = document.getElementById("privacidade").value;
+
+    if (!nome || !descricao) {
+        alert("Preencha todos os campos!");
+        return;
+    }
+
+    // Atualizar dados
+    const com = dadosComunidades[id];
+    com.nome = nome;
+    com.descricao = descricao;
+    com.categoria = categoria;
+    com.privacidade = privacidade;
+    if (fotoDataURL) com.foto = fotoDataURL;
+
+    // Atualizar card na lista
+    const card = document.querySelector(`.cardComunidade[data-id="${id}"]`);
+    if (card) {
+        const topoHTML = com.foto
+            ? `<img src="${com.foto}" alt="foto">`
+            : `<span class="semFoto">🏫</span>`;
+        card.querySelector(".topoCard").innerHTML = topoHTML;
+        card.querySelector(".cabecalhoCard h3").innerText = nome;
+        card.querySelector(".conteudoCard p").innerText = descricao;
+        const spans = card.querySelectorAll(".infoComunidade span");
+        spans[0].innerText = `📁 ${categoria}`;
+        spans[1].innerText = `🌐 ${privacidade}`;
+    }
+
+    // Atualizar página da comunidade se estiver aberta
+    if (document.getElementById("paginaComunidade").style.display !== "none") {
+        document.getElementById("tituloComunidade").innerText = nome;
+        document.getElementById("NomeDiferenciado").innerText = nome;
+        document.getElementById("descricaoComunidade").innerText = descricao;
+        const banner = document.getElementById("bannerComunidade");
+        if (com.foto) {
+            banner.innerHTML = `<img src="${com.foto}" alt="banner">`;
+        } else {
+            banner.innerHTML = `<span class="semFotoBanner">🏫</span>`;
+        }
+    }
+
+    // Persistir
+    salvarNoStorage();
+
+    fecharAba();
+}
+
+
+/* =====================
+   MENU TRÊS PONTINHOS — CARD
 ===================== */
 function abrirMenuOpcoesCard(event, id) {
     event.stopPropagation();
@@ -146,7 +320,6 @@ function abrirMenuOpcoesCard(event, id) {
     const menu = document.getElementById("menuOpcoes");
     const overlay = document.getElementById("overlayMenu");
 
-    // Posicionar próximo ao botão clicado
     const btn = event.currentTarget;
     const rect = btn.getBoundingClientRect();
 
@@ -187,7 +360,7 @@ function acaoMenuOpcoes(acao) {
     if (acao === "convidar") {
         abrirModalConvidar(comunidadeAtiva);
     } else if (acao === "editar") {
-        alert("Funcionalidade de edição em breve!");
+        abrirFormularioEdicao(comunidadeAtiva);
     } else if (acao === "excluir") {
         if (confirm(`Tem certeza que deseja excluir a comunidade "${com.nome}"?`)) {
             excluirComunidade(comunidadeAtiva);
@@ -196,15 +369,15 @@ function acaoMenuOpcoes(acao) {
 }
 
 function excluirComunidade(id) {
-    // Remover da lista visual
     const card = document.querySelector(`.cardComunidade[data-id="${id}"]`);
     if (card) card.remove();
 
-    // Remover dos dados
     delete dadosComunidades[id];
     delete dadosSalas[id];
 
-    // Se estava na página da comunidade, voltar
+    // Persistir remoção
+    salvarNoStorage();
+
     if (document.getElementById("paginaComunidade").style.display !== "none") {
         voltarComunidades();
     }
@@ -218,15 +391,12 @@ function excluirComunidade(id) {
 ===================== */
 function abrirModalConvidar(id) {
     comunidadeAtiva = id;
-    const com = dadosComunidades[id];
 
-    // Gerar link de convite simulado
     const link = `https://joviclass.app/convite/${id}`;
     document.getElementById("inputLinkConvite").value = link;
     document.getElementById("statusCopiar").textContent = "";
     document.getElementById("emailConvite").value = "";
 
-    // Mostrar convidados já enviados
     renderizarConvidados(id);
 
     document.getElementById("modalConvidar").style.display = "flex";
@@ -238,7 +408,6 @@ function fecharModalConvidar() {
     document.getElementById("overlay").style.display = "none";
 }
 
-// Fechar modal ao clicar no overlay (sobrescreve fecharAba para lidar com os dois modais)
 document.getElementById("overlay").addEventListener("click", function () {
     fecharAba();
     fecharModalConvidar();
@@ -281,7 +450,6 @@ function enviarConviteEmail() {
     const com = dadosComunidades[comunidadeAtiva];
     if (!com) return;
 
-    // Verificar duplicata
     if (com.convidados.find(c => c.email === email)) {
         alert("Este e-mail já recebeu um convite.");
         return;
@@ -289,6 +457,8 @@ function enviarConviteEmail() {
 
     com.convidados.push({ email, status: "pendente" });
     emailInput.value = "";
+
+    salvarNoStorage();
     renderizarConvidados(comunidadeAtiva);
 }
 
@@ -323,6 +493,7 @@ function renderizarConvidados(id) {
 
 function removerConvite(id, idx) {
     dadosComunidades[id].convidados.splice(idx, 1);
+    salvarNoStorage();
     renderizarConvidados(id);
 }
 
@@ -348,7 +519,7 @@ function abrirComunidade(id, nome, descricao, foto) {
     if (foto) {
         banner.innerHTML = `<img src="${foto}" alt="banner">`;
     } else {
-        banner.innerHTML = `<span class="semFotoBanner"></span>`;
+        banner.innerHTML = `<span class="semFotoBanner">🏫</span>`;
     }
 
     // Montar lista de salas
@@ -384,13 +555,19 @@ function abrirSala(comId, sala) {
     document.getElementById("salaInterna").style.display = "block";
     document.getElementById("nomeSalaAtual").innerText = sala.icone + " " + sala.nome;
 
-    // Limpar áreas
     document.getElementById("arquivoArea").innerHTML = "";
     document.getElementById("mensagensChat").innerHTML = "";
+
+    // Garantir que dados da sala existam (caso seja carregado do storage)
+    if (!dadosSalas[comId]) dadosSalas[comId] = {};
+    if (!dadosSalas[comId][sala.nome]) dadosSalas[comId][sala.nome] = { mensagens: [], arquivos: [] };
 
     const dados = dadosSalas[comId][sala.nome];
 
     if (sala.tipo === "arquivos") {
+        // Esconder área de chat na sala de arquivos
+        document.getElementById("chatArea").style.display = "none";
+
         const arquivoArea = document.getElementById("arquivoArea");
         arquivoArea.innerHTML = `
             <h2 class="tituloArquivos">📁 Arquivos</h2>
@@ -414,6 +591,7 @@ function abrirSala(comId, sala) {
             if (!arquivo) return;
 
             dados.arquivos.push(arquivo.name);
+            salvarNoStorage();
 
             const item = document.createElement("div");
             item.classList.add("arquivoItem");
@@ -423,11 +601,14 @@ function abrirSala(comId, sala) {
             alert("Arquivo enviado com sucesso!");
             this.value = "";
         });
-    }
+    } else {
+        // Sala de chat: mostrar área de chat
+        document.getElementById("chatArea").style.display = "block";
 
-    dados.mensagens.forEach(texto => {
-        adicionarMensagem(texto, false);
-    });
+        dados.mensagens.forEach(texto => {
+            adicionarMensagem(texto, false);
+        });
+    }
 
     window._salaAtiva = { comId, salaNome: sala.nome };
 }
@@ -444,6 +625,7 @@ function enviarMensagem() {
     const { comId, salaNome } = window._salaAtiva;
     dadosSalas[comId][salaNome].mensagens.push(texto);
 
+    salvarNoStorage();
     adicionarMensagem(texto, true);
     input.value = "";
 }
@@ -468,6 +650,7 @@ document.getElementById("inputMensagem").addEventListener("keydown", function (e
 function voltarSalas() {
     document.getElementById("salaInterna").style.display = "none";
     document.getElementById("salasArea").style.display = "block";
+    document.getElementById("chatArea").style.display = "block";
 }
 
 function voltarComunidades() {
@@ -477,3 +660,10 @@ function voltarComunidades() {
     document.getElementById("subtituloComunidade").style.display = "block";
     document.getElementById("btnNovaComunidade").style.display = "block";
 }
+
+
+/* =====================
+   INICIALIZAÇÃO — carregar dados salvos
+===================== */
+carregarDoStorage();
+Object.values(dadosComunidades).forEach(com => renderizarCard(com));

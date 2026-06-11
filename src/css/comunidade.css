@@ -156,7 +156,7 @@ body {
     z-index: 1099;
 }
 
-/* FORMULÁRIO CRIAR COMUNIDADE */
+/* FORMULÁRIO CRIAR / EDITAR COMUNIDADE */
 #formulario {
     display: none;
     position: fixed;
@@ -358,7 +358,7 @@ body {
 .btnTresPontos span {
     display: block;
     width: 4px;
-    height: 4px;    
+    height: 4px;
     border-radius: 50%;
     background-color: #ffffff;
 }

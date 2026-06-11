@@ -279,6 +279,12 @@ body {
   gap: 10px;
 }
 
+.campo label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #444;
+}
+
 .campo input {
   padding: 14px;
   border: 1px solid #ccc;
@@ -290,6 +296,42 @@ body {
 
 .campo input:focus {
   border-color: var(--bg-color4);
+}
+
+/* =========================
+   SELETOR DE CORES
+========================= */
+.seletorCores {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.btnCor {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 3px solid transparent;
+  cursor: pointer;
+  transition: transform 0.15s, border-color 0.15s;
+  padding: 0;
+  outline: none;
+}
+
+.btnCor:hover {
+  transform: scale(1.15);
+}
+
+.btnCor.selecionada {
+  border-color: #222;
+  transform: scale(1.15);
+}
+
+/* =========================
+   ÍCONE DO CARD (SVG colorido)
+========================= */
+.iconeMateria rect {
+  /* fill vem via atributo direto */
 }
 
 .acoesModal {
@@ -436,6 +478,10 @@ body {
   .acoesModal button {
     width: 100%;
     text-align: center;
+  }
+
+  .seletorCores {
+    gap: 8px;
   }
 }
 
