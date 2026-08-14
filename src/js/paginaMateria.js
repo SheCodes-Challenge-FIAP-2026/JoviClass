@@ -32,6 +32,19 @@ const viewerCorpo      = document.getElementById('viewerCorpo');
 const btnFecharViewer  = document.getElementById('btnFecharViewer');
 const btnEditarViewer  = document.getElementById('btnEditarViewer');
 
+// ── Narração / Player ────────────────────────────────────────
+const btnConteudoNarrado   = document.getElementById('btnConteudoNarrado');
+const playerNarracao       = document.getElementById('playerNarracao');
+const playerTitulo         = document.getElementById('playerTitulo');
+const playerStatus         = document.getElementById('playerStatus');
+const playerBarraWrapper   = document.getElementById('playerBarraWrapper');
+const playerBarraProgresso = document.getElementById('playerBarraProgresso');
+const playerParteEl        = document.getElementById('playerParte');
+const playerPlayPauseBtn   = document.getElementById('playerPlayPause');
+const playerVoltarBtn      = document.getElementById('playerVoltar');
+const playerAvancarBtn     = document.getElementById('playerAvancar');
+const playerFecharBtn      = document.getElementById('playerFechar');
+
 // ── Hamburger ──────────────────────────────────────────────
 hamburger.addEventListener('click', () => menuLinks.classList.toggle('active'));
 
@@ -100,121 +113,432 @@ let dropdownAlvoIndex = null;
 let viewerEditandoIndex = null;
 
 // ==========================================================
-// 🔊 CONTEÚDO NARRADO
+// 🔊 PLAYER DE NARRAÇÃO
 // ==========================================================
 
-// Estado da narração
-let narracaoParada = false;
-let narracaoExecutando = false;
+const ICONE_PLAY = `<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>`;
+const ICONE_PAUSE = `<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>`;
 
-// Elementos criados pelo JavaScript
-let btnConteudoNarrado = null;
-let statusNarracao = null;
+// Estado central do player (única fonte de verdade)
+const estadoPlayer = {
+  ativo: false,      // player visível/aberto
+  gerando: false,    // extraindo texto (ainda não começou a falar)
+  pausado: false,
+  concluido: false,
+  partes: [],
+  indiceParte: 0,
+  titulo: '',
+  origemId: null      // 'pasta' (matéria inteira) ou item.id (arquivo específico)
+};
 
+// Usado para cancelar uma extração de texto em andamento (ex: OCR de PDF grande)
+// caso o usuário feche o player antes de terminar.
+let cancelarPreparoAtual = false;
 
-// ── Criar botão de Conteúdo Narrado ────────────────────────
-function criarInterfaceNarracao() {
-
-  if (btnConteudoNarrado) return;
-
-  btnConteudoNarrado = document.createElement('button');
-
-  btnConteudoNarrado.id = 'btnConteudoNarrado';
-  btnConteudoNarrado.type = 'button';
-
-  btnConteudoNarrado.innerHTML = `
-    <span>🔊</span>
-    <span>Conteúdo narrado</span>
-  `;
-
-  // Estilo básico para não depender de alterações no CSS
-  btnConteudoNarrado.style.cssText = `
-    display: none;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    width: 100%;
-    max-width: 280px;
-    margin: 20px auto;
-    padding: 12px 18px;
-    border: none;
-    border-radius: 10px;
-    background: #111;
-    color: #fff;
-    font-size: 15px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: 0.2s ease;
-  `;
-
-  btnConteudoNarrado.addEventListener('mouseenter', () => {
-    btnConteudoNarrado.style.opacity = '0.85';
-  });
-
-  btnConteudoNarrado.addEventListener('mouseleave', () => {
-    btnConteudoNarrado.style.opacity = '1';
-  });
-
-  btnConteudoNarrado.addEventListener('click', iniciarConteudoNarrado);
-
-  // Coloca o botão antes da lista de arquivos
-  listaArquivos.parentNode.insertBefore(btnConteudoNarrado, listaArquivos);
-
-  // Status da narração
-  statusNarracao = document.createElement('div');
-
-  statusNarracao.id = 'statusNarracao';
-
-  statusNarracao.style.cssText = `
-    display: none;
-    width: 100%;
-    max-width: 500px;
-    margin: 10px auto 20px;
-    padding: 12px 16px;
-    border-radius: 10px;
-    background: #f5f5f5;
-    color: #333;
-    text-align: center;
-    font-size: 14px;
-    line-height: 1.5;
-    box-sizing: border-box;
-  `;
-
-  listaArquivos.parentNode.insertBefore(statusNarracao, listaArquivos);
+function setStatus(texto) {
+  playerStatus.textContent = texto;
 }
 
-
-// ── Atualizar botão conforme quantidade de arquivos ───────
-function atualizarBotaoNarracao() {
-
-  if (!btnConteudoNarrado) {
-    criarInterfaceNarracao();
+function setBarraIndeterminada(ativa) {
+  playerBarraProgresso.classList.toggle('indeterminada', ativa);
+  if (ativa) {
+    playerBarraProgresso.style.width = '100%';
   }
+}
+
+function setControlesHabilitados(habilitado) {
+  playerPlayPauseBtn.disabled = !habilitado;
+  playerVoltarBtn.disabled = !habilitado;
+  playerAvancarBtn.disabled = !habilitado;
+}
+
+function abrirPlayer(titulo) {
+  playerTitulo.textContent = titulo;
+  playerNarracao.classList.add('ativo');
+  playerNarracao.setAttribute('aria-hidden', 'false');
+}
+
+function fecharPlayer() {
+
+  if (estadoPlayer.gerando) {
+    cancelarPreparoAtual = true;
+  }
+
+  window.speechSynthesis.cancel();
+
+  estadoPlayer.ativo = false;
+  estadoPlayer.gerando = false;
+  estadoPlayer.pausado = false;
+  estadoPlayer.concluido = false;
+  estadoPlayer.partes = [];
+  estadoPlayer.indiceParte = 0;
+  estadoPlayer.origemId = null;
+
+  playerNarracao.classList.remove('ativo');
+  playerNarracao.setAttribute('aria-hidden', 'true');
+  playerBarraProgresso.style.width = '0%';
+  playerBarraProgresso.classList.remove('indeterminada');
+  playerParteEl.textContent = '';
+
+  atualizarEstadoBotaoFolder();
+}
+
+function atualizarEstadoBotaoFolder() {
+
+  const ativoNaPasta = estadoPlayer.ativo && estadoPlayer.origemId === 'pasta';
+  const tocandoPasta = ativoNaPasta && !estadoPlayer.pausado && !estadoPlayer.gerando && !estadoPlayer.concluido;
+
+  btnConteudoNarrado.classList.toggle('narrando', ativoNaPasta);
+
+  if (tocandoPasta) {
+    btnConteudoNarrado.innerHTML = `<span class="btnConteudoIcone">⏸</span><span>Pausar narração</span>`;
+  } else if (ativoNaPasta) {
+    btnConteudoNarrado.innerHTML = `<span class="btnConteudoIcone">▶</span><span>Retomar narração</span>`;
+  } else {
+    btnConteudoNarrado.innerHTML = `<span class="btnConteudoIcone">🔊</span><span>Conteúdo narrado</span>`;
+  }
+}
+
+function atualizarBarraProgresso(fracaoParteAtual = 0) {
+  const total = estadoPlayer.partes.length || 1;
+  const progresso = ((estadoPlayer.indiceParte + fracaoParteAtual) / total) * 100;
+  playerBarraProgresso.style.width = `${Math.min(progresso, 100)}%`;
+}
+
+function atualizarUIParte() {
+  playerParteEl.textContent = `${estadoPlayer.indiceParte + 1}/${estadoPlayer.partes.length}`;
+  atualizarBarraProgresso(0);
+}
+
+function renderizarIconePlayPause() {
+  const mostrarPause = estadoPlayer.ativo && !estadoPlayer.pausado && !estadoPlayer.gerando && !estadoPlayer.concluido;
+  playerPlayPauseBtn.innerHTML = mostrarPause ? ICONE_PAUSE : ICONE_PLAY;
+}
+
+function textoDeStatusTocando() {
+  return estadoPlayer.origemId === 'pasta'
+    ? '🔊 Narrando conteúdo da matéria...'
+    : `🔊 Narrando "${estadoPlayer.titulo}"...`;
+}
+
+// ── Vozes (com cache) ──────────────────────────────────────
+let vozesCacheadas = null;
+
+function obterVozes() {
+
+  if (vozesCacheadas && vozesCacheadas.length) {
+    return Promise.resolve(vozesCacheadas);
+  }
+
+  return new Promise((resolve) => {
+
+    let vozes = window.speechSynthesis.getVoices();
+
+    if (vozes.length > 0) {
+      vozesCacheadas = vozes;
+      resolve(vozes);
+      return;
+    }
+
+    const verificarVozes = () => {
+
+      vozes = window.speechSynthesis.getVoices();
+
+      if (vozes.length > 0) {
+        window.speechSynthesis.removeEventListener('voiceschanged', verificarVozes);
+        vozesCacheadas = vozes;
+        resolve(vozes);
+      }
+    };
+
+    window.speechSynthesis.addEventListener('voiceschanged', verificarVozes);
+
+    setTimeout(() => {
+      vozes = window.speechSynthesis.getVoices();
+      window.speechSynthesis.removeEventListener('voiceschanged', verificarVozes);
+      vozesCacheadas = vozes;
+      resolve(vozes);
+    }, 1000);
+  });
+}
+
+function escolherVoz(vozes) {
+
+  let voz = vozes.find(
+    v => v.lang === 'pt-BR' && v.name.toLowerCase().includes('google português do brasil')
+  );
+
+  if (!voz) {
+    voz = vozes.find(v => v.lang === 'pt-BR' && v.name.toLowerCase().includes('google'));
+  }
+
+  if (!voz) {
+    voz = vozes.find(v => v.lang === 'pt-BR');
+  }
+
+  return voz || null;
+}
+
+// ── Fala da parte atual ─────────────────────────────────────
+async function falarParteAtual() {
+
+  if (!estadoPlayer.partes.length) return;
+
+  const texto = estadoPlayer.partes[estadoPlayer.indiceParte];
+  const vozes = await obterVozes();
+  const voz = escolherVoz(vozes);
+
+  if (!voz) {
+    mostrarToast('⚠️ Nenhuma voz em português foi encontrada neste navegador.');
+    fecharPlayer();
+    return;
+  }
+
+  const fala = new SpeechSynthesisUtterance(texto);
+
+  fala.voice = voz;
+  fala.lang = 'pt-BR';
+  fala.rate = 0.95;
+  fala.pitch = 1;
+  fala.volume = 1;
+
+  fala.onboundary = (evento) => {
+    if (!texto.length) return;
+    const fracao = Math.min(evento.charIndex / texto.length, 1);
+    atualizarBarraProgresso(fracao);
+  };
+
+  fala.onstart = () => {
+    estadoPlayer.pausado = false;
+    estadoPlayer.concluido = false;
+    renderizarIconePlayPause();
+    atualizarEstadoBotaoFolder();
+    setStatus(textoDeStatusTocando());
+  };
+
+  fala.onend = () => {
+    avancarAutomaticamente();
+  };
+
+  fala.onerror = (erro) => {
+    if (erro.error === 'interrupted' || erro.error === 'canceled') return;
+    console.error('Erro na narração:', erro);
+  };
+
+  window.speechSynthesis.cancel();
+  window.speechSynthesis.resume();
+
+  setTimeout(() => window.speechSynthesis.speak(fala), 60);
+}
+
+function avancarAutomaticamente() {
+
+  if (estadoPlayer.indiceParte < estadoPlayer.partes.length - 1) {
+    estadoPlayer.indiceParte++;
+    atualizarUIParte();
+    falarParteAtual();
+  } else {
+    finalizarNarracao();
+  }
+}
+
+function finalizarNarracao() {
+  estadoPlayer.concluido = true;
+  estadoPlayer.pausado = true;
+  renderizarIconePlayPause();
+  atualizarEstadoBotaoFolder();
+  setStatus('✅ Narração concluída');
+  playerBarraProgresso.style.width = '100%';
+  mostrarToast('🔊 Narração concluída!');
+}
+
+function iniciarNarracaoDePartes(partes, titulo, origemId) {
+
+  estadoPlayer.partes = partes;
+  estadoPlayer.indiceParte = 0;
+  estadoPlayer.titulo = titulo;
+  estadoPlayer.origemId = origemId;
+  estadoPlayer.ativo = true;
+  estadoPlayer.gerando = false;
+  estadoPlayer.pausado = false;
+  estadoPlayer.concluido = false;
+
+  playerBarraProgresso.classList.remove('indeterminada');
+  setControlesHabilitados(true);
+  atualizarUIParte();
+  atualizarEstadoBotaoFolder();
+  falarParteAtual();
+}
+
+// Ponto de entrada único para narrar qualquer coisa (pasta ou arquivo individual)
+async function narrarConteudo({ titulo, origemId, obterPartes }) {
+
+  if (!('speechSynthesis' in window)) {
+    mostrarToast('⚠️ Seu navegador não suporta narração de texto.');
+    return;
+  }
+
+  window.speechSynthesis.cancel();
+  cancelarPreparoAtual = false;
+
+  estadoPlayer.ativo = true;
+  estadoPlayer.gerando = true;
+  estadoPlayer.pausado = false;
+  estadoPlayer.concluido = false;
+  estadoPlayer.origemId = origemId;
+  estadoPlayer.titulo = titulo;
+
+  abrirPlayer(titulo);
+  setStatus('🔎 Preparando conteúdo...');
+  setBarraIndeterminada(true);
+  setControlesHabilitados(false);
+  atualizarEstadoBotaoFolder();
+  playerParteEl.textContent = '';
+
+  try {
+
+    const partes = await obterPartes();
+
+    if (!partes || !partes.length) {
+      mostrarToast('⚠️ Não encontramos texto para narrar.');
+      fecharPlayer();
+      return;
+    }
+
+    iniciarNarracaoDePartes(partes, titulo, origemId);
+
+  } catch (erro) {
+
+    if (erro.message === 'NARRACAO_CANCELADA') {
+      return; // usuário fechou o player enquanto preparava
+    }
+
+    console.error('Erro ao preparar narração:', erro);
+    mostrarToast('⚠️ Não foi possível preparar a narração.');
+    fecharPlayer();
+  }
+}
+
+// ── Controles do player ─────────────────────────────────────
+playerPlayPauseBtn.addEventListener('click', () => {
+
+  if (estadoPlayer.gerando || !estadoPlayer.ativo) return;
+
+  if (estadoPlayer.concluido) {
+    estadoPlayer.indiceParte = 0;
+    estadoPlayer.concluido = false;
+    atualizarUIParte();
+    falarParteAtual();
+    return;
+  }
+
+  if (estadoPlayer.pausado) {
+    window.speechSynthesis.resume();
+    estadoPlayer.pausado = false;
+  } else {
+    window.speechSynthesis.pause();
+    estadoPlayer.pausado = true;
+  }
+
+  renderizarIconePlayPause();
+  atualizarEstadoBotaoFolder();
+  setStatus(estadoPlayer.pausado ? '⏸️ Narração pausada' : textoDeStatusTocando());
+});
+
+playerVoltarBtn.addEventListener('click', () => {
+
+  if (estadoPlayer.gerando || !estadoPlayer.ativo) return;
+
+  window.speechSynthesis.cancel();
+  estadoPlayer.indiceParte = Math.max(0, estadoPlayer.indiceParte - 1);
+  estadoPlayer.concluido = false;
+  atualizarUIParte();
+  falarParteAtual();
+});
+
+playerAvancarBtn.addEventListener('click', () => {
+
+  if (estadoPlayer.gerando || !estadoPlayer.ativo) return;
+
+  window.speechSynthesis.cancel();
+
+  if (estadoPlayer.indiceParte < estadoPlayer.partes.length - 1) {
+    estadoPlayer.indiceParte++;
+    estadoPlayer.concluido = false;
+    atualizarUIParte();
+    falarParteAtual();
+  } else {
+    finalizarNarracao();
+  }
+});
+
+playerFecharBtn.addEventListener('click', fecharPlayer);
+
+// Clicar/arrastar na barra pula para o trecho correspondente
+playerBarraWrapper.addEventListener('click', (e) => {
+
+  if (estadoPlayer.gerando || !estadoPlayer.ativo || !estadoPlayer.partes.length) return;
+
+  const rect = playerBarraWrapper.getBoundingClientRect();
+  const fracao = Math.min(Math.max((e.clientX - rect.left) / rect.width, 0), 1);
+  const novoIndice = Math.min(
+    Math.floor(fracao * estadoPlayer.partes.length),
+    estadoPlayer.partes.length - 1
+  );
+
+  window.speechSynthesis.cancel();
+  estadoPlayer.indiceParte = novoIndice;
+  estadoPlayer.concluido = false;
+  atualizarUIParte();
+  falarParteAtual();
+});
+
+// ── Botão "Conteúdo narrado" (matéria inteira) ─────────────
+btnConteudoNarrado.addEventListener('click', () => {
+
+  if (!itens.length) {
+    mostrarToast('⚠️ Não há arquivos para narrar.');
+    return;
+  }
+
+  const tocandoPasta = estadoPlayer.ativo && estadoPlayer.origemId === 'pasta';
+
+  if (tocandoPasta) {
+    playerPlayPauseBtn.click();
+    return;
+  }
+
+  narrarConteudo({
+    titulo: 'Conteúdo da matéria',
+    origemId: 'pasta',
+    obterPartes: async () => {
+
+      const resultados = await prepararConteudoNarrado();
+
+      let textoCompleto = '';
+
+      resultados.forEach((resultado) => {
+        textoCompleto += resultado.texto + '\n\n';
+      });
+
+      textoCompleto = limparTextoParaNarracao(textoCompleto);
+
+      return dividirTextoEmPartes(textoCompleto);
+    }
+  });
+});
+
+function atualizarVisibilidadeBotaoNarracao() {
 
   if (itens.length > 0) {
-
     btnConteudoNarrado.style.display = 'flex';
-
   } else {
-
     btnConteudoNarrado.style.display = 'none';
 
-    if (statusNarracao) {
-      statusNarracao.style.display = 'none';
+    if (estadoPlayer.ativo && estadoPlayer.origemId === 'pasta') {
+      fecharPlayer();
     }
   }
-}
-
-
-// ── Atualizar status ───────────────────────────────────────
-function atualizarStatusNarracao(texto, mostrar = true) {
-
-  if (!statusNarracao) {
-    criarInterfaceNarracao();
-  }
-
-  statusNarracao.textContent = texto;
-  statusNarracao.style.display = mostrar ? 'block' : 'none';
 }
 
 
@@ -255,7 +579,7 @@ async function carregarOCR() {
     return;
   }
 
-  atualizarStatusNarracao('🔎 Preparando reconhecimento de texto...');
+  setStatus('🔎 Preparando reconhecimento de texto...');
 
   await carregarScript(
     'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js',
@@ -264,22 +588,62 @@ async function carregarOCR() {
 }
 
 
-// ── Carregar PDF.js ────────────────────────────────────────
+// ── Carregar PDF.js (worker via Blob para evitar bloqueios de CORS/file://) ──
 async function carregarPDFJS() {
 
-  if (window.pdfjsLib) {
+  if (window.pdfjsLib && window.pdfjsLib.__workerConfigurado) {
     return;
   }
 
-  atualizarStatusNarracao('📄 Preparando leitura de PDF...');
+  setStatus('📄 Preparando leitura de PDF...');
 
   await carregarScript(
     'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js',
     'pdfjsScript'
   );
 
-  window.pdfjsLib.GlobalWorkerOptions.workerSrc =
-    'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  if (!window.pdfjsLib) {
+    throw new Error('Não foi possível carregar a biblioteca de PDF.');
+  }
+
+  if (!window.pdfjsLib.__workerConfigurado) {
+
+    try {
+
+      // Baixa o worker como texto e cria uma URL local (Blob).
+      // Isso evita falhas de carregamento de worker em contextos
+      // com CORS restrito ou quando a página é aberta via file://
+      const respostaWorker = await fetch(
+        'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js'
+      );
+
+      if (!respostaWorker.ok) {
+        throw new Error('Falha ao baixar o worker do PDF.js');
+      }
+
+      const codigoWorker = await respostaWorker.text();
+
+      const blobWorker = new Blob(
+        [codigoWorker],
+        { type: 'application/javascript' }
+      );
+
+      window.pdfjsLib.GlobalWorkerOptions.workerSrc =
+        URL.createObjectURL(blobWorker);
+
+    } catch (erro) {
+
+      console.warn(
+        'Não foi possível carregar o worker do PDF.js como Blob, usando URL direta como último recurso.',
+        erro
+      );
+
+      window.pdfjsLib.GlobalWorkerOptions.workerSrc =
+        'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    }
+
+    window.pdfjsLib.__workerConfigurado = true;
+  }
 }
 
 
@@ -297,17 +661,23 @@ async function extrairTextoImagem(dataURL) {
     {
       logger: (info) => {
 
+        if (cancelarPreparoAtual) return;
+
         if (info.status === 'recognizing text' && info.progress) {
 
           const porcentagem = Math.round(info.progress * 100);
 
-          atualizarStatusNarracao(
+          setStatus(
             `🔎 Lendo imagem... ${porcentagem}%`
           );
         }
       }
     }
   );
+
+  if (cancelarPreparoAtual) {
+    throw new Error('NARRACAO_CANCELADA');
+  }
 
   return (resultado.data.text || '').trim();
 }
@@ -348,11 +718,11 @@ async function extrairTextoPDF(dataURL) {
 
   for (let numeroPagina = 1; numeroPagina <= pdf.numPages; numeroPagina++) {
 
-    if (narracaoParada) {
+    if (cancelarPreparoAtual) {
       throw new Error('NARRACAO_CANCELADA');
     }
 
-    atualizarStatusNarracao(
+    setStatus(
       `📄 Lendo PDF... página ${numeroPagina} de ${pdf.numPages}`
     );
 
@@ -393,11 +763,11 @@ async function extrairTextoPDFComOCR(dataURL) {
 
   for (let numeroPagina = 1; numeroPagina <= pdf.numPages; numeroPagina++) {
 
-    if (narracaoParada) {
+    if (cancelarPreparoAtual) {
       throw new Error('NARRACAO_CANCELADA');
     }
 
-    atualizarStatusNarracao(
+    setStatus(
       `🔎 Lendo PDF escaneado... página ${numeroPagina} de ${pdf.numPages}`
     );
 
@@ -434,25 +804,40 @@ async function extrairTextoPDFComOCR(dataURL) {
 
 
 // ==========================================================
-// 📄 PROCESSAR PDF
+// 📄 PROCESSAR PDF (com fallback automático para OCR)
 // ==========================================================
 
 async function processarPDF(dataURL) {
 
-  // Primeiro tenta extrair texto normalmente
-  const texto = await extrairTextoPDF(dataURL);
+  let texto = '';
 
-  // Se encontrou texto, usa o texto encontrado
+  try {
+
+    texto = await extrairTextoPDF(dataURL);
+
+  } catch (erro) {
+
+    if (erro.message === 'NARRACAO_CANCELADA') {
+      throw erro;
+    }
+
+    console.warn(
+      'Falha ao extrair texto diretamente do PDF, tentando OCR como alternativa...',
+      erro
+    );
+
+    setStatus('⚠️ Leitura direta falhou, tentando reconhecimento visual...');
+  }
+
+  // Se encontrou texto suficiente, usa ele
   if (texto && texto.replace(/\s/g, '').length > 10) {
-
     return texto;
   }
 
-  // Se praticamente não encontrou texto,
-  // significa que provavelmente é um PDF escaneado.
+  // Se não encontrou (ou a extração direta falhou),
+  // tenta via OCR (renderiza cada página como imagem e lê)
   return await extrairTextoPDFComOCR(dataURL);
 }
-
 
 // ==========================================================
 // 📝 PROCESSAR ANOTAÇÃO
@@ -470,11 +855,11 @@ async function processarAnotacao(item) {
 
 async function processarItemNarracao(item, indice, total) {
 
-  if (narracaoParada) {
+  if (cancelarPreparoAtual) {
     throw new Error('NARRACAO_CANCELADA');
   }
 
-  atualizarStatusNarracao(
+  setStatus(
     `📚 Processando ${indice + 1} de ${total}: ${item.nome}`
   );
 
@@ -567,18 +952,16 @@ async function processarItemNarracao(item, indice, total) {
 
 
 // ==========================================================
-// 🔊 PREPARAR CONTEÚDO COMPLETO
+// 🔊 PREPARAR CONTEÚDO COMPLETO (todos os arquivos da pasta)
 // ==========================================================
 
 async function prepararConteudoNarrado() {
-
-  narracaoParada = false;
 
   const textos = [];
 
   for (let i = 0; i < itens.length; i++) {
 
-    if (narracaoParada) {
+    if (cancelarPreparoAtual) {
       throw new Error('NARRACAO_CANCELADA');
     }
 
@@ -625,428 +1008,12 @@ function limparTextoParaNarracao(texto) {
 
 
 // ==========================================================
-// 🔊 FALAR TEXTO
+// ✂️ DIVIDIR TEXTO GRANDE EM PARTES
+//    (partes menores = barra de progresso e avançar/voltar
+//     mais precisos)
 // ==========================================================
 
-function obterVozes() {
-
-  return new Promise((resolve) => {
-
-    // Tenta pegar as vozes imediatamente
-    let vozes = window.speechSynthesis.getVoices();
-
-    // Se já existem vozes, retorna imediatamente
-    if (vozes.length > 0) {
-      resolve(vozes);
-      return;
-    }
-
-    // Se ainda não existem, espera o Chrome carregá-las
-    const verificarVozes = () => {
-
-      vozes = window.speechSynthesis.getVoices();
-
-      if (vozes.length > 0) {
-
-        window.speechSynthesis.removeEventListener(
-          'voiceschanged',
-          verificarVozes
-        );
-
-        resolve(vozes);
-      }
-    };
-
-    window.speechSynthesis.addEventListener(
-      'voiceschanged',
-      verificarVozes
-    );
-
-    // Segurança: tenta novamente depois de 1 segundo
-    setTimeout(() => {
-
-      vozes = window.speechSynthesis.getVoices();
-
-      window.speechSynthesis.removeEventListener(
-        'voiceschanged',
-        verificarVozes
-      );
-
-      resolve(vozes);
-
-    }, 1000);
-  });
-}
-
-async function falarTexto(texto) {
-
-  if (!texto || !texto.trim()) {
-
-    console.warn(
-      'Nenhum texto para narrar.'
-    );
-
-    return;
-  }
-
-  console.log(
-    '🔊 Texto que será narrado:',
-    texto
-  );
-
-
-  // ======================================================
-  // ESPERA O CHROME CARREGAR AS VOZES
-  // ======================================================
-
-  const vozes = await obterVozes();
-
-
-  console.log(
-    '🎙️ Vozes disponíveis:',
-    vozes.map(
-      voz => `${voz.name} - ${voz.lang}`
-    )
-  );
-
-
-  // ======================================================
-  // PROCURA GOOGLE PORTUGUÊS DO BRASIL
-  // ======================================================
-
-  let vozGoogle = vozes.find(
-    voz =>
-      voz.lang === 'pt-BR' &&
-      voz.name
-        .toLowerCase()
-        .includes(
-          'google português do brasil'
-        )
-  );
-
-
-  // Se não encontrou a Google específica,
-  // procura qualquer voz Google pt-BR
-  if (!vozGoogle) {
-
-    vozGoogle = vozes.find(
-      voz =>
-        voz.lang === 'pt-BR' &&
-        voz.name
-          .toLowerCase()
-          .includes('google')
-    );
-  }
-
-
-  // Último fallback:
-  // qualquer voz em português brasileiro
-  if (!vozGoogle) {
-
-    vozGoogle = vozes.find(
-      voz =>
-        voz.lang === 'pt-BR'
-    );
-  }
-
-
-  if (!vozGoogle) {
-
-    console.error(
-      '❌ Nenhuma voz pt-BR foi encontrada.'
-    );
-
-    throw new Error(
-      'Nenhuma voz pt-BR encontrada.'
-    );
-  }
-
-
-  console.log(
-    '🎙️ Voz selecionada:',
-    vozGoogle.name,
-    '|',
-    vozGoogle.lang
-  );
-
-
-  // ======================================================
-  // CRIA A FALA
-  // ======================================================
-
-  const fala =
-    new SpeechSynthesisUtterance(texto);
-
-
-  fala.voice =
-    vozGoogle;
-
-  fala.lang =
-    'pt-BR';
-
-  fala.rate =
-    0.9;
-
-  fala.pitch =
-    1;
-
-  fala.volume =
-    1;
-
-
-  // ======================================================
-  // EVENTOS
-  // ======================================================
-
-  fala.onstart = () => {
-
-    console.log(
-      '🔊 Narração começou!'
-    );
-
-    atualizarStatusNarracao(
-      '🔊 Reproduzindo conteúdo narrado...'
-    );
-  };
-
-
-  fala.onend = () => {
-
-    console.log(
-      '✅ Narração terminou!'
-    );
-  };
-
-
-  fala.onerror = (erro) => {
-
-    console.error(
-      '❌ Erro na narração:',
-      erro
-    );
-  };
-
-
-// ======================================================
-// INICIA A NARRAÇÃO
-// ======================================================
-
-window.speechSynthesis.resume();
-
-setTimeout(() => {
-  window.speechSynthesis.speak(fala);
-}, 100);
-}
-// ==========================================================
-// 🔊 INICIAR CONTEÚDO NARRADO
-// ==========================================================
-
-async function iniciarConteudoNarrado() {
-
-  if (narracaoExecutando) {
-
-    pararConteudoNarrado();
-
-    return;
-  }
-
-
-  if (!itens.length) {
-
-    mostrarToast(
-      '⚠️ Não há arquivos para narrar.'
-    );
-
-    return;
-  }
-
-
-  if (!('speechSynthesis' in window)) {
-
-    mostrarToast(
-      '⚠️ Seu navegador não suporta narração de texto.'
-    );
-
-    return;
-  }
-
-
-  narracaoExecutando = true;
-  narracaoParada = false;
-
-
-  // Muda o botão para "Parar"
-  btnConteudoNarrado.innerHTML = `
-    <span>⏹️</span>
-    <span>Parar narração</span>
-  `;
-
-
-  try {
-
-    atualizarStatusNarracao(
-      '🔎 Analisando os arquivos da pasta...'
-    );
-
-
-    // Processa anotações, imagens e PDFs
-    const resultados =
-      await prepararConteudoNarrado();
-
-
-    if (narracaoParada) {
-      throw new Error('NARRACAO_CANCELADA');
-    }
-
-
-    // Junta todos os textos
-    let textoCompleto = '';
-
-
-    resultados.forEach((resultado) => {
-
-      textoCompleto +=
-        resultado.texto + '\n\n';
-    });
-
-
-    textoCompleto =
-      limparTextoParaNarracao(
-        textoCompleto
-      );
-
-
-    if (!textoCompleto) {
-
-      mostrarToast(
-        '⚠️ Não encontramos texto nos arquivos.'
-      );
-
-      return;
-    }
-
-
-    atualizarStatusNarracao(
-      '✅ Conteúdo identificado. Preparando narração...'
-    );
-
-
-    // Pequeno intervalo para permitir que a interface atualize
-    await new Promise(resolve =>
-      setTimeout(resolve, 300)
-    );
-
-
-    if (narracaoParada) {
-      throw new Error('NARRACAO_CANCELADA');
-    }
-
-
-    // Divide textos muito grandes em partes.
-    // Isso evita problemas com limites do navegador.
-    const partes =
-      dividirTextoEmPartes(textoCompleto);
-
-
-    for (let i = 0; i < partes.length; i++) {
-
-      if (narracaoParada) {
-        throw new Error('NARRACAO_CANCELADA');
-      }
-
-
-      atualizarStatusNarracao(
-        `🔊 Narrando parte ${i + 1} de ${partes.length}...`
-      );
-
-
-      await falarTexto(partes[i]);
-    }
-
-
-    if (!narracaoParada) {
-
-      atualizarStatusNarracao(
-        '✅ Narração concluída!'
-      );
-
-      mostrarToast(
-        '🔊 Conteúdo narrado concluído!'
-      );
-    }
-
-
-  } catch (erro) {
-
-    if (erro.message === 'NARRACAO_CANCELADA') {
-
-      atualizarStatusNarracao(
-        '⏹️ Narração interrompida.'
-      );
-
-    } else {
-
-      console.error(
-        'Erro no Conteúdo Narrado:',
-        erro
-      );
-
-      atualizarStatusNarracao(
-        '⚠️ Ocorreu um erro ao preparar a narração.'
-      );
-
-      mostrarToast(
-        '⚠️ Não foi possível gerar a narração.'
-      );
-    }
-
-  } finally {
-
-    narracaoExecutando = false;
-
-
-    // Volta o botão ao estado normal
-    btnConteudoNarrado.innerHTML = `
-      <span>🔊</span>
-      <span>Conteúdo narrado</span>
-    `;
-
-    narracaoParada = false;
-  }
-}
-
-
-// ==========================================================
-// ⏹️ PARAR NARRAÇÃO
-// ==========================================================
-
-function pararConteudoNarrado() {
-
-  narracaoParada = true;
-
-  speechSynthesis.cancel();
-
-  narracaoExecutando = false;
-
-  if (btnConteudoNarrado) {
-
-    btnConteudoNarrado.innerHTML = `
-      <span>🔊</span>
-      <span>Conteúdo narrado</span>
-    `;
-  }
-
-  atualizarStatusNarracao(
-    '⏹️ Narração interrompida.'
-  );
-}
-
-
-// ==========================================================
-// ✂️ DIVIDIR TEXTO GRANDE
-// ==========================================================
-
-function dividirTextoEmPartes(texto, limite = 3000) {
+function dividirTextoEmPartes(texto, limite = 900) {
 
   const partes = [];
 
@@ -1110,7 +1077,7 @@ function renderizar() {
 
     semArquivos.style.display = 'flex';
 
-    atualizarBotaoNarracao();
+    atualizarVisibilidadeBotaoNarracao();
 
     return;
   }
@@ -1256,6 +1223,19 @@ function renderizar() {
         dropdownArquivo.style.left =
           `${rect.right - dropdownArquivo.offsetWidth}px`;
 
+        // Marca visualmente se este item já está sendo narrado
+        const item = itens[dropdownAlvoIndex];
+        const btnNarrar = dropdownArquivo.querySelector('[data-acao="narrar"]');
+
+        if (btnNarrar) {
+          const tocandoEsteItem =
+            estadoPlayer.ativo &&
+            estadoPlayer.origemId === item?.id;
+
+          btnNarrar.classList.toggle('dropAtivo', !!tocandoEsteItem);
+          btnNarrar.lastChild.textContent = tocandoEsteItem ? ' Pausar/Retomar' : ' Narrar';
+        }
+
         dropdownArquivo.classList.add('visivel');
 
         requestAnimationFrame(() => {
@@ -1268,8 +1248,8 @@ function renderizar() {
     });
 
 
-  // Atualiza botão de narração
-  atualizarBotaoNarracao();
+  // Atualiza visibilidade do botão de narração da pasta
+  atualizarVisibilidadeBotaoNarracao();
 }
 
 
@@ -1781,7 +1761,7 @@ function lerArquivoComoDataURL(file) {
 }
 
 
-// ── Dropdown de arquivo – salvar / excluir ─────────────────
+// ── Dropdown de arquivo – abrir / narrar / salvar / excluir ─
 dropdownArquivo
   .querySelectorAll('.dropItem')
   .forEach(btn => {
@@ -1789,9 +1769,6 @@ dropdownArquivo
     btn.addEventListener(
       'click',
       async () => {
-
-        const formato =
-          btn.dataset.format;
 
         const acao =
           btn.dataset.acao;
@@ -1827,6 +1804,14 @@ dropdownArquivo
             );
           }
 
+          // Se este item estava sendo narrado, para tudo
+          if (
+            estadoPlayer.ativo &&
+            estadoPlayer.origemId === item.id
+          ) {
+            fecharPlayer();
+          }
+
 
           itens.splice(
             dropdownAlvoIndex,
@@ -1855,6 +1840,36 @@ dropdownArquivo
           dropdownAlvoIndex = null;
 
           abrirViewer(idx);
+
+          return;
+        }
+
+
+        if (acao === 'narrar') {
+
+          dropdownAlvoIndex = null;
+
+          const tocandoEsteItem =
+            estadoPlayer.ativo &&
+            estadoPlayer.origemId === item.id;
+
+          if (tocandoEsteItem) {
+            // já está tocando este arquivo -> só alterna play/pause
+            playerPlayPauseBtn.click();
+            return;
+          }
+
+          narrarConteudo({
+            titulo: item.nome,
+            origemId: item.id,
+            obterPartes: async () => {
+
+              const texto = await processarItemNarracao(item, 0, 1);
+              const limpo = limparTextoParaNarracao(texto || '');
+
+              return dividirTextoEmPartes(limpo);
+            }
+          });
 
           return;
         }
@@ -2173,10 +2188,7 @@ function mostrarToast(msg) {
 // ── Init ───────────────────────────────────────────────────
 abrirDB().then(() => {
 
-  // Cria a interface da narração
-  criarInterfaceNarracao();
-
-  // Renderiza arquivos normalmente
+  renderizarIconePlayPause();
   renderizar();
 
 });

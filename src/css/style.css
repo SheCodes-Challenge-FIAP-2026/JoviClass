@@ -1,13 +1,10 @@
 :root {
-  /* paleta original preservada */
   --bg-color1: #000fb0;
   --bg-color2: #ffffff;
   --bg-color3: rgba(255, 255, 255, 0.18);
   --bg-color4: #1466ff;
   --bg-color5: #888;
   --bg-colorFundo: #f0f0f5;
-
-  /* novos tokens de apoio ao redesign */
   --grad-inicio: #0015d6;
   --grad-fim: #000fb0;
   --acento-menta: #34d399;

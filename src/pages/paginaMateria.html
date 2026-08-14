@@ -75,6 +75,11 @@
       </div>
     </div>
 
+    <!-- Botão de narração da matéria inteira -->
+ <button class="btnConteudoNarrado" id="btnConteudoNarrado" type="button" style="display:none">
+  <span class="btnConteudoIcone">▶</span>
+  <span>Conteúdo narrado</span>
+</button>
     <!-- Lista de arquivos -->
     <div class="listaArquivos" id="listaArquivos"></div>
 
@@ -104,6 +109,10 @@
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
       Abrir
     </button>
+    <button class="dropItem" data-acao="narrar">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5 6 9H2v6h4l5 4V5Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>
+      Narrar
+    </button>
     <button class="dropItem" data-acao="download">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
       Baixar
@@ -132,6 +141,46 @@
         </div>
       </div>
       <div class="viewerCorpo" id="viewerCorpo"></div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       PLAYER DE NARRAÇÃO
+  ════════════════════════════════════════════ -->
+  <div class="playerNarracao" id="playerNarracao" aria-hidden="true">
+    <div class="playerTopo">
+      <div class="playerInfo">
+        <span class="playerIcone">🔊</span>
+        <div class="playerTextos">
+          <span class="playerTitulo" id="playerTitulo">Conteúdo narrado</span>
+          <span class="playerStatus" id="playerStatus">Preparando...</span>
+        </div>
+      </div>
+      <button class="playerFechar" id="playerFechar" title="Fechar" aria-label="Fechar player">✕</button>
+    </div>
+
+    <div class="playerBarraWrapper" id="playerBarraWrapper">
+      <div class="playerBarraFundo">
+        <div class="playerBarraProgresso" id="playerBarraProgresso"></div>
+      </div>
+    </div>
+
+    <div class="playerControles">
+      <span class="playerParte" id="playerParte"></span>
+
+      <div class="playerBotoes">
+        <button class="playerBtn" id="playerVoltar" title="Parte anterior" aria-label="Voltar">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zM20 6L10 12l10 6z"/></svg>
+        </button>
+
+        <button class="playerBtn playerBtnPlay" id="playerPlayPause" title="Play/Pausa" aria-label="Play ou pausa">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+        </button>
+
+        <button class="playerBtn" id="playerAvancar" title="Próxima parte" aria-label="Avançar">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M16 6h2v12h-2zM4 6l10 6-10 6z"/></svg>
+        </button>
+      </div>
     </div>
   </div>
 
