@@ -2417,3 +2417,95 @@ function iniciarSistemaDeNotificacoes() {
 }
 
 iniciarSistemaDeNotificacoes();
+
+//IA
+async function usarIA(acao) {
+
+  const texto = document
+    .getElementById("textoIA")
+    .value
+    .trim();
+
+  const resultado = document
+    .getElementById("resultadoIA");
+
+  if (!texto) {
+
+    resultado.innerHTML = `
+            <p>⚠️ Coloque algum conteúdo primeiro.</p>
+        `;
+
+    return;
+  }
+
+  resultado.innerHTML = `
+        <p>🤖 A IA está analisando o conteúdo...</p>
+    `;
+
+  try {
+
+    console.log("📤 Enviando para o backend...");
+    console.log("Ação:", acao);
+    console.log("Texto:", texto);
+
+    const resposta = await fetch(
+      "http://localhost:3000/ia",
+      {
+        method: "POST",
+
+        headers: {
+          "Content-Type": "application/json"
+        },
+
+        body: JSON.stringify({
+          acao: acao,
+          texto: texto
+        })
+      }
+    );
+
+    console.log("📥 Status recebido:", resposta.status);
+
+    const dados = await resposta.json();
+
+    console.log("📦 Resposta:", dados);
+
+    if (!resposta.ok) {
+
+      throw new Error(
+        dados.erro || "Erro no servidor"
+      );
+
+    }
+
+    resultado.innerHTML = `
+            <div class="resultado-ia">
+ 
+                <h3>📚 Resultado da IA</h3>
+ 
+                <div class="texto-resultado">
+                    ${dados.resultado.replace(/\n/g, "<br>")}
+                </div>
+ 
+            </div>
+        `;
+
+  } catch (erro) {
+
+    console.error("❌ ERRO NO FRONTEND:", erro);
+
+    resultado.innerHTML = `
+            <div class="erro-ia">
+ 
+                <strong>❌ Erro ao utilizar a IA</strong>
+ 
+                <p>
+                    ${erro.message}
+                </p>
+ 
+            </div>
+        `;
+
+  }
+
+}
