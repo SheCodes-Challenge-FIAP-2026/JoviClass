@@ -195,7 +195,7 @@ function atualizarEstadoBotaoFolder() {
   } else if (ativoNaPasta) {
     btnConteudoNarrado.innerHTML = `<span class="btnConteudoIcone">▶</span><span>Retomar narração</span>`;
   } else {
-    btnConteudoNarrado.innerHTML = `<span class="btnConteudoIcone">🔊</span><span>Conteúdo narrado</span>`;
+    btnConteudoNarrado.innerHTML = `<span class="btnConteudoIcone">▶</span><span>Conteúdo narrado</span>`;
   }
 }
 
@@ -217,8 +217,8 @@ function renderizarIconePlayPause() {
 
 function textoDeStatusTocando() {
   return estadoPlayer.origemId === 'pasta'
-    ? '🔊 Narrando conteúdo da matéria...'
-    : `🔊 Narrando "${estadoPlayer.titulo}"...`;
+    ? '▶ Narrando conteúdo da matéria...'
+    : `▶ Narrando "${estadoPlayer.titulo}"...`;
 }
 
 // ── Vozes (com cache) ──────────────────────────────────────
@@ -349,7 +349,7 @@ function finalizarNarracao() {
   atualizarEstadoBotaoFolder();
   setStatus('✅ Narração concluída');
   playerBarraProgresso.style.width = '100%';
-  mostrarToast('🔊 Narração concluída!');
+  mostrarToast('▶ Narração concluída!');
 }
 
 function iniciarNarracaoDePartes(partes, titulo, origemId) {
