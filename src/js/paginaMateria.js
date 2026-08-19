@@ -24,6 +24,9 @@ const textoAnotacao       = document.getElementById('textoAnotacao');
 const dropdownArquivo     = document.getElementById('dropdownArquivo');
 const hamburger           = document.getElementById('hamburger');
 const menuLinks           = document.getElementById('menuLinks');
+const inputBuscar          = document.getElementById('inputBuscar');
+const btnBuscar            = document.getElementById('btnBuscar');
+
 
 // ── Viewer ─────────────────────────────────────────────────
 const viewerOverlay    = document.getElementById('viewerOverlay');
@@ -4214,3 +4217,31 @@ function usarIA(
     'ℹ️ Abra uma anotação para usar a IA.'
   );
 }
+
+function buscar() {
+  const termo = inputBuscar.value.trim().toLowerCase();
+  const cards = listaArquivos.querySelectorAll('.itemArquivo');
+  let encontrados = 0;
+
+  cards.forEach((card) => {
+    const index = Number(card.dataset.index);
+    const item = itens[index];
+    const textoPesquisavel = `${item.nome} ${item.conteudo || ''}`.toLowerCase();
+    const corresponde = textoPesquisavel.includes(termo);
+
+    card.style.display = corresponde ? '' : 'none';
+    if (corresponde) encontrados++;
+  });
+
+  if (itens.length === 0) return;
+
+  semArquivos.style.display = encontrados > 0 ? 'none' : 'flex';
+  semArquivos.textContent = encontrados > 0
+    ? 'Ainda não há arquivos.'
+    : 'Nenhum arquivo ou anotação encontrado.';
+}
+
+btnBuscar.addEventListener('click', buscar);
+inputBuscar.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') buscar();
+});

@@ -31,8 +31,7 @@ body {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  padding-bottom: 78px;
-  /* espaço p/ nav inferior mobile */
+  padding-bottom: 78px; /* espaço p/ nav inferior mobile */
 }
 
 a {
@@ -210,17 +209,9 @@ a {
   font-size: 15px;
 }
 
-.notif-icone.urgente {
-  background: #ffe1e1;
-}
-
-.notif-icone.breve {
-  background: #ffe9d1;
-}
-
-.notif-icone.normal {
-  background: #dbeaff;
-}
+.notif-icone.urgente { background: #ffe1e1; }
+.notif-icone.breve { background: #ffe9d1; }
+.notif-icone.normal { background: #dbeaff; }
 
 .notif-corpo {
   flex: 1;
@@ -246,17 +237,9 @@ a {
   display: inline-block;
 }
 
-.notif-prazo.urgente {
-  color: #e0304a;
-}
-
-.notif-prazo.breve {
-  color: #d97706;
-}
-
-.notif-prazo.normal {
-  color: var(--bg-color1);
-}
+.notif-prazo.urgente { color: #e0304a; }
+.notif-prazo.breve { color: #d97706; }
+.notif-prazo.normal { color: var(--bg-color1); }
 
 /* =========================
    BOTÃO HAMBÚRGUER
@@ -317,51 +300,49 @@ a {
 }
 
 
-/* =========================
+  /* =========================
     CONTEÚDO
   ========================= */
-.materias {
-  padding: 30px;
-  width: 100%;
-  min-width: 0;
-}
+  .materias {
+    padding: 30px;
+    width: 100%;
+    min-width: 0;
+  }
 
-.materias h1 {
-  margin-top: 10px;
-  margin-bottom: 20px;
-}
+  .materias h1 {
+    margin-top: 10px;
+    margin-bottom: 20px;
+  }
 
-.headerMaterias {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 15px;
-}
+  .headerMaterias {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
+  }
 
-.headerMaterias>div {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
+  .headerMaterias > div {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
 
-.voltarBtn {
-  font-size: 13px;
-  color: var(--bg-color4);
-  text-decoration: none;
-  font-weight: 600;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  transition: opacity 0.2s;
-  position: relative;
-  z-index: 1;
-  pointer-events: all;
-}
+  .voltarBtn {
+    font-size: 13px;
+    color: var(--bg-color4);
+    text-decoration: none;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    transition: opacity 0.2s;
+    position: relative;
+    z-index: 1;
+    pointer-events: all;
+  }
 
-.voltarBtn:hover {
-  opacity: 0.7;
-}
+  .voltarBtn:hover { opacity: 0.7; }
 
 /* =========================
    BOTÕES AÇÕES CABEÇALHO
@@ -390,9 +371,7 @@ a {
   text-decoration: none;
 }
 
-.btnPrimario:hover {
-  background-color: #0d55e0;
-}
+.btnPrimario:hover { background-color: #0d55e0; }
 
 .btnSecundario {
   display: inline-flex;
@@ -462,9 +441,7 @@ a {
   color: var(--bg-color4);
 }
 
-.arquivoTexto {
-  overflow: hidden;
-}
+.arquivoTexto { overflow: hidden; }
 
 .arquivoNome {
   font-weight: 700;
@@ -559,10 +536,7 @@ a {
   margin-bottom: 20px;
 }
 
-.anotacaoHeader h2 {
-  font-size: 18px;
-  color: #222;
-}
+.anotacaoHeader h2 { font-size: 18px; color: #222; }
 
 .btnFecharAnotacao {
   background: #f0f0f5;
@@ -576,9 +550,7 @@ a {
   transition: background 0.2s;
 }
 
-.btnFecharAnotacao:hover {
-  background: #e0e0e5;
-}
+.btnFecharAnotacao:hover { background: #e0e0e5; }
 
 .inputAnotacao {
   width: 100%;
@@ -592,9 +564,7 @@ a {
   transition: border-color 0.2s;
 }
 
-.inputAnotacao:focus {
-  border-color: var(--bg-color4);
-}
+.inputAnotacao:focus { border-color: var(--bg-color4); }
 
 .textareaAnotacao {
   width: 100%;
@@ -609,9 +579,7 @@ a {
   transition: border-color 0.2s;
 }
 
-.textareaAnotacao:focus {
-  border-color: var(--bg-color4);
-}
+.textareaAnotacao:focus { border-color: var(--bg-color4); }
 
 .acoesAnotacao {
   display: flex;
@@ -635,20 +603,11 @@ a {
   animation: fadeInDrop 0.15s ease;
 }
 
-.dropdownMenu.visivel {
-  display: block;
-}
+.dropdownMenu.visivel { display: block; }
 
 @keyframes fadeInDrop {
-  from {
-    opacity: 0;
-    transform: translateY(-6px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 .dropItem {
@@ -668,17 +627,10 @@ a {
   transition: background 0.15s;
 }
 
-.dropItem:hover {
-  background: #f0f0f5;
-}
+.dropItem:hover { background: #f0f0f5; }
 
-.dropDanger {
-  color: #cc0000;
-}
-
-.dropDanger:hover {
-  background: #fff0f0;
-}
+.dropDanger { color: #cc0000; }
+.dropDanger:hover { background: #fff0f0; }
 
 .dropItem.dropAtivo {
   color: var(--bg-color1);
@@ -697,25 +649,10 @@ a {
   letter-spacing: 0.3px;
 }
 
-.badgeTipo.anotacao {
-  background: #fff3cd;
-  color: #8a6200;
-}
-
-.badgeTipo.arquivo {
-  background: #eef2ff;
-  color: #3d5af1;
-}
-
-.badgeTipo.pdf {
-  background: #fde8e8;
-  color: #c0392b;
-}
-
-.badgeTipo.imagem {
-  background: #e8f8f0;
-  color: #1a8a55;
-}
+.badgeTipo.anotacao  { background: #fff3cd; color: #8a6200; }
+.badgeTipo.arquivo   { background: #eef2ff; color: #3d5af1; }
+.badgeTipo.pdf       { background: #fde8e8; color: #c0392b; }
+.badgeTipo.imagem    { background: #e8f8f0; color: #1a8a55; }
 
 /* =========================
    VIEWER MODAL
@@ -734,18 +671,11 @@ a {
   animation: fadeOverlay 0.2s ease;
 }
 
-.viewerOverlay.aberto {
-  display: flex;
-}
+.viewerOverlay.aberto { display: flex; }
 
 @keyframes fadeOverlay {
-  from {
-    opacity: 0;
-  }
-
-  to {
-    opacity: 1;
-  }
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
 
 .viewerModal {
@@ -762,15 +692,8 @@ a {
 }
 
 @keyframes slideUpModal {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 /* Cabeçalho do viewer */
@@ -821,10 +744,7 @@ a {
   flex-shrink: 0;
 }
 
-.btnFecharViewer:hover {
-  background: #e0e0e5;
-  color: #111;
-}
+.btnFecharViewer:hover { background: #e0e0e5; color: #111; }
 
 /* Corpo do viewer */
 .viewerCorpo {
@@ -905,10 +825,7 @@ a {
   pointer-events: none;
 }
 
-.toast.show {
-  opacity: 1;
-  transform: translateY(0);
-}
+.toast.show { opacity: 1; transform: translateY(0); }
 
 /* =========================
    BOTÃO "CONTEÚDO NARRADO" (matéria inteira)
@@ -979,8 +896,8 @@ a {
   pointer-events: none;
   opacity: 0;
   transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1),
-    opacity 0.25s ease,
-    visibility 0s linear 0.35s;
+              opacity 0.25s ease,
+              visibility 0s linear 0.35s;
 }
 
 .playerNarracao.ativo {
@@ -989,8 +906,8 @@ a {
   pointer-events: auto;
   opacity: 1;
   transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1),
-    opacity 0.25s ease,
-    visibility 0s linear 0s;
+              opacity 0.25s ease,
+              visibility 0s linear 0s;
 }
 
 .playerTopo {
@@ -1056,9 +973,7 @@ a {
   transition: background 0.2s;
 }
 
-.playerFechar:hover {
-  background: rgba(255, 255, 255, 0.3);
-}
+.playerFechar:hover { background: rgba(255, 255, 255, 0.3); }
 
 .playerBarraWrapper {
   width: 100%;
@@ -1088,15 +1003,8 @@ a {
 }
 
 @keyframes pulsarBarra {
-
-  0%,
-  100% {
-    opacity: 0.45;
-  }
-
-  50% {
-    opacity: 1;
-  }
+  0%, 100% { opacity: 0.45; }
+  50% { opacity: 1; }
 }
 
 .playerControles {
@@ -1135,14 +1043,8 @@ a {
   transition: background 0.2s, transform 0.15s;
 }
 
-.playerBtn:hover {
-  background: rgba(255, 255, 255, 0.3);
-  transform: scale(1.05);
-}
-
-.playerBtn:active {
-  transform: scale(0.95);
-}
+.playerBtn:hover { background: rgba(255, 255, 255, 0.3); transform: scale(1.05); }
+.playerBtn:active { transform: scale(0.95); }
 
 .playerBtn:disabled {
   opacity: 0.4;
@@ -1162,30 +1064,16 @@ a {
   color: var(--bg-color1);
 }
 
-.playerBtnPlay:hover {
-  background: #eef1ff;
-}
+.playerBtnPlay:hover { background: #eef1ff; }
 
 /* =========================
    MOBILE
 ========================= */
 @media (max-width: 699px) {
-  .menu {
-    width: 100%;
-    padding: 20px;
-  }
-
-  #logo {
-    width: 70px;
-  }
-
-  .menu h2 {
-    font-size: 1.8rem;
-  }
-
-  .hamburger {
-    display: flex;
-  }
+  .menu { width: 100%; padding: 20px; }
+  #logo { width: 70px; }
+  .menu h2 { font-size: 1.8rem; }
+  .hamburger { display: flex; }
 
   .menu-links {
     display: none;
@@ -1195,9 +1083,7 @@ a {
     gap: 10px;
   }
 
-  .menu-links.active {
-    display: flex;
-  }
+  .menu-links.active { display: flex; }
 
   .menu a {
     width: 100%;
@@ -1212,9 +1098,7 @@ a {
     gap: 20px;
   }
 
-  .acoesCabecalho {
-    width: 100%;
-  }
+  .acoesCabecalho { width: 100%; }
 
   .btnPrimario,
   .btnSecundario {
@@ -1222,28 +1106,15 @@ a {
     justify-content: center;
   }
 
-  .arquivoNome {
-    max-width: 160px;
-  }
+  .arquivoNome { max-width: 160px; }
 
   /* Esconde botão "Abrir" no mobile (card inteiro é clicável) */
-  .btnAbrirArquivo {
-    display: none;
-  }
+  .btnAbrirArquivo { display: none; }
 
-  .acoesAnotacao {
-    flex-direction: column;
-  }
+  .acoesAnotacao { flex-direction: column; }
+  .acoesAnotacao button { width: 100%; justify-content: center; }
 
-  .acoesAnotacao button {
-    width: 100%;
-    justify-content: center;
-  }
-
-  .viewerOverlay {
-    padding: 0;
-    align-items: flex-end;
-  }
+  .viewerOverlay { padding: 0; align-items: flex-end; }
 
   .viewerModal {
     border-radius: 20px 20px 0 0;
@@ -1251,29 +1122,21 @@ a {
     max-width: 100%;
   }
 
-  .viewerPDF {
-    height: 55vh;
-  }
+  .viewerPDF { height: 55vh; }
 
   .playerNarracao {
-    bottom: 78px;
-    /* fica acima do nav-mobile */
+    bottom: 78px; /* fica acima do nav-mobile */
     padding: 12px 16px 14px;
   }
 
-  .playerTitulo,
-  .playerStatus {
-    max-width: 180px;
-  }
+  .playerTitulo, .playerStatus { max-width: 180px; }
 }
 
 /* =========================
    DESKTOP
 ========================= */
 @media (min-width: 700px) {
-  body {
-    flex-direction: row;
-  }
+  body { flex-direction: row; }
 
   .menu {
     width: 320px;
@@ -1287,18 +1150,14 @@ a {
     gap: 12px;
   }
 
-  #logo {
-    width: 110px;
-  }
+  #logo { width: 110px; }
 
   .menu h2 {
     font-size: 1.9rem;
     text-align: center;
   }
 
-  .hamburger {
-    display: none;
-  }
+  .hamburger { display: none; }
 
   .menu-links {
     display: flex !important;
@@ -1315,13 +1174,12 @@ a {
     font-size: 15px;
   }
 
-  .nav-mobile {
+   .nav-mobile {
     display: none;
   }
 
   .playerNarracao {
-    left: 320px;
-    /* não invade o menu lateral fixo */
+    left: 320px; /* não invade o menu lateral fixo */
   }
 }
 
@@ -1374,459 +1232,4 @@ a {
 
 .nav-icone-camera {
   font-size: 20px;
-}
-
-/* ==========================================================
-   IA DENTRO DO MODAL DA ANOTAÇÃO
-   ========================================================== */
-
-.viewerModal {
-  overflow: hidden;
-}
-
-
-/* ==========================================================
-   CONTAINER IA
-   ========================================================== */
-
-.viewerIA {
-  flex-shrink: 0;
-
-  padding: 18px 22px 20px;
-
-  background:
-    linear-gradient(180deg,
-      #ffffff 0%,
-      #f8f9ff 100%);
-
-  border-top: 1px solid #e7e9f2;
-
-  box-shadow:
-    0 -6px 20px rgba(30, 40, 100, 0.05);
-}
-
-
-/* ==========================================================
-   CABEÇALHO IA
-   ========================================================== */
-
-.viewerIAHeader {
-  display: flex;
-
-  align-items: center;
-
-  justify-content: space-between;
-
-  margin-bottom: 14px;
-}
-
-
-.viewerIAInfo {
-  display: flex;
-
-  align-items: center;
-
-  gap: 11px;
-}
-
-
-.viewerIAIcone {
-  width: 38px;
-  height: 38px;
-
-  display: flex;
-
-  align-items: center;
-  justify-content: center;
-
-  border-radius: 11px;
-
-  background:
-    linear-gradient(135deg,
-      #eef0ff,
-      #f4ecff);
-
-  font-size: 18px;
-
-  box-shadow:
-    0 3px 10px rgba(82, 72, 180, 0.08);
-}
-
-
-.viewerIAInfo strong {
-  display: block;
-
-  font-size: 13px;
-
-  font-weight: 800;
-
-  color: #1e2340;
-}
-
-
-.viewerIAInfo span {
-  display: block;
-
-  margin-top: 2px;
-
-  font-size: 11px;
-
-  color: #85899c;
-}
-
-
-.viewerIABadge {
-  padding: 5px 9px;
-
-  border-radius: 20px;
-
-  background: #eef0ff;
-
-  color: #3d4bc7;
-
-  font-size: 10px;
-
-  font-weight: 800;
-
-  letter-spacing: .5px;
-}
-
-
-/* ==========================================================
-   BOTÕES IA
-   ========================================================== */
-
-.viewerIABotoes {
-  display: flex;
-
-  gap: 8px;
-
-  flex-wrap: wrap;
-}
-
-
-.viewerIAButton {
-  display: inline-flex;
-
-  align-items: center;
-
-  justify-content: center;
-
-  gap: 6px;
-
-  padding: 9px 12px;
-
-  border: 1px solid #e2e4ed;
-
-  border-radius: 10px;
-
-  background: #ffffff;
-
-  color: #34384d;
-
-  font-family: "Manrope", Arial, sans-serif;
-
-  font-size: 11px;
-
-  font-weight: 700;
-
-  cursor: pointer;
-
-  transition:
-    transform .18s ease,
-    box-shadow .18s ease,
-    border-color .18s ease,
-    background .18s ease;
-}
-
-
-.viewerIAButton span:first-child {
-  font-size: 14px;
-}
-
-
-.viewerIAButton:hover {
-  transform: translateY(-1px);
-
-  border-color: #bfc5ed;
-
-  background: #f9faff;
-
-  box-shadow:
-    0 5px 14px rgba(44, 56, 150, 0.09);
-}
-
-
-.viewerIAButton:active {
-  transform: translateY(0);
-}
-
-
-.viewerIAButton.carregando {
-  pointer-events: none;
-
-  opacity: .65;
-}
-
-
-/* ==========================================================
-   RESULTADO
-   ========================================================== */
-
-.resultadoIAViewer {
-  margin-top: 13px;
-}
-
-
-.resultadoIAViewer:empty {
-  display: none;
-}
-
-
-.resultadoIABox {
-  border: 1px solid #e1e4f0;
-
-  border-radius: 12px;
-
-  background: #ffffff;
-
-  overflow: hidden;
-
-  animation:
-    aparecerResultado .25s ease;
-}
-
-
-@keyframes aparecerResultado {
-
-  from {
-    opacity: 0;
-
-    transform:
-      translateY(5px);
-  }
-
-  to {
-    opacity: 1;
-
-    transform:
-      translateY(0);
-  }
-
-}
-
-
-/* ==========================================================
-   HEADER RESULTADO
-   ========================================================== */
-
-.resultadoIAHeader {
-  display: flex;
-
-  align-items: center;
-
-  justify-content: space-between;
-
-  padding: 11px 13px;
-
-  background: #f7f8ff;
-
-  border-bottom: 1px solid #e8eaf3;
-}
-
-
-.resultadoIATitulo {
-  display: flex;
-
-  align-items: center;
-
-  gap: 7px;
-
-  font-size: 12px;
-
-  font-weight: 800;
-
-  color: #292e4a;
-}
-
-
-.resultadoIAFechar {
-  width: 25px;
-  height: 25px;
-
-  display: flex;
-
-  align-items: center;
-
-  justify-content: center;
-
-  border: none;
-
-  border-radius: 7px;
-
-  background: transparent;
-
-  color: #999;
-
-  font-size: 17px;
-
-  cursor: pointer;
-}
-
-
-.resultadoIAFechar:hover {
-  background: #e9eaf2;
-
-  color: #444;
-}
-
-
-/* ==========================================================
-   TEXTO RESULTADO
-   ========================================================== */
-
-.resultadoIATexto {
-  padding: 13px;
-
-  max-height: 220px;
-
-  overflow-y: auto;
-
-  color: #44485a;
-
-  font-size: 12px;
-
-  line-height: 1.65;
-}
-
-
-/* ==========================================================
-   AÇÕES
-   ========================================================== */
-
-.resultadoIAAcoes {
-  display: flex;
-
-  gap: 7px;
-
-  padding: 10px 13px;
-
-  border-top: 1px solid #eeeeF4;
-}
-
-
-.btnResultadoIA {
-  padding: 8px 11px;
-
-  border: none;
-
-  border-radius: 8px;
-
-  font-family: "Manrope", Arial, sans-serif;
-
-  font-size: 11px;
-
-  font-weight: 700;
-
-  cursor: pointer;
-
-  transition: .18s ease;
-}
-
-
-.btnAdicionarResultado {
-  background: #1466ff;
-
-  color: white;
-}
-
-
-.btnAdicionarResultado:hover {
-  background: #0d55e0;
-}
-
-
-.btnCopiarResultado {
-  background: #f0f1f5;
-
-  color: #424654;
-}
-
-
-.btnCopiarResultado:hover {
-  background: #e5e6eb;
-}
-
-
-/* ==========================================================
-   LOADING
-   ========================================================== */
-
-.viewerIALoading {
-  display: flex;
-
-  align-items: center;
-
-  gap: 10px;
-
-  padding: 12px;
-
-  border-radius: 10px;
-
-  background: #f7f8fc;
-
-  color: #74798c;
-
-  font-size: 12px;
-}
-
-
-.viewerIALoadingIcon {
-  animation:
-    rodarIA 1.2s linear infinite;
-}
-
-
-@keyframes rodarIA {
-
-  from {
-    transform: rotate(0deg);
-  }
-
-  to {
-    transform: rotate(360deg);
-  }
-
-}
-
-
-/* ==========================================================
-   RESPONSIVO
-   ========================================================== */
-
-@media (max-width: 700px) {
-
-  .viewerIA {
-    padding: 14px;
-  }
-
-  .viewerIABotoes {
-    display: grid;
-
-    grid-template-columns:
-      repeat(2, 1fr);
-  }
-
-  .viewerIAButton {
-    width: 100%;
-  }
-
-  .resultadoIAAcoes {
-    flex-direction: column;
-  }
-
-  .btnResultadoIA {
-    width: 100%;
-  }
-
 }
