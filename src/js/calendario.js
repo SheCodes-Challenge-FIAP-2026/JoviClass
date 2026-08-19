@@ -543,3 +543,37 @@ function iniciarSistemaDeNotificacoes() {
 }
 
 iniciarSistemaDeNotificacoes();
+
+async function carregarEventosGoogle() {
+  try {
+    const resp = await fetch('http://localhost:3000/api/calendar/eventos', { credentials: 'include' });
+    if (!resp.ok) return [];
+
+    const eventosGoogle = await resp.json();
+
+    return eventosGoogle.map(ev => ({
+      id: `google-${ev.id}`,
+      titulo: ev.summary || '(Sem título)',
+      tipo: 'reuniao', // ou inferir pelo nome/descrição
+      materia: '',
+      data: ev.start?.dateTime || ev.start?.date
+    }));
+  } catch {
+    return [];
+  }
+}
+
+// No lugar de usar só EVENTOS fixo, combine:
+async function gerarNotificacoes() {
+  const eventosGoogle = await carregarEventosGoogle();
+  const todosEventos = [...EVENTOS, ...eventosGoogle];
+
+  return todosEventos
+    .map((evento) => {
+      const status = calcularStatus(evento);
+      if (!status || status.diffMs > LIMIARES_ALERTA.aviso7dias) return null;
+      return { ...evento, ...status };
+    })
+    .filter(Boolean)
+    .sort((a, b) => a.diffMs - b.diffMs);
+}

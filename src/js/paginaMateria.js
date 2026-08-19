@@ -14,6 +14,8 @@ const listaArquivos       = document.getElementById('listaArquivos');
 const semArquivos         = document.getElementById('semArquivos');
 const inputArquivo        = document.getElementById('inputArquivo');
 const btnAddArquivo       = document.getElementById('btnAddArquivo');
+const btnImportarDrive = document.getElementById('importarArquivoDrive');
+const btnImportarNotion = document.getElementById('importarPaginaNotion');
 const btnCriarAnotacao    = document.getElementById('btnCriarAnotacao');
 const areaAnotacao        = document.getElementById('areaAnotacao');
 const btnFecharAnotacao   = document.getElementById('btnFecharAnotacao');
@@ -4244,4 +4246,149 @@ function buscar() {
 btnBuscar.addEventListener('click', buscar);
 inputBuscar.addEventListener('keydown', (e) => {
   if (e.key === 'Enter') buscar();
+});
+
+async function listarArquivosDrive() {
+  const resp = await fetch('http://localhost:3000/api/drive/arquivos', { credentials: 'include' });
+  if (!resp.ok) {
+    mostrarToast('⚠️ Conecte sua conta Google primeiro.');
+    return;
+  }
+  return await resp.json();
+}
+
+async function importarArquivoDrive(fileId) {
+  const resp = await fetch(`http://localhost:3000/api/drive/arquivo/${fileId}`, { credentials: 'include' });
+  const { nome, mimeType, dataURL } = await resp.json();
+
+  const id = Date.now() + Math.random();
+  const ext = nome.split('.').pop().toUpperCase();
+
+  await dbPut({ chaveId: `${materiaId}_${id}`, dataURL, mimeType });
+
+  itens.push({
+    id, nome, tipo: 'arquivo', ext, mimeType,
+    data: new Date().toLocaleDateString('pt-BR')
+  });
+
+  salvar();
+  renderizar();
+  mostrarToast('📥 Arquivo importado do Drive!');
+}
+
+async function listarPaginasNotion() {
+  const resp = await fetch('http://localhost:3000/api/notion/paginas');
+  if (!resp.ok) {
+    mostrarToast('⚠️ Não foi possível conectar ao Notion.');
+    return [];
+  }
+  return await resp.json();
+}
+
+async function importarPaginaNotion(pageId, titulo) {
+  const resp = await fetch(`http://localhost:3000/api/notion/pagina/${pageId}/texto`);
+  const { texto } = await resp.json();
+
+  itens.push({
+    id: Date.now(),
+    nome: titulo,
+    tipo: 'anotacao',
+    ext: null,
+    conteudo: texto,
+    data: new Date().toLocaleDateString('pt-BR')
+  });
+
+  salvar();
+  renderizar();
+  mostrarToast('📥 Página do Notion importada como anotação!');
+}
+
+// ==========================================================
+// 🗂️ MODAL DE SELEÇÃO (Drive / Notion)
+// ==========================================================
+
+function abrirModalSelecao(titulo, itensParaEscolher, aoSelecionar) {
+  // Remove modal anterior se existir
+  fecharModalSelecao();
+
+  const overlay = document.createElement('div');
+  overlay.id = 'modalSelecaoOverlay';
+  overlay.style.cssText = `
+    position: fixed; inset: 0; background: rgba(0,0,0,.5);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 9999;
+  `;
+
+  const caixa = document.createElement('div');
+  caixa.style.cssText = `
+    background: #fff; border-radius: 12px; padding: 20px;
+    width: 90%; max-width: 420px; max-height: 70vh;
+    display: flex; flex-direction: column; gap: 12px;
+  `;
+
+  caixa.innerHTML = `
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+      <h2 style="margin:0; font-size:18px;">${titulo}</h2>
+      <button id="btnFecharModalSelecao" style="border:none;background:none;font-size:20px;cursor:pointer;">✕</button>
+    </div>
+    <div id="listaModalSelecao" style="overflow-y:auto; display:flex; flex-direction:column; gap:8px;"></div>
+  `;
+
+  overlay.appendChild(caixa);
+  document.body.appendChild(overlay);
+
+  const lista = caixa.querySelector('#listaModalSelecao');
+
+  if (!itensParaEscolher || !itensParaEscolher.length) {
+    lista.innerHTML = `<p style="color:#888; text-align:center;">Nenhum item encontrado.</p>`;
+  } else {
+    itensParaEscolher.forEach(item => {
+      const btn = document.createElement('button');
+      btn.className = 'btnSecundario';
+      btn.style.cssText = 'text-align:left; width:100%;';
+      btn.textContent = item.nome || item.titulo;
+      btn.addEventListener('click', () => {
+        fecharModalSelecao();
+        aoSelecionar(item);
+      });
+      lista.appendChild(btn);
+    });
+  }
+
+  caixa.querySelector('#btnFecharModalSelecao')
+    .addEventListener('click', fecharModalSelecao);
+
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) fecharModalSelecao();
+  });
+}
+
+function fecharModalSelecao() {
+  const existente = document.getElementById('modalSelecaoOverlay');
+  if (existente) existente.remove();
+}
+// ==========================================================
+// 🔗 EVENTOS DOS BOTÕES DE IMPORTAÇÃO
+// ==========================================================
+
+btnImportarDrive.addEventListener('click', async () => {
+  mostrarToast('🔎 Buscando arquivos do Drive...');
+
+  const arquivos = await listarArquivosDrive();
+  if (!arquivos) return; // já mostrou toast de erro dentro da função
+
+  abrirModalSelecao('Escolha um arquivo do Drive', arquivos, (arquivo) => {
+    importarArquivoDrive(arquivo.id);
+  });
+});
+
+btnImportarNotion.addEventListener('click', async () => {
+  mostrarToast('🔎 Buscando páginas do Notion...');
+
+  const paginas = await listarPaginasNotion();
+  if (!paginas || !paginas.length) return;
+
+  abrirModalSelecao('Escolha uma página do Notion', paginas, (pagina) => {
+    importarPaginaNotion(pagina.id, pagina.titulo);
+  });
 });
