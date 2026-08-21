@@ -12,6 +12,7 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "@google/genai": "^2.18.0",
     "@notionhq/client": "^5.25.2",
     "cookie-session": "^2.1.1",
     "cors": "^2.8.6",

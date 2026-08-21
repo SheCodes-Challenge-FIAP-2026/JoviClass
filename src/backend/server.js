@@ -11,8 +11,10 @@ const { GoogleGenAI } = require("@google/genai");
 
 const app = express();
 const PORT = 3000;
-
-app.use(cors({ origin: process.env.FRONTEND_URL || "http://127.0.0.1:5500", credentials: true }));
+app.use(cors({
+    origin: true,
+    credentials: true
+}));
 app.use(express.json({ limit: "10mb" }));
 app.use(session({ name: "jovi_session", keys: [process.env.SESSION_SECRET || "troque-essa-chave"] }));
 
@@ -307,7 +309,7 @@ app.post("/ia", async (req, res) => {
         console.log("🤖 Enviando conteúdo para o Gemini...");
 
         const resposta = await ai.models.generateContent({
-            model: "gemini-2.5-flash",
+            model: "gemini-3.5-flash",
             contents: prompt
         });
 
@@ -342,6 +344,32 @@ app.post("/ia", async (req, res) => {
 // INICIAR SERVIDOR (UMA ÚNICA VEZ!)
 // ======================================================
 
+app.get("/teste-gemini", async (req, res) => {
+    try {
+        console.log("🤖 Testando Gemini...");
+
+        const resposta = await ai.models.generateContent({
+            model: "gemini-3.7-flash",
+            contents: "Responda apenas: Gemini funcionando!"
+        });
+
+        console.log("✅ Resposta do Gemini:", resposta.text);
+
+        res.json({
+            sucesso: true,
+            resposta: resposta.text
+        });
+
+    } catch (erro) {
+        console.error("❌ ERRO NO GEMINI:");
+        console.error(erro);
+
+        res.status(500).json({
+            sucesso: false,
+            erro: erro.message
+        });
+    }
+});
 app.listen(PORT, () => {
     console.log("\n======================================");
     console.log("🚀 JoviClass Backend");
