@@ -34,8 +34,7 @@ const ai = new GoogleGenAI({
 // ======================================================
 
 app.use("/", require("./routes/google"));
-app.use("/api/notion", require("./routes/notion"));
-
+app.use("/", require("./routes/notion"));
 // ======================================================
 // ROTA PRINCIPAL / TESTE
 // ======================================================
@@ -351,3 +350,16 @@ app.listen(PORT, () => {
     console.log("🤖 Gemini:   conectado");
     console.log("======================================\n");
 });
+
+app.use(cors({
+  origin: process.env.FRONTEND_URL,
+  credentials: true
+}));
+
+app.use(session({
+  name: 'jovi_session',
+  keys: [process.env.SESSION_SECRET],
+  sameSite: 'lax',       // tente trocar para 'none' se 'lax' não resolver
+  secure: false,           // 'true' exigiria HTTPS — mantenha false em localhost
+  httpOnly: true
+}));

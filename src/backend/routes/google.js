@@ -28,7 +28,7 @@ router.get('/auth/google/callback', async (req, res) => {
     const { code } = req.query;
     const { tokens } = await oauth2Client.getToken(code);
     req.session.googleTokens = tokens; // guarda na sessão (simples pra começar)
-    res.redirect(`${process.env.FRONTEND_URL}/pages/materias.html?google=conectado`);
+    res.redirect(`${process.env.FRONTEND_URL}/src/pages/perfil.html?google=conectado`);
 });
 
 function getAuthClient(req) {
