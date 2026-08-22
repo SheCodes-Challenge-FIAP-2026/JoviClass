@@ -26,10 +26,121 @@ document.addEventListener('DOMContentLoaded', function () {
     let today = new Date();
     let diaSelecionado = null;
 
+    // --- Eventos do Google Agenda ---
+
+    const API_BASE = 'http://localhost:3000';
+    let eventosGoogle = [];      // cache dos eventos já convertidos em Date
+    let googleConectado = false; // true assim que conseguirmos ler a agenda da pessoa
+
+    async function buscarEventosGoogle() {
+        try {
+            const resp = await fetch(`${API_BASE}/api/calendar/eventos`, { credentials: 'include' });
+
+            // 401/403 = a pessoa ainda não conectou (ou a sessão expirou)
+            if (resp.status === 401 || resp.status === 403) {
+                googleConectado = false;
+                eventosGoogle = [];
+                return;
+            }
+
+            if (!resp.ok) throw new Error('Falha ao buscar eventos do Google Agenda');
+
+            const dados = await resp.json();
+
+            eventosGoogle = dados
+                .map(ev => {
+                    const inicio = ev.start?.dateTime || ev.start?.date;
+                    if (!inicio) return null;
+                    return {
+                        id: `google-${ev.id}`,
+                        titulo: ev.summary || '(Sem título)',
+                        descricao: ev.description || '',
+                        data: new Date(inicio),
+                        diaTodo: !ev.start?.dateTime
+                    };
+                })
+                .filter(Boolean);
+
+            googleConectado = true;
+        } catch (erro) {
+            console.error('Não foi possível carregar os eventos do Google Agenda:', erro);
+            googleConectado = false;
+            eventosGoogle = [];
+        }
+
+        // Deixa o cache visível para o painel de notificações, que vive
+        // fora deste escopo (fora do DOMContentLoaded).
+        window.eventosGoogleCache = eventosGoogle;
+
+        atualizarStatusGoogle();
+    }
+
+    function atualizarStatusGoogle() {
+        const status = document.getElementById('googleStatus');
+        if (!status) return;
+
+        if (googleConectado) {
+            status.hidden = true;
+        } else {
+            status.hidden = false;
+            status.innerHTML = 'Conecte sua conta Google no <a href="../pages/perfil.html">perfil</a> para ver seus eventos do Google Agenda aqui.';
+        }
+    }
+
+    function eventosGoogleDoDia(ano, mes, dia) {
+        return eventosGoogle.filter(ev =>
+            ev.data.getFullYear() === ano &&
+            ev.data.getMonth() === mes &&
+            ev.data.getDate() === dia
+        );
+    }
+
+    // Evita que título/descrição vindos da API quebrem o HTML do overlay
+    function escapeHTML(texto) {
+        const aux = document.createElement('div');
+        aux.textContent = texto ?? '';
+        return aux.innerHTML;
+    }
+
+    // Mostra, no topo do overlay, os eventos do Google Agenda daquele dia
+    // (se houver). O formulário de "Novo Evento" continua logo abaixo.
+    function renderizarEventosGoogleNoFormulario(eventos) {
+        const container = document.getElementById('eventosGoogleFormulario');
+        if (!container) return;
+
+        if (!eventos || eventos.length === 0) {
+            container.hidden = true;
+            container.innerHTML = '';
+            return;
+        }
+
+        container.hidden = false;
+        container.innerHTML = `
+            <span class="eventos-google-titulo">Eventos do Google Agenda</span>
+            ${eventos.map(ev => {
+                const hora = ev.diaTodo
+                    ? 'Dia todo'
+                    : ev.data.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+
+                return `
+                    <div class="evento-google-card">
+                        <div class="evento-google-card-topo">
+                            <span class="evento-google-bolinha"></span>
+                            <strong>${escapeHTML(ev.titulo)}</strong>
+                        </div>
+                        <span class="evento-google-hora">${hora}</span>
+                        ${ev.descricao ? `<p class="evento-google-descricao">${escapeHTML(ev.descricao)}</p>` : ''}
+                    </div>
+                `;
+            }).join('')}
+        `;
+    }
+
     // --- Formulário de Evento ---
 
     function abrirFormularioEvento(diaDiv) {
         diaSelecionado = diaDiv;
+        renderizarEventosGoogleNoFormulario(diaDiv._eventosGoogle);
         document.getElementById("formularioEvento").style.display = "flex";
     }
 
@@ -94,6 +205,21 @@ document.addEventListener('DOMContentLoaded', function () {
                 diaDiv.classList.add('today');
             }
 
+            // Eventos do Google Agenda que caem nesse dia: guarda no elemento
+            // pra abrir no overlay ao clicar, e mostra só uma bolinha azul
+            // indicando que existe evento (sem lotar a célula de texto).
+            const eventosDoDia = eventosGoogleDoDia(ano, mes, i);
+            diaDiv._eventosGoogle = eventosDoDia;
+
+            if (eventosDoDia.length > 0) {
+                const bolinha = document.createElement('span');
+                bolinha.classList.add('bolinha-evento-google');
+                bolinha.title = eventosDoDia.length === 1
+                    ? eventosDoDia[0].titulo
+                    : `${eventosDoDia.length} eventos do Google Agenda`;
+                diaDiv.appendChild(bolinha);
+            }
+
             diasContainer.appendChild(diaDiv);
         }
 
@@ -119,7 +245,18 @@ document.addEventListener('DOMContentLoaded', function () {
         calendario(dataAtual);
     });
 
+    // Desenha o calendário na hora (sem esperar a rede) e depois busca
+    // os eventos do Google Agenda, se a pessoa já tiver conectado a conta
+    // no perfil, redesenhando o mês assim que eles chegarem.
     calendario(dataAtual);
+
+    async function atualizarCalendario() {
+        await buscarEventosGoogle();
+        calendario(dataAtual);
+        if (typeof renderizarPainel === 'function') renderizarPainel();
+    }
+
+    atualizarCalendario();
 
 
     // ===========================
@@ -362,6 +499,7 @@ const ICONE_TIPO = {
   prova: "📝",
   trabalho: "📁",
   reuniao: "🗓️",
+  google: "🗓️",
 };
 
 // Em quantos milissegundos cada limiar de alerta dispara antes do evento
@@ -412,9 +550,21 @@ function calcularStatus(evento) {
   return { diffMs, diffHoras, diffDias, urgencia, prazoTexto };
 }
 
-// Monta a lista de notificações ativas (eventos futuros dentro da janela de aviso)
+// Monta a lista de notificações ativas (eventos futuros dentro da janela de aviso).
+// Junta os eventos locais fixos (EVENTOS) com os eventos do Google Agenda já
+// carregados em cache (window.eventosGoogleCache) pelo bloco do calendário.
 function gerarNotificacoes() {
-  return EVENTOS
+  const eventosGoogleFormatados = (window.eventosGoogleCache || []).map((ev) => ({
+    id: ev.id,
+    titulo: ev.titulo,
+    tipo: "google",
+    materia: "",
+    data: ev.data,
+  }));
+
+  const todosEventos = [...EVENTOS, ...eventosGoogleFormatados];
+
+  return todosEventos
     .map((evento) => {
       const status = calcularStatus(evento);
       if (!status || status.diffMs > LIMIARES_ALERTA.aviso7dias) return null;
@@ -424,7 +574,7 @@ function gerarNotificacoes() {
     .sort((a, b) => a.diffMs - b.diffMs);
 }
 
-const TIPO_LABEL = { prova: "Prova", trabalho: "Trabalho", reuniao: "Reunião" };
+const TIPO_LABEL = { prova: "Prova", trabalho: "Trabalho", reuniao: "Reunião", google: "Google Agenda" };
 
 function renderizarPainel() {
   const lista = document.getElementById("notifLista");
@@ -543,37 +693,3 @@ function iniciarSistemaDeNotificacoes() {
 }
 
 iniciarSistemaDeNotificacoes();
-
-async function carregarEventosGoogle() {
-  try {
-    const resp = await fetch('http://localhost:3000/api/calendar/eventos', { credentials: 'include' });
-    if (!resp.ok) return [];
-
-    const eventosGoogle = await resp.json();
-
-    return eventosGoogle.map(ev => ({
-      id: `google-${ev.id}`,
-      titulo: ev.summary || '(Sem título)',
-      tipo: 'reuniao', // ou inferir pelo nome/descrição
-      materia: '',
-      data: ev.start?.dateTime || ev.start?.date
-    }));
-  } catch {
-    return [];
-  }
-}
-
-// No lugar de usar só EVENTOS fixo, combine:
-async function gerarNotificacoes() {
-  const eventosGoogle = await carregarEventosGoogle();
-  const todosEventos = [...EVENTOS, ...eventosGoogle];
-
-  return todosEventos
-    .map((evento) => {
-      const status = calcularStatus(evento);
-      if (!status || status.diffMs > LIMIARES_ALERTA.aviso7dias) return null;
-      return { ...evento, ...status };
-    })
-    .filter(Boolean)
-    .sort((a, b) => a.diffMs - b.diffMs);
-}

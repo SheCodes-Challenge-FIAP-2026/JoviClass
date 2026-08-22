@@ -69,6 +69,8 @@
 
         <!-- CALENDÁRIO -->
         <div class="calendario">
+            <div class="google-status" id="googleStatus" hidden></div>
+
             <div class="header">
                 <div id="voltar" class="btn"><img class="arrow-mes" src="../assets/img/arrowLeft.png" alt="mês_anterior"></div>
                 <div id="mes-ano"></div>
@@ -131,6 +133,9 @@
     <div id="formularioEvento">
         <form>
             <button type="button" onclick="fecharFormularioEvento()" id="fecharEvento">X</button>
+
+            <div id="eventosGoogleFormulario" class="eventos-google-lista" hidden></div>
+
             <h2>Novo Evento</h2>
 
             <label for="tituloEvento">Título:</label>
