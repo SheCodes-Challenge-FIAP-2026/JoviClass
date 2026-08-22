@@ -1769,6 +1769,7 @@ function renderizar() {
             class="btnOpcoesArquivo"
             data-index="${idx}"
             title="Opções"
+            type="button"
           >
             &#8942;
           </button>
@@ -1839,7 +1840,7 @@ function renderizar() {
       }
     );
 
-  // Eventos — dropdown
+  // Eventos — dropdown (menu de 3 pontinhos)
   document
     .querySelectorAll(
       '.btnOpcoesArquivo'
@@ -1852,59 +1853,15 @@ function renderizar() {
           (e) => {
 
             e.stopPropagation();
+            e.preventDefault();
 
             dropdownAlvoIndex =
               parseInt(
                 btn.dataset.index
               );
 
-            const rect =
-              btn.getBoundingClientRect();
-
-            dropdownArquivo.style.top =
-              `${rect.bottom + 6 + window.scrollY}px`;
-
-            dropdownArquivo.style.left =
-              `${rect.right - dropdownArquivo.offsetWidth}px`;
-
-            const item =
-              itens[
-                dropdownAlvoIndex
-              ];
-
-            const btnNarrar =
-              dropdownArquivo.querySelector(
-                '[data-acao="narrar"]'
-              );
-
-            if (btnNarrar) {
-
-              const tocandoEsteItem =
-                estadoPlayer.ativo &&
-                estadoPlayer.origemId ===
-                  item?.id;
-
-              btnNarrar.classList.toggle(
-                'dropAtivo',
-                !!tocandoEsteItem
-              );
-
-              btnNarrar.lastChild.textContent =
-                tocandoEsteItem
-                  ? ' Pausar/Retomar'
-                  : ' Narrar';
-            }
-
-            dropdownArquivo.classList.add(
-              'visivel'
-            );
-
-            requestAnimationFrame(
-              () => {
-
-                dropdownArquivo.style.left =
-                  `${rect.right - dropdownArquivo.offsetWidth}px`;
-              }
+            abrirDropdownArquivo(
+              btn
             );
           }
         );
@@ -1912,6 +1869,135 @@ function renderizar() {
     );
 
   atualizarVisibilidadeBotaoNarracao();
+}
+
+// ==========================================================
+// DROPDOWN DE ARQUIVO (3 PONTINHOS)
+// ==========================================================
+
+function abrirDropdownArquivo(
+  btn
+) {
+
+  const item =
+    itens[
+      dropdownAlvoIndex
+    ];
+
+  const btnNarrar =
+    dropdownArquivo.querySelector(
+      '[data-acao="narrar"]'
+    );
+
+  if (btnNarrar) {
+
+    const tocandoEsteItem =
+      estadoPlayer.ativo &&
+      estadoPlayer.origemId ===
+        item?.id;
+
+    btnNarrar.classList.toggle(
+      'dropAtivo',
+      !!tocandoEsteItem
+    );
+
+    btnNarrar.lastChild.textContent =
+      tocandoEsteItem
+        ? ' Pausar/Retomar'
+        : ' Narrar';
+  }
+
+  // 1) Torna o menu visível ANTES de medir o tamanho dele.
+  //    Enquanto "display: none" o offsetWidth/offsetHeight é sempre 0,
+  //    o que fazia o menu ser posicionado fora da tela (por isso
+  //    parecia que "não abria").
+  dropdownArquivo.classList.add(
+    'visivel'
+  );
+
+  const rect =
+    btn.getBoundingClientRect();
+
+  const larguraMenu =
+    dropdownArquivo.offsetWidth ||
+    180;
+
+  const alturaMenu =
+    dropdownArquivo.offsetHeight ||
+    220;
+
+  const margem = 8;
+
+  // 2) Calcula a posição ideal (abaixo e alinhado à direita do botão)
+  let top =
+    rect.bottom +
+    6 +
+    window.scrollY;
+
+  let left =
+    rect.right -
+    larguraMenu +
+    window.scrollX;
+
+  // 3) Garante que o menu não seja aberto para fora da tela
+  //    (nem em cima do player de narração, quando ele está visível)
+  const limiteInferior =
+    window.scrollY +
+    window.innerHeight -
+    margem;
+
+  if (
+    top + alturaMenu >
+    limiteInferior
+  ) {
+
+    // não cabe embaixo do botão: abre para cima dele
+    top =
+      rect.top +
+      window.scrollY -
+      alturaMenu -
+      6;
+  }
+
+  if (
+    left <
+    window.scrollX + margem
+  ) {
+
+    left =
+      window.scrollX +
+      margem;
+  }
+
+  const limiteDireito =
+    window.scrollX +
+    window.innerWidth -
+    larguraMenu -
+    margem;
+
+  if (
+    left > limiteDireito
+  ) {
+
+    left =
+      limiteDireito;
+  }
+
+  dropdownArquivo.style.top =
+    `${top}px`;
+
+  dropdownArquivo.style.left =
+    `${left}px`;
+}
+
+function fecharDropdownArquivo() {
+
+  dropdownArquivo.classList.remove(
+    'visivel'
+  );
+
+  dropdownAlvoIndex =
+    null;
 }
 
 // ==========================================================
@@ -2222,6 +2308,7 @@ document.addEventListener(
     ) {
 
       fecharViewer();
+      fecharDropdownArquivo();
     }
   }
 );
@@ -2558,7 +2645,7 @@ function lerArquivoComoDataURL(
 }
 
 // ==========================================================
-// DROPDOWN
+// DROPDOWN — AÇÕES
 // ==========================================================
 
 dropdownArquivo
@@ -2580,9 +2667,7 @@ dropdownArquivo
               dropdownAlvoIndex
             ];
 
-          dropdownArquivo.classList.remove(
-            'visivel'
-          );
+          fecharDropdownArquivo();
 
           if (!item) {
             return;
@@ -2621,10 +2706,20 @@ dropdownArquivo
               fecharPlayer();
             }
 
-            itens.splice(
-              dropdownAlvoIndex,
-              1
-            );
+            const idxRemovido =
+              itens.indexOf(
+                item
+              );
+
+            if (
+              idxRemovido > -1
+            ) {
+
+              itens.splice(
+                idxRemovido,
+                1
+              );
+            }
 
             salvar();
 
@@ -2633,9 +2728,6 @@ dropdownArquivo
             mostrarToast(
               '🗑️ Item excluído'
             );
-
-            dropdownAlvoIndex =
-              null;
 
             return;
           }
@@ -2646,14 +2738,10 @@ dropdownArquivo
             'abrir'
           ) {
 
-            const idx =
-              dropdownAlvoIndex;
-
-            dropdownAlvoIndex =
-              null;
-
             abrirViewer(
-              idx
+              itens.indexOf(
+                item
+              )
             );
 
             return;
@@ -2664,9 +2752,6 @@ dropdownArquivo
             acao ===
             'narrar'
           ) {
-
-            dropdownAlvoIndex =
-              null;
 
             const tocandoEsteItem =
               estadoPlayer.ativo &&
@@ -2762,15 +2847,14 @@ dropdownArquivo
               mostrarToast(
                 '⚠️ Arquivo não encontrado no armazenamento'
               );
+
+              return;
             }
           }
 
           mostrarToast(
             '💾 Download iniciado'
           );
-
-          dropdownAlvoIndex =
-            null;
         }
       );
     }
@@ -2796,7 +2880,7 @@ function baixar(
 }
 
 // ==========================================================
-// FECHAR DROPDOWN
+// FECHAR DROPDOWN AO CLICAR FORA / ROLAR / REDIMENSIONAR
 // ==========================================================
 
 document.addEventListener(
@@ -2807,19 +2891,25 @@ document.addEventListener(
       !dropdownArquivo.contains(
         e.target
       ) &&
-      !e.target.classList.contains(
-        'btnOpcoesArquivo'
+      !e.target.closest(
+        '.btnOpcoesArquivo'
       )
     ) {
 
-      dropdownArquivo.classList.remove(
-        'visivel'
-      );
-
-      dropdownAlvoIndex =
-        null;
+      fecharDropdownArquivo();
     }
   }
+);
+
+window.addEventListener(
+  'scroll',
+  () => fecharDropdownArquivo(),
+  true
+);
+
+window.addEventListener(
+  'resize',
+  () => fecharDropdownArquivo()
 );
 
 // ==========================================================
@@ -4277,7 +4367,7 @@ async function importarArquivoDrive(fileId) {
 }
 
 async function listarPaginasNotion() {
-  const resp = await fetch('http://localhost:3000/api/notion/paginas');
+  const resp = await fetch('http://localhost:3000/api/notion/paginas', { credentials: 'include' });
   if (!resp.ok) {
     mostrarToast('⚠️ Não foi possível conectar ao Notion.');
     return [];
@@ -4286,7 +4376,7 @@ async function listarPaginasNotion() {
 }
 
 async function importarPaginaNotion(pageId, titulo) {
-  const resp = await fetch(`http://localhost:3000/api/notion/pagina/${pageId}/texto`);
+  const resp = await fetch(`http://localhost:3000/api/notion/pagina/${pageId}/texto`, { credentials: 'include' });
   const { texto } = await resp.json();
 
   itens.push({
@@ -4375,9 +4465,15 @@ btnImportarDrive.addEventListener('click', async () => {
   mostrarToast('🔎 Buscando arquivos do Drive...');
 
   const arquivos = await listarArquivosDrive();
-  if (!arquivos) return; // já mostrou toast de erro dentro da função
+  if (!arquivos) return;
 
-  abrirModalSelecao('Escolha um arquivo do Drive', arquivos, (arquivo) => {
+  // Normaliza "name" (Google) para "nome" (usado no modal)
+  const arquivosFormatados = arquivos.map(a => ({
+    ...a,
+    nome: a.name
+  }));
+
+  abrirModalSelecao('Escolha um arquivo do Drive', arquivosFormatados, (arquivo) => {
     importarArquivoDrive(arquivo.id);
   });
 });

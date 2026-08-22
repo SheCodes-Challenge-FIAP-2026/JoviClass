@@ -355,110 +355,58 @@ a {
 }
 
 /* =========================
-   CARD DE PROGRESSO
+   AÇÕES DO PERFIL (editar + conexões)
 ========================= */
-.progresso-card {
-  background: linear-gradient(135deg, var(--grad-inicio), var(--bg-color4) 120%);
-  border-radius: 22px;
-  padding: 24px;
+.perfil-acoes {
   display: flex;
   align-items: center;
-  gap: 22px;
-  color: white;
-  box-shadow: var(--sombra-forte);
+  gap: 14px;
   flex-wrap: wrap;
 }
 
-.progresso-anel {
-  position: relative;
-  width: 108px;
-  height: 108px;
-  flex-shrink: 0;
+/* =========================
+   CONEXÕES EXTERNAS (Google, Notion...)
+========================= */
+.conexoes-externas {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
-.progresso-anel svg {
-  width: 100%;
-  height: 100%;
-  transform: rotate(-90deg);
-}
-
-.anel-fundo {
-  fill: none;
-  stroke: rgba(255, 255, 255, 0.22);
-  stroke-width: 10;
-}
-
-.anel-valor {
-  fill: none;
-  stroke: var(--acento-menta-clara);
-  stroke-width: 10;
-  stroke-linecap: round;
-  stroke-dasharray: 326.7;
-  stroke-dashoffset: calc(326.7 - (326.7 * var(--valor)) / 100);
-}
-
-.anel-texto {
-  position: absolute;
-  inset: 0;
+.btn-conexaoG, .btn-conexaoN {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.92);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.5rem;
-  font-weight: 800;
+  cursor: pointer;
+  padding: 0;
+  flex-shrink: 0;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.progresso-info {
-  flex: 1;
-  min-width: 210px;
+.btn-conexaoG img {
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
 }
 
-.progresso-label {
-  font-size: 13px;
-  font-weight: 700;
-  opacity: 0.9;
+.btn-conexaoN img {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
 }
 
-.progresso-barrinhas {
-  display: flex;
-  gap: 5px;
-  margin: 12px 0 16px;
-  flex-wrap: wrap;
+.btn-conexao:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.2);
 }
 
-.progresso-barrinhas span {
-  width: 20px;
-  height: 7px;
-  border-radius: 4px;
-  background: rgba(255, 255, 255, 0.25);
-}
-
-.progresso-barrinhas span.ativa {
-  background: var(--acento-menta);
-}
-
-.progresso-barrinhas span.meio {
-  background: var(--acento-menta-clara);
-}
-
-.progresso-stats {
-  display: flex;
-  gap: 22px;
-  flex-wrap: wrap;
-}
-
-.stat {
-  display: flex;
-  flex-direction: column;
-}
-
-.stat strong {
-  font-size: 1.2rem;
-  font-weight: 800;
-}
-
-.stat span {
-  font-size: 11.5px;
-  opacity: 0.85;
+.btn-conexao:active {
+  transform: translateY(0);
 }
 
 /* =========================

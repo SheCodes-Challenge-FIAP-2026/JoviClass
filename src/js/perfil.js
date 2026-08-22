@@ -786,3 +786,7 @@ iniciarResumoSemanal();
 document.getElementById('btnConectarGoogle').addEventListener('click', () => {
   window.location.href = 'http://localhost:3000/auth/google';
 });
+
+document.getElementById('btnConectarNotion').addEventListener('click', () => {
+  window.location.href = 'http://localhost:3000/auth/notion';
+}); 
