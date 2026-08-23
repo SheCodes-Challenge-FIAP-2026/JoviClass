@@ -1,62 +1,70 @@
 // ===========================
-//  paginaMateria.js
+// paginaMateria.js
 // ===========================
 
 // ── Parâmetros de URL ──────────────────────────────────────
-const params      = new URLSearchParams(window.location.search);
-const materiaId   = params.get('id');
+const params = new URLSearchParams(window.location.search);
+const materiaId = params.get('id');
 const materiaNome = params.get('nome') || 'Matéria';
 
 document.getElementById('tituloPagina').textContent = materiaNome;
 
 // ── Elementos ──────────────────────────────────────────────
-const listaArquivos       = document.getElementById('listaArquivos');
-const semArquivos         = document.getElementById('semArquivos');
-const inputArquivo        = document.getElementById('inputArquivo');
-const btnAddArquivo       = document.getElementById('btnAddArquivo');
+const listaArquivos = document.getElementById('listaArquivos');
+const semArquivos = document.getElementById('semArquivos');
+const inputArquivo = document.getElementById('inputArquivo');
+const btnAddArquivo = document.getElementById('btnAddArquivo');
 const btnImportarDrive = document.getElementById('importarArquivoDrive');
 const btnImportarNotion = document.getElementById('importarPaginaNotion');
-const btnCriarAnotacao    = document.getElementById('btnCriarAnotacao');
-const areaAnotacao        = document.getElementById('areaAnotacao');
-const btnFecharAnotacao   = document.getElementById('btnFecharAnotacao');
+const btnCriarAnotacao = document.getElementById('btnCriarAnotacao');
+const areaAnotacao = document.getElementById('areaAnotacao');
+const btnFecharAnotacao = document.getElementById('btnFecharAnotacao');
 const btnCancelarAnotacao = document.getElementById('btnCancelarAnotacao');
-const btnSalvarAnotacao   = document.getElementById('btnSalvarAnotacao');
-const tituloAnotacao      = document.getElementById('tituloAnotacao');
-const textoAnotacao       = document.getElementById('textoAnotacao');
-const dropdownArquivo     = document.getElementById('dropdownArquivo');
-const hamburger           = document.getElementById('hamburger');
-const menuLinks           = document.getElementById('menuLinks');
-const inputBuscar          = document.getElementById('inputBuscar');
-const btnBuscar            = document.getElementById('btnBuscar');
-
+const btnSalvarAnotacao = document.getElementById('btnSalvarAnotacao');
+const tituloAnotacao = document.getElementById('tituloAnotacao');
+const textoAnotacao = document.getElementById('textoAnotacao');
+const dropdownArquivo = document.getElementById('dropdownArquivo');
+const hamburger = document.getElementById('hamburger');
+const menuLinks = document.getElementById('menuLinks');
+const inputBuscar = document.getElementById('inputBuscar');
+const btnBuscar = document.getElementById('btnBuscar');
 
 // ── Viewer ─────────────────────────────────────────────────
-const viewerOverlay    = document.getElementById('viewerOverlay');
-const viewerTitulo     = document.getElementById('viewerTitulo');
-const viewerCorpo      = document.getElementById('viewerCorpo');
-const btnFecharViewer  = document.getElementById('btnFecharViewer');
-const btnEditarViewer  = document.getElementById('btnEditarViewer');
+const viewerOverlay = document.getElementById('viewerOverlay');
+const viewerTitulo = document.getElementById('viewerTitulo');
+const viewerCorpo = document.getElementById('viewerCorpo');
+const btnFecharViewer = document.getElementById('btnFecharViewer');
+const btnEditarViewer = document.getElementById('btnEditarViewer');
 
-// ── Narração / Player ────────────────────────────────────────
-const btnConteudoNarrado   = document.getElementById('btnConteudoNarrado');
-const playerNarracao       = document.getElementById('playerNarracao');
-const playerTitulo         = document.getElementById('playerTitulo');
-const playerStatus         = document.getElementById('playerStatus');
-const playerBarraWrapper   = document.getElementById('playerBarraWrapper');
+// ── Narração / Player ──────────────────────────────────────
+const btnConteudoNarrado = document.getElementById('btnConteudoNarrado');
+const playerNarracao = document.getElementById('playerNarracao');
+const playerTitulo = document.getElementById('playerTitulo');
+const playerStatus = document.getElementById('playerStatus');
+const playerBarraWrapper = document.getElementById('playerBarraWrapper');
 const playerBarraProgresso = document.getElementById('playerBarraProgresso');
-const playerParteEl        = document.getElementById('playerParte');
-const playerPlayPauseBtn   = document.getElementById('playerPlayPause');
-const playerVoltarBtn      = document.getElementById('playerVoltar');
-const playerAvancarBtn     = document.getElementById('playerAvancar');
-const playerFecharBtn      = document.getElementById('playerFechar');
+const playerParteEl = document.getElementById('playerParte');
+const playerPlayPauseBtn = document.getElementById('playerPlayPause');
+const playerVoltarBtn = document.getElementById('playerVoltar');
+const playerAvancarBtn = document.getElementById('playerAvancar');
+const playerFecharBtn = document.getElementById('playerFechar');
+
+//IA
+const btnAbrirIAViewer = document.getElementById("btnAbrirIAViewer");
+const viewerIA = document.getElementById("viewerIA");
 
 // ── Hamburger ──────────────────────────────────────────────
-hamburger.addEventListener('click', () => menuLinks.classList.toggle('active'));
+if (hamburger && menuLinks) {
+  hamburger.addEventListener('click', () => {
+    menuLinks.classList.toggle('active');
+  });
+}
 
 // ── IndexedDB ──────────────────────────────────────────────
-const DB_NAME    = 'JoviClassDB';
+const DB_NAME = 'JoviClassDB';
 const DB_VERSION = 1;
 const STORE_NAME = 'arquivos';
+
 let db = null;
 
 function abrirDB() {
@@ -67,7 +75,9 @@ function abrirDB() {
       const d = e.target.result;
 
       if (!d.objectStoreNames.contains(STORE_NAME)) {
-        d.createObjectStore(STORE_NAME, { keyPath: 'chaveId' });
+        d.createObjectStore(STORE_NAME, {
+          keyPath: 'chaveId'
+        });
       }
     };
 
@@ -76,7 +86,9 @@ function abrirDB() {
       resolve(db);
     };
 
-    req.onerror = () => reject(req.error);
+    req.onerror = () => {
+      reject(req.error);
+    };
   });
 }
 
@@ -84,19 +96,33 @@ function dbPut(obj) {
   return new Promise((resolve, reject) => {
     const tx = db.transaction(STORE_NAME, 'readwrite');
 
-    tx.objectStore(STORE_NAME).put(obj).onsuccess = resolve;
+    const request = tx
+      .objectStore(STORE_NAME)
+      .put(obj);
 
-    tx.onerror = () => reject(tx.error);
+    request.onsuccess = resolve;
+
+    tx.onerror = () => {
+      reject(tx.error);
+    };
   });
 }
 
 function dbGet(chaveId) {
   return new Promise((resolve, reject) => {
     const tx = db.transaction(STORE_NAME, 'readonly');
-    const req = tx.objectStore(STORE_NAME).get(chaveId);
 
-    req.onsuccess = () => resolve(req.result);
-    req.onerror = () => reject(req.error);
+    const req = tx
+      .objectStore(STORE_NAME)
+      .get(chaveId);
+
+    req.onsuccess = () => {
+      resolve(req.result);
+    };
+
+    req.onerror = () => {
+      reject(req.error);
+    };
   });
 }
 
@@ -104,16 +130,25 @@ function dbDelete(chaveId) {
   return new Promise((resolve, reject) => {
     const tx = db.transaction(STORE_NAME, 'readwrite');
 
-    tx.objectStore(STORE_NAME).delete(chaveId).onsuccess = resolve;
+    const request = tx
+      .objectStore(STORE_NAME)
+      .delete(chaveId);
 
-    tx.onerror = () => reject(tx.error);
+    request.onsuccess = resolve;
+
+    tx.onerror = () => {
+      reject(tx.error);
+    };
   });
 }
 
-// ── Estado (metadados em localStorage) ────────────────────
+// ── Estado ─────────────────────────────────────────────────
 const chave = `arquivos_${materiaId}`;
 
-let itens = JSON.parse(localStorage.getItem(chave) || '[]');
+let itens = JSON.parse(
+  localStorage.getItem(chave) || '[]'
+);
+
 let dropdownAlvoIndex = null;
 let viewerEditandoIndex = null;
 
@@ -121,10 +156,18 @@ let viewerEditandoIndex = null;
 // 🔊 PLAYER DE NARRAÇÃO
 // ==========================================================
 
-const ICONE_PLAY = `<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>`;
-const ICONE_PAUSE = `<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>`;
+const ICONE_PLAY = `
+<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+  <path d="M8 5v14l11-7z"/>
+</svg>
+`;
 
-// Estado central do player (única fonte de verdade)
+const ICONE_PAUSE = `
+<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+  <path d="M6 5h4v14H6zM14 5h4v14h-4z"/>
+</svg>
+`;
+
 const estadoPlayer = {
   ativo: false,
   gerando: false,
@@ -136,15 +179,23 @@ const estadoPlayer = {
   origemId: null
 };
 
-// Usado para cancelar uma extração de texto em andamento
 let cancelarPreparoAtual = false;
 
 function setStatus(texto) {
-  playerStatus.textContent = texto;
+  if (playerStatus) {
+    playerStatus.textContent = texto;
+  }
 }
 
 function setBarraIndeterminada(ativa) {
-  playerBarraProgresso.classList.toggle('indeterminada', ativa);
+  if (!playerBarraProgresso) {
+    return;
+  }
+
+  playerBarraProgresso.classList.toggle(
+    'indeterminada',
+    ativa
+  );
 
   if (ativa) {
     playerBarraProgresso.style.width = '100%';
@@ -152,19 +203,36 @@ function setBarraIndeterminada(ativa) {
 }
 
 function setControlesHabilitados(habilitado) {
-  playerPlayPauseBtn.disabled = !habilitado;
-  playerVoltarBtn.disabled = !habilitado;
-  playerAvancarBtn.disabled = !habilitado;
+  if (playerPlayPauseBtn) {
+    playerPlayPauseBtn.disabled = !habilitado;
+  }
+
+  if (playerVoltarBtn) {
+    playerVoltarBtn.disabled = !habilitado;
+  }
+
+  if (playerAvancarBtn) {
+    playerAvancarBtn.disabled = !habilitado;
+  }
 }
 
 function abrirPlayer(titulo) {
-  playerTitulo.textContent = titulo;
+  if (!playerNarracao) {
+    return;
+  }
+
+  if (playerTitulo) {
+    playerTitulo.textContent = titulo;
+  }
+
   playerNarracao.classList.add('ativo');
-  playerNarracao.setAttribute('aria-hidden', 'false');
+  playerNarracao.setAttribute(
+    'aria-hidden',
+    'false'
+  );
 }
 
 function fecharPlayer() {
-
   if (estadoPlayer.gerando) {
     cancelarPreparoAtual = true;
   }
@@ -178,17 +246,35 @@ function fecharPlayer() {
   estadoPlayer.partes = [];
   estadoPlayer.indiceParte = 0;
   estadoPlayer.origemId = null;
+  estadoPlayer.titulo = '';
 
-  playerNarracao.classList.remove('ativo');
-  playerNarracao.setAttribute('aria-hidden', 'true');
-  playerBarraProgresso.style.width = '0%';
-  playerBarraProgresso.classList.remove('indeterminada');
-  playerParteEl.textContent = '';
+  if (playerNarracao) {
+    playerNarracao.classList.remove('ativo');
+
+    playerNarracao.setAttribute(
+      'aria-hidden',
+      'true'
+    );
+  }
+
+  if (playerBarraProgresso) {
+    playerBarraProgresso.style.width = '0%';
+    playerBarraProgresso.classList.remove(
+      'indeterminada'
+    );
+  }
+
+  if (playerParteEl) {
+    playerParteEl.textContent = '';
+  }
 
   atualizarEstadoBotaoFolder();
 }
 
 function atualizarEstadoBotaoFolder() {
+  if (!btnConteudoNarrado) {
+    return;
+  }
 
   const ativoNaPasta =
     estadoPlayer.ativo &&
@@ -206,37 +292,54 @@ function atualizarEstadoBotaoFolder() {
   );
 
   if (tocandoPasta) {
-
-    btnConteudoNarrado.innerHTML =
-      `<span class="btnConteudoIcone">⏸</span><span>Pausar narração</span>`;
-
+    btnConteudoNarrado.innerHTML = `
+      <span class="btnConteudoIcone">⏸</span>
+      <span>Pausar narração</span>
+    `;
   } else if (ativoNaPasta) {
-
-    btnConteudoNarrado.innerHTML =
-      `<span class="btnConteudoIcone">▶</span><span>Retomar narração</span>`;
-
+    btnConteudoNarrado.innerHTML = `
+      <span class="btnConteudoIcone">▶</span>
+      <span>Retomar narração</span>
+    `;
   } else {
-
-    btnConteudoNarrado.innerHTML =
-      `<span class="btnConteudoIcone">▶</span><span>Conteúdo narrado</span>`;
+    btnConteudoNarrado.innerHTML = `
+      <span class="btnConteudoIcone">▶</span>
+      <span>Conteúdo narrado</span>
+    `;
   }
 }
 
 function atualizarBarraProgresso(
   fracaoParteAtual = 0
 ) {
+  if (!playerBarraProgresso) {
+    return;
+  }
 
   const total =
     estadoPlayer.partes.length || 1;
 
   const progresso =
-    ((estadoPlayer.indiceParte + fracaoParteAtual) / total) * 100;
+    (
+      (
+        estadoPlayer.indiceParte +
+        fracaoParteAtual
+      ) / total
+    ) * 100;
 
   playerBarraProgresso.style.width =
     `${Math.min(progresso, 100)}%`;
 }
 
 function atualizarUIParte() {
+  if (!playerParteEl) {
+    return;
+  }
+
+  if (!estadoPlayer.partes.length) {
+    playerParteEl.textContent = '';
+    return;
+  }
 
   playerParteEl.textContent =
     `${estadoPlayer.indiceParte + 1}/${estadoPlayer.partes.length}`;
@@ -245,6 +348,9 @@ function atualizarUIParte() {
 }
 
 function renderizarIconePlayPause() {
+  if (!playerPlayPauseBtn) {
+    return;
+  }
 
   const mostrarPause =
     estadoPlayer.ativo &&
@@ -259,17 +365,15 @@ function renderizarIconePlayPause() {
 }
 
 function textoDeStatusTocando() {
-
   return estadoPlayer.origemId === 'pasta'
     ? '▶ Narrando conteúdo da matéria...'
     : `▶ Narrando "${estadoPlayer.titulo}"...`;
 }
 
-// ── Vozes ─────────────────────────────────────────────────
+// ── Vozes ──────────────────────────────────────────────────
 let vozesCacheadas = null;
 
 function obterVozes() {
-
   if (
     vozesCacheadas &&
     vozesCacheadas.length
@@ -280,25 +384,20 @@ function obterVozes() {
   }
 
   return new Promise((resolve) => {
-
     let vozes =
       window.speechSynthesis.getVoices();
 
     if (vozes.length > 0) {
-
       vozesCacheadas = vozes;
       resolve(vozes);
-
       return;
     }
 
     const verificarVozes = () => {
-
       vozes =
         window.speechSynthesis.getVoices();
 
       if (vozes.length > 0) {
-
         window.speechSynthesis
           .removeEventListener(
             'voiceschanged',
@@ -306,7 +405,6 @@ function obterVozes() {
           );
 
         vozesCacheadas = vozes;
-
         resolve(vozes);
       }
     };
@@ -318,7 +416,6 @@ function obterVozes() {
       );
 
     setTimeout(() => {
-
       vozes =
         window.speechSynthesis.getVoices();
 
@@ -331,13 +428,11 @@ function obterVozes() {
       vozesCacheadas = vozes;
 
       resolve(vozes);
-
     }, 1000);
   });
 }
 
 function escolherVoz(vozes) {
-
   let voz =
     vozes.find(
       v =>
@@ -350,7 +445,6 @@ function escolherVoz(vozes) {
     );
 
   if (!voz) {
-
     voz =
       vozes.find(
         v =>
@@ -362,26 +456,25 @@ function escolherVoz(vozes) {
   }
 
   if (!voz) {
-
     voz =
       vozes.find(
-        v => v.lang === 'pt-BR'
+        v =>
+          v.lang === 'pt-BR'
       );
   }
 
   return voz || null;
 }
 
-// ── Fala da parte atual ─────────────────────────────────────
+// ── Fala da parte atual ────────────────────────────────────
 async function falarParteAtual() {
-
   if (!estadoPlayer.partes.length) {
     return;
   }
 
   const texto =
     estadoPlayer.partes[
-      estadoPlayer.indiceParte
+    estadoPlayer.indiceParte
     ];
 
   const vozes =
@@ -391,13 +484,11 @@ async function falarParteAtual() {
     escolherVoz(vozes);
 
   if (!voz) {
-
     mostrarToast(
       '⚠️ Nenhuma voz em português foi encontrada neste navegador.'
     );
 
     fecharPlayer();
-
     return;
   }
 
@@ -412,92 +503,79 @@ async function falarParteAtual() {
   fala.pitch = 1;
   fala.volume = 1;
 
-  fala.onboundary =
-    (evento) => {
+  fala.onboundary = (evento) => {
+    if (!texto.length) {
+      return;
+    }
 
-      if (!texto.length) {
-        return;
-      }
-
-      const fracao =
-        Math.min(
-          evento.charIndex / texto.length,
-          1
-        );
-
-      atualizarBarraProgresso(
-        fracao
+    const fracao =
+      Math.min(
+        evento.charIndex /
+        texto.length,
+        1
       );
-    };
 
-  fala.onstart =
-    () => {
+    atualizarBarraProgresso(
+      fracao
+    );
+  };
 
-      estadoPlayer.pausado = false;
-      estadoPlayer.concluido = false;
+  fala.onstart = () => {
+    estadoPlayer.pausado = false;
+    estadoPlayer.concluido = false;
 
-      renderizarIconePlayPause();
-      atualizarEstadoBotaoFolder();
+    renderizarIconePlayPause();
+    atualizarEstadoBotaoFolder();
 
-      setStatus(
-        textoDeStatusTocando()
-      );
-    };
+    setStatus(
+      textoDeStatusTocando()
+    );
+  };
 
-  fala.onend =
-    () => {
-      avancarAutomaticamente();
-    };
+  fala.onend = () => {
+    avancarAutomaticamente();
+  };
 
-  fala.onerror =
-    (erro) => {
+  fala.onerror = (erro) => {
+    if (
+      erro.error === 'interrupted' ||
+      erro.error === 'canceled'
+    ) {
+      return;
+    }
 
-      if (
-        erro.error === 'interrupted' ||
-        erro.error === 'canceled'
-      ) {
-        return;
-      }
-
-      console.error(
-        'Erro na narração:',
-        erro
-      );
-    };
+    console.error(
+      'Erro na narração:',
+      erro
+    );
+  };
 
   window.speechSynthesis.cancel();
   window.speechSynthesis.resume();
 
-  setTimeout(
-    () =>
-      window.speechSynthesis.speak(
-        fala
-      ),
-    60
-  );
+  setTimeout(() => {
+    window.speechSynthesis.speak(
+      fala
+    );
+  }, 60);
 }
 
 function avancarAutomaticamente() {
-
   if (
     estadoPlayer.indiceParte <
     estadoPlayer.partes.length - 1
   ) {
-
     estadoPlayer.indiceParte++;
 
     atualizarUIParte();
 
     falarParteAtual();
-
   } else {
-
     finalizarNarracao();
   }
 }
 
 function finalizarNarracao() {
-
   estadoPlayer.concluido = true;
   estadoPlayer.pausado = true;
 
@@ -508,8 +586,10 @@ function finalizarNarracao() {
     '✅ Narração concluída'
   );
 
-  playerBarraProgresso.style.width =
-    '100%';
+  if (playerBarraProgresso) {
+    playerBarraProgresso.style.width =
+      '100%';
+  }
 
   mostrarToast(
     '▶ Narração concluída!'
@@ -521,7 +601,6 @@ function iniciarNarracaoDePartes(
   titulo,
   origemId
 ) {
-
   estadoPlayer.partes = partes;
   estadoPlayer.indiceParte = 0;
   estadoPlayer.titulo = titulo;
@@ -532,9 +611,11 @@ function iniciarNarracaoDePartes(
   estadoPlayer.pausado = false;
   estadoPlayer.concluido = false;
 
-  playerBarraProgresso
-    .classList
-    .remove('indeterminada');
+  if (playerBarraProgresso) {
+    playerBarraProgresso
+      .classList
+      .remove('indeterminada');
+  }
 
   setControlesHabilitados(
     true
@@ -551,13 +632,9 @@ async function narrarConteudo({
   origemId,
   obterPartes
 }) {
-
   if (
-    !(
-      'speechSynthesis' in window
-    )
+    !('speechSynthesis' in window)
   ) {
-
     mostrarToast(
       '⚠️ Seu navegador não suporta narração de texto.'
     );
@@ -588,10 +665,11 @@ async function narrarConteudo({
 
   atualizarEstadoBotaoFolder();
 
-  playerParteEl.textContent = '';
+  if (playerParteEl) {
+    playerParteEl.textContent = '';
+  }
 
   try {
-
     const partes =
       await obterPartes();
 
@@ -599,13 +677,11 @@ async function narrarConteudo({
       !partes ||
       !partes.length
     ) {
-
       mostrarToast(
         '⚠️ Não encontramos texto para narrar.'
       );
 
       fecharPlayer();
-
       return;
     }
 
@@ -614,9 +690,7 @@ async function narrarConteudo({
       titulo,
       origemId
     );
-
   } catch (erro) {
-
     if (
       erro.message ===
       'NARRACAO_CANCELADA'
@@ -637,260 +711,246 @@ async function narrarConteudo({
   }
 }
 
-// ── Controles do player ─────────────────────────────────────
-playerPlayPauseBtn.addEventListener(
-  'click',
-  () => {
+// ── Controles do player ────────────────────────────────────
+if (playerPlayPauseBtn) {
+  playerPlayPauseBtn.addEventListener(
+    'click',
+    () => {
+      if (
+        estadoPlayer.gerando ||
+        !estadoPlayer.ativo
+      ) {
+        return;
+      }
 
-    if (
-      estadoPlayer.gerando ||
-      !estadoPlayer.ativo
-    ) {
-      return;
-    }
+      if (
+        estadoPlayer.concluido
+      ) {
+        estadoPlayer.indiceParte = 0;
+        estadoPlayer.concluido = false;
 
-    if (
-      estadoPlayer.concluido
-    ) {
+        atualizarUIParte();
+        falarParteAtual();
 
-      estadoPlayer.indiceParte = 0;
-      estadoPlayer.concluido = false;
+        return;
+      }
 
-      atualizarUIParte();
+      if (
+        estadoPlayer.pausado
+      ) {
+        window.speechSynthesis.resume();
+        estadoPlayer.pausado = false;
+      } else {
+        window.speechSynthesis.pause();
+        estadoPlayer.pausado = true;
+      }
 
-      falarParteAtual();
+      renderizarIconePlayPause();
+      atualizarEstadoBotaoFolder();
 
-      return;
-    }
-
-    if (
-      estadoPlayer.pausado
-    ) {
-
-      window.speechSynthesis.resume();
-      estadoPlayer.pausado = false;
-
-    } else {
-
-      window.speechSynthesis.pause();
-      estadoPlayer.pausado = true;
-    }
-
-    renderizarIconePlayPause();
-
-    atualizarEstadoBotaoFolder();
-
-    setStatus(
-      estadoPlayer.pausado
-        ? '⏸️ Narração pausada'
-        : textoDeStatusTocando()
-    );
-  }
-);
-
-playerVoltarBtn.addEventListener(
-  'click',
-  () => {
-
-    if (
-      estadoPlayer.gerando ||
-      !estadoPlayer.ativo
-    ) {
-      return;
-    }
-
-    window.speechSynthesis.cancel();
-
-    estadoPlayer.indiceParte =
-      Math.max(
-        0,
-        estadoPlayer.indiceParte - 1
+      setStatus(
+        estadoPlayer.pausado
+          ? '⏸️ Narração pausada'
+          : textoDeStatusTocando()
       );
-
-    estadoPlayer.concluido = false;
-
-    atualizarUIParte();
-
-    falarParteAtual();
-  }
-);
-
-playerAvancarBtn.addEventListener(
-  'click',
-  () => {
-
-    if (
-      estadoPlayer.gerando ||
-      !estadoPlayer.ativo
-    ) {
-      return;
     }
+  );
+}
 
-    window.speechSynthesis.cancel();
+if (playerVoltarBtn) {
+  playerVoltarBtn.addEventListener(
+    'click',
+    () => {
+      if (
+        estadoPlayer.gerando ||
+        !estadoPlayer.ativo
+      ) {
+        return;
+      }
 
-    if (
-      estadoPlayer.indiceParte <
-      estadoPlayer.partes.length - 1
-    ) {
+      window.speechSynthesis.cancel();
 
-      estadoPlayer.indiceParte++;
-
-      estadoPlayer.concluido = false;
-
-      atualizarUIParte();
-
-      falarParteAtual();
-
-    } else {
-
-      finalizarNarracao();
-    }
-  }
-);
-
-playerFecharBtn.addEventListener(
-  'click',
-  fecharPlayer
-);
-
-// Clicar/arrastar na barra
-playerBarraWrapper.addEventListener(
-  'click',
-  (e) => {
-
-    if (
-      estadoPlayer.gerando ||
-      !estadoPlayer.ativo ||
-      !estadoPlayer.partes.length
-    ) {
-      return;
-    }
-
-    const rect =
-      playerBarraWrapper
-        .getBoundingClientRect();
-
-    const fracao =
-      Math.min(
+      estadoPlayer.indiceParte =
         Math.max(
-          (
-            e.clientX -
-            rect.left
-          ) /
-          rect.width,
-          0
-        ),
-        1
-      );
+          0,
+          estadoPlayer.indiceParte - 1
+        );
 
-    const novoIndice =
-      Math.min(
-        Math.floor(
-          fracao *
-          estadoPlayer.partes.length
-        ),
-        estadoPlayer.partes.length - 1
-      );
+      estadoPlayer.concluido = false;
 
-    window.speechSynthesis.cancel();
+      atualizarUIParte();
 
-    estadoPlayer.indiceParte =
-      novoIndice;
-
-    estadoPlayer.concluido =
-      false;
-
-    atualizarUIParte();
-
-    falarParteAtual();
-  }
-);
-
-// ── Botão "Conteúdo narrado" ─────────────────────────────
-btnConteudoNarrado.addEventListener(
-  'click',
-  () => {
-
-    if (!itens.length) {
-
-      mostrarToast(
-        '⚠️ Não há arquivos para narrar.'
-      );
-
-      return;
+      falarParteAtual();
     }
+  );
+}
 
-    const tocandoPasta =
-      estadoPlayer.ativo &&
-      estadoPlayer.origemId ===
+if (playerAvancarBtn) {
+  playerAvancarBtn.addEventListener(
+    'click',
+    () => {
+      if (
+        estadoPlayer.gerando ||
+        !estadoPlayer.ativo
+      ) {
+        return;
+      }
+
+      window.speechSynthesis.cancel();
+
+      if (
+        estadoPlayer.indiceParte <
+        estadoPlayer.partes.length - 1
+      ) {
+        estadoPlayer.indiceParte++;
+
+        estadoPlayer.concluido = false;
+
+        atualizarUIParte();
+
+        falarParteAtual();
+      } else {
+        finalizarNarracao();
+      }
+    }
+  );
+}
+
+if (playerFecharBtn) {
+  playerFecharBtn.addEventListener(
+    'click',
+    fecharPlayer
+  );
+}
+
+if (playerBarraWrapper) {
+  playerBarraWrapper.addEventListener(
+    'click',
+    (e) => {
+      if (
+        estadoPlayer.gerando ||
+        !estadoPlayer.ativo ||
+        !estadoPlayer.partes.length
+      ) {
+        return;
+      }
+
+      const rect =
+        playerBarraWrapper
+          .getBoundingClientRect();
+
+      const fracao =
+        Math.min(
+          Math.max(
+            (
+              e.clientX -
+              rect.left
+            ) / rect.width,
+            0
+          ),
+          1
+        );
+
+      const novoIndice =
+        Math.min(
+          Math.floor(
+            fracao *
+            estadoPlayer.partes.length
+          ),
+          estadoPlayer.partes.length - 1
+        );
+
+      window.speechSynthesis.cancel();
+
+      estadoPlayer.indiceParte =
+        novoIndice;
+
+      estadoPlayer.concluido =
+        false;
+
+      atualizarUIParte();
+
+      falarParteAtual();
+    }
+  );
+}
+
+// ── Botão Conteúdo narrado ─────────────────────────────────
+if (btnConteudoNarrado) {
+  btnConteudoNarrado.addEventListener(
+    'click',
+    () => {
+      if (!itens.length) {
+        mostrarToast(
+          '⚠️ Não há arquivos para narrar.'
+        );
+
+        return;
+      }
+
+      const tocandoPasta =
+        estadoPlayer.ativo &&
+        estadoPlayer.origemId ===
         'pasta';
 
-    if (tocandoPasta) {
+      if (tocandoPasta) {
+        playerPlayPauseBtn.click();
+        return;
+      }
 
-      playerPlayPauseBtn.click();
+      narrarConteudo({
+        titulo:
+          'Conteúdo da matéria',
 
-      return;
-    }
+        origemId:
+          'pasta',
 
-    narrarConteudo({
+        obterPartes:
+          async () => {
+            const resultados =
+              await prepararConteudoNarrado();
 
-      titulo:
-        'Conteúdo da matéria',
+            let textoCompleto = '';
 
-      origemId:
-        'pasta',
-
-      obterPartes:
-        async () => {
-
-          const resultados =
-            await prepararConteudoNarrado();
-
-          let textoCompleto =
-            '';
-
-          resultados.forEach(
-            (resultado) => {
-
-              textoCompleto +=
-                resultado.texto +
-                '\n\n';
-            }
-          );
-
-          textoCompleto =
-            limparTextoParaNarracao(
-              textoCompleto
+            resultados.forEach(
+              (resultado) => {
+                textoCompleto +=
+                  resultado.texto +
+                  '\n\n';
+              }
             );
 
-          return dividirTextoEmPartes(
-            textoCompleto
-          );
-        }
-    });
-  }
-);
+            textoCompleto =
+              limparTextoParaNarracao(
+                textoCompleto
+              );
+
+            return dividirTextoEmPartes(
+              textoCompleto
+            );
+          }
+      });
+    }
+  );
+}
 
 function atualizarVisibilidadeBotaoNarracao() {
+  if (!btnConteudoNarrado) {
+    return;
+  }
 
-  if (
-    itens.length > 0
-  ) {
-
+  if (itens.length > 0) {
     btnConteudoNarrado.style.display =
       'flex';
-
   } else {
-
     btnConteudoNarrado.style.display =
       'none';
 
     if (
       estadoPlayer.ativo &&
       estadoPlayer.origemId ===
-        'pasta'
+      'pasta'
     ) {
-
       fecharPlayer();
     }
   }
@@ -904,18 +964,12 @@ function carregarScript(
   url,
   id
 ) {
-
   return new Promise(
     (resolve, reject) => {
-
       if (
-        document.getElementById(
-          id
-        )
+        document.getElementById(id)
       ) {
-
         resolve();
-
         return;
       }
 
@@ -932,7 +986,6 @@ function carregarScript(
 
       script.onerror =
         () => {
-
           reject(
             new Error(
               `Não foi possível carregar a biblioteca: ${url}`
@@ -947,12 +1000,9 @@ function carregarScript(
   );
 }
 
-// ── Tesseract ─────────────────────────────────────────────
+// ── Tesseract ──────────────────────────────────────────────
 async function carregarOCR() {
-
-  if (
-    window.Tesseract
-  ) {
+  if (window.Tesseract) {
     return;
   }
 
@@ -968,7 +1018,6 @@ async function carregarOCR() {
 
 // ── PDF.js ─────────────────────────────────────────────────
 async function carregarPDFJS() {
-
   if (
     window.pdfjsLib &&
     window.pdfjsLib.__workerConfigurado
@@ -985,10 +1034,7 @@ async function carregarPDFJS() {
     'pdfjsScript'
   );
 
-  if (
-    !window.pdfjsLib
-  ) {
-
+  if (!window.pdfjsLib) {
     throw new Error(
       'Não foi possível carregar a biblioteca de PDF.'
     );
@@ -998,18 +1044,13 @@ async function carregarPDFJS() {
     !window.pdfjsLib
       .__workerConfigurado
   ) {
-
     try {
-
       const respostaWorker =
         await fetch(
           'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js'
         );
 
-      if (
-        !respostaWorker.ok
-      ) {
-
+      if (!respostaWorker.ok) {
         throw new Error(
           'Falha ao baixar o worker do PDF.js'
         );
@@ -1030,12 +1071,10 @@ async function carregarPDFJS() {
       window.pdfjsLib
         .GlobalWorkerOptions
         .workerSrc =
-          URL.createObjectURL(
-            blobWorker
-          );
-
+        URL.createObjectURL(
+          blobWorker
+        );
     } catch (erro) {
-
       console.warn(
         'Não foi possível carregar o worker do PDF.js como Blob, usando URL direta como último recurso.',
         erro
@@ -1044,7 +1083,7 @@ async function carregarPDFJS() {
       window.pdfjsLib
         .GlobalWorkerOptions
         .workerSrc =
-          'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+        'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
     }
 
     window.pdfjsLib
@@ -1059,7 +1098,6 @@ async function carregarPDFJS() {
 async function extrairTextoImagem(
   dataURL
 ) {
-
   await carregarOCR();
 
   const resultado =
@@ -1069,7 +1107,6 @@ async function extrairTextoImagem(
       {
         logger:
           (info) => {
-
             if (
               cancelarPreparoAtual
             ) {
@@ -1078,10 +1115,9 @@ async function extrairTextoImagem(
 
             if (
               info.status ===
-                'recognizing text' &&
+              'recognizing text' &&
               info.progress
             ) {
-
               const porcentagem =
                 Math.round(
                   info.progress *
@@ -1099,7 +1135,6 @@ async function extrairTextoImagem(
   if (
     cancelarPreparoAtual
   ) {
-
     throw new Error(
       'NARRACAO_CANCELADA'
     );
@@ -1118,7 +1153,6 @@ async function extrairTextoImagem(
 function dataURLParaUint8Array(
   dataURL
 ) {
-
   const base64 =
     dataURL.split(',')[1];
 
@@ -1135,7 +1169,6 @@ function dataURLParaUint8Array(
     i < binary.length;
     i++
   ) {
-
     bytes[i] =
       binary.charCodeAt(i);
   }
@@ -1146,7 +1179,6 @@ function dataURLParaUint8Array(
 async function extrairTextoPDF(
   dataURL
 ) {
-
   await carregarPDFJS();
 
   const bytes =
@@ -1161,20 +1193,17 @@ async function extrairTextoPDF(
       })
       .promise;
 
-  let textoCompleto =
-    '';
+  let textoCompleto = '';
 
   for (
     let numeroPagina = 1;
     numeroPagina <=
-      pdf.numPages;
+    pdf.numPages;
     numeroPagina++
   ) {
-
     if (
       cancelarPreparoAtual
     ) {
-
       throw new Error(
         'NARRACAO_CANCELADA'
       );
@@ -1202,7 +1231,6 @@ async function extrairTextoPDF(
     if (
       textoPagina.trim()
     ) {
-
       textoCompleto +=
         textoPagina.trim() +
         '\n\n';
@@ -1213,13 +1241,12 @@ async function extrairTextoPDF(
 }
 
 // ==========================================================
-// 📄 PDF ESCANEADO → IMAGEM → OCR
+// 📄 PDF ESCANEADO → OCR
 // ==========================================================
 
 async function extrairTextoPDFComOCR(
   dataURL
 ) {
-
   await carregarPDFJS();
   await carregarOCR();
 
@@ -1235,20 +1262,17 @@ async function extrairTextoPDFComOCR(
       })
       .promise;
 
-  let textoCompleto =
-    '';
+  let textoCompleto = '';
 
   for (
     let numeroPagina = 1;
     numeroPagina <=
-      pdf.numPages;
+    pdf.numPages;
     numeroPagina++
   ) {
-
     if (
       cancelarPreparoAtual
     ) {
-
       throw new Error(
         'NARRACAO_CANCELADA'
       );
@@ -1304,7 +1328,6 @@ async function extrairTextoPDFComOCR(
     if (
       textoPagina.trim()
     ) {
-
       textoCompleto +=
         textoPagina.trim() +
         '\n\n';
@@ -1321,24 +1344,18 @@ async function extrairTextoPDFComOCR(
 async function processarPDF(
   dataURL
 ) {
-
-  let texto =
-    '';
+  let texto = '';
 
   try {
-
     texto =
       await extrairTextoPDF(
         dataURL
       );
-
   } catch (erro) {
-
     if (
       erro.message ===
       'NARRACAO_CANCELADA'
     ) {
-
       throw erro;
     }
 
@@ -1359,7 +1376,6 @@ async function processarPDF(
       ''
     ).length > 10
   ) {
-
     return texto;
   }
 
@@ -1375,7 +1391,6 @@ async function processarPDF(
 async function processarAnotacao(
   item
 ) {
-
   return (
     item.conteudo ||
     ''
@@ -1391,11 +1406,9 @@ async function processarItemNarracao(
   indice,
   total
 ) {
-
   if (
     cancelarPreparoAtual
   ) {
-
     throw new Error(
       'NARRACAO_CANCELADA'
     );
@@ -1409,7 +1422,6 @@ async function processarItemNarracao(
     item.tipo ===
     'anotacao'
   ) {
-
     return await processarAnotacao(
       item
     );
@@ -1419,14 +1431,12 @@ async function processarItemNarracao(
     item.tipo ===
     'arquivo'
   ) {
-
     const registro =
       await dbGet(
         `${materiaId}_${item.id}`
       );
 
     if (!registro) {
-
       console.warn(
         `Arquivo não encontrado: ${item.nome}`
       );
@@ -1445,7 +1455,6 @@ async function processarItemNarracao(
         'image/'
       )
     ) {
-
       return await extrairTextoImagem(
         dataURL
       );
@@ -1453,11 +1462,10 @@ async function processarItemNarracao(
 
     if (
       mimeType ===
-        'application/pdf' ||
+      'application/pdf' ||
       item.ext?.toUpperCase() ===
-        'PDF'
+      'PDF'
     ) {
-
       return await processarPDF(
         dataURL
       );
@@ -1465,13 +1473,11 @@ async function processarItemNarracao(
 
     if (
       mimeType ===
-        'text/plain' ||
+      'text/plain' ||
       item.ext?.toUpperCase() ===
-        'TXT'
+      'TXT'
     ) {
-
       try {
-
         const base64 =
           dataURL.split(',')[1];
 
@@ -1483,9 +1489,7 @@ async function processarItemNarracao(
           );
 
         return decoded.trim();
-
       } catch (erro) {
-
         console.warn(
           'Não foi possível ler o arquivo de texto:',
           erro
@@ -1504,7 +1508,6 @@ async function processarItemNarracao(
 // ==========================================================
 
 async function prepararConteudoNarrado() {
-
   const textos = [];
 
   for (
@@ -1512,11 +1515,9 @@ async function prepararConteudoNarrado() {
     i < itens.length;
     i++
   ) {
-
     if (
       cancelarPreparoAtual
     ) {
-
       throw new Error(
         'NARRACAO_CANCELADA'
       );
@@ -1536,15 +1537,12 @@ async function prepararConteudoNarrado() {
       texto &&
       texto.trim()
     ) {
-
       textos.push({
-
         nome:
           item.nome,
 
         texto:
           texto.trim()
-
       });
     }
   }
@@ -1559,24 +1557,19 @@ async function prepararConteudoNarrado() {
 function limparTextoParaNarracao(
   texto
 ) {
-
   return texto
-
     .replace(
       /[ \t]+/g,
       ' '
     )
-
     .replace(
       /\n{3,}/g,
       '\n\n'
     )
-
     .replace(
       /\s+([,.!?;:])/g,
       '$1'
     )
-
     .trim();
 }
 
@@ -1588,7 +1581,6 @@ function dividirTextoEmPartes(
   texto,
   limite = 900
 ) {
-
   const partes = [];
 
   let restante =
@@ -1598,7 +1590,6 @@ function dividirTextoEmPartes(
     restante.length >
     limite
   ) {
-
     let corte =
       restante.lastIndexOf(
         '.',
@@ -1609,7 +1600,6 @@ function dividirTextoEmPartes(
       corte <
       limite * 0.5
     ) {
-
       corte =
         restante.lastIndexOf(
           ' ',
@@ -1620,7 +1610,6 @@ function dividirTextoEmPartes(
     if (
       corte <= 0
     ) {
-
       corte =
         limite;
     }
@@ -1642,10 +1631,7 @@ function dividirTextoEmPartes(
         .trim();
   }
 
-  if (
-    restante
-  ) {
-
+  if (restante) {
     partes.push(
       restante
     );
@@ -1653,17 +1639,16 @@ function dividirTextoEmPartes(
 
   return partes;
 }
+// ==========================================================
+// 📋 RENDERIZAR LISTA
+// ==========================================================
 
-// ── Renderizar lista ───────────────────────────────────────
 function renderizar() {
-
-  listaArquivos.innerHTML =
-    '';
+  listaArquivos.innerHTML = '';
 
   if (
     itens.length === 0
   ) {
-
     semArquivos.style.display =
       'flex';
 
@@ -1680,7 +1665,6 @@ function renderizar() {
       item,
       idx
     ) => {
-
       const div =
         document.createElement(
           'div'
@@ -1693,12 +1677,11 @@ function renderizar() {
         idx;
 
       const icone =
-        item.tipo ===
-        'anotacao'
+        item.tipo === 'anotacao'
           ? iconeLapis()
           : iconeArquivoPorExt(
-              item.ext
-            );
+            item.ext
+          );
 
       div.innerHTML = `
         <div class="arquivoInfo">
@@ -1710,27 +1693,20 @@ function renderizar() {
           <div class="arquivoTexto">
 
             <div class="arquivoNome">
-              ${item.nome}
+              ${escaparHTML(item.nome)}
             </div>
 
             <div class="arquivoMeta">
 
-              <span class="badgeTipo ${
-                item.tipo ===
-                'anotacao'
-                  ? 'anotacao'
-                  : extParaClasse(
-                      item.ext
-                    )
-              }">
+              <span class="badgeTipo ${item.tipo === 'anotacao'
+          ? 'anotacao'
+          : extParaClasse(item.ext)
+        }">
 
-                ${
-                  item.tipo ===
-                  'anotacao'
-                    ? 'Anotação'
-                    : item.ext ||
-                      'Arquivo'
-                }
+                ${item.tipo === 'anotacao'
+          ? 'Anotação'
+          : item.ext || 'Arquivo'
+        }
 
               </span>
 
@@ -1769,7 +1745,6 @@ function renderizar() {
             class="btnOpcoesArquivo"
             data-index="${idx}"
             title="Opções"
-            type="button"
           >
             &#8942;
           </button>
@@ -1783,18 +1758,16 @@ function renderizar() {
     }
   );
 
-  // Eventos — abrir
+  // ── Abrir arquivo
   document
     .querySelectorAll(
       '.btnAbrirArquivo'
     )
     .forEach(
       btn => {
-
         btn.addEventListener(
           'click',
           (e) => {
-
             e.stopPropagation();
 
             abrirViewer(
@@ -1807,18 +1780,16 @@ function renderizar() {
       }
     );
 
-  // Clique no card também abre
+  // ── Clique no card
   document
     .querySelectorAll(
       '.itemArquivo'
     )
     .forEach(
       div => {
-
         div.addEventListener(
           'click',
           (e) => {
-
             if (
               e.target.closest(
                 '.btnOpcoesArquivo'
@@ -1840,28 +1811,81 @@ function renderizar() {
       }
     );
 
-  // Eventos — dropdown (menu de 3 pontinhos)
+  // ── Dropdown
   document
     .querySelectorAll(
       '.btnOpcoesArquivo'
     )
     .forEach(
       btn => {
-
         btn.addEventListener(
           'click',
           (e) => {
-
             e.stopPropagation();
-            e.preventDefault();
 
             dropdownAlvoIndex =
               parseInt(
                 btn.dataset.index
               );
 
-            abrirDropdownArquivo(
-              btn
+            const rect =
+              btn.getBoundingClientRect();
+
+            const item =
+              itens[
+              dropdownAlvoIndex
+              ];
+
+            dropdownArquivo.style.top =
+              `${rect.bottom + 6 + window.scrollY}px`;
+
+            dropdownArquivo.style.left =
+              `${rect.right - dropdownArquivo.offsetWidth}px`;
+
+            const btnNarrar =
+              dropdownArquivo.querySelector(
+                '[data-acao="narrar"]'
+              );
+
+            if (btnNarrar) {
+              const tocandoEsteItem =
+                estadoPlayer.ativo &&
+                estadoPlayer.origemId ===
+                item?.id;
+
+              btnNarrar.classList.toggle(
+                'dropAtivo',
+                !!tocandoEsteItem
+              );
+
+              btnNarrar.lastChild.textContent =
+                tocandoEsteItem
+                  ? ' Pausar/Retomar'
+                  : ' Narrar';
+            }
+
+            // Mostrar/esconder opção IA
+            const btnIA =
+              dropdownArquivo.querySelector(
+                '[data-acao="ia"]'
+              );
+
+            if (btnIA) {
+              btnIA.style.display =
+                item?.tipo === 'anotacao'
+                  ? ''
+                  : 'none';
+            }
+
+            dropdownArquivo.classList.add(
+              'visivel'
+            );
+
+            requestAnimationFrame(
+              () => {
+                dropdownArquivo.style.left =
+                  `${rect.right - dropdownArquivo.offsetWidth}px`;
+              }
             );
           }
         );
@@ -1872,389 +1896,195 @@ function renderizar() {
 }
 
 // ==========================================================
-// DROPDOWN DE ARQUIVO (3 PONTINHOS)
-// ==========================================================
-
-function abrirDropdownArquivo(
-  btn
-) {
-
-  const item =
-    itens[
-      dropdownAlvoIndex
-    ];
-
-  const btnNarrar =
-    dropdownArquivo.querySelector(
-      '[data-acao="narrar"]'
-    );
-
-  if (btnNarrar) {
-
-    const tocandoEsteItem =
-      estadoPlayer.ativo &&
-      estadoPlayer.origemId ===
-        item?.id;
-
-    btnNarrar.classList.toggle(
-      'dropAtivo',
-      !!tocandoEsteItem
-    );
-
-    btnNarrar.lastChild.textContent =
-      tocandoEsteItem
-        ? ' Pausar/Retomar'
-        : ' Narrar';
-  }
-
-  // 1) Torna o menu visível ANTES de medir o tamanho dele.
-  //    Enquanto "display: none" o offsetWidth/offsetHeight é sempre 0,
-  //    o que fazia o menu ser posicionado fora da tela (por isso
-  //    parecia que "não abria").
-  dropdownArquivo.classList.add(
-    'visivel'
-  );
-
-  const rect =
-    btn.getBoundingClientRect();
-
-  const larguraMenu =
-    dropdownArquivo.offsetWidth ||
-    180;
-
-  const alturaMenu =
-    dropdownArquivo.offsetHeight ||
-    220;
-
-  const margem = 8;
-
-  // 2) Calcula a posição ideal (abaixo e alinhado à direita do botão)
-  let top =
-    rect.bottom +
-    6 +
-    window.scrollY;
-
-  let left =
-    rect.right -
-    larguraMenu +
-    window.scrollX;
-
-  // 3) Garante que o menu não seja aberto para fora da tela
-  //    (nem em cima do player de narração, quando ele está visível)
-  const limiteInferior =
-    window.scrollY +
-    window.innerHeight -
-    margem;
-
-  if (
-    top + alturaMenu >
-    limiteInferior
-  ) {
-
-    // não cabe embaixo do botão: abre para cima dele
-    top =
-      rect.top +
-      window.scrollY -
-      alturaMenu -
-      6;
-  }
-
-  if (
-    left <
-    window.scrollX + margem
-  ) {
-
-    left =
-      window.scrollX +
-      margem;
-  }
-
-  const limiteDireito =
-    window.scrollX +
-    window.innerWidth -
-    larguraMenu -
-    margem;
-
-  if (
-    left > limiteDireito
-  ) {
-
-    left =
-      limiteDireito;
-  }
-
-  dropdownArquivo.style.top =
-    `${top}px`;
-
-  dropdownArquivo.style.left =
-    `${left}px`;
-}
-
-function fecharDropdownArquivo() {
-
-  dropdownArquivo.classList.remove(
-    'visivel'
-  );
-
-  dropdownAlvoIndex =
-    null;
-}
-
-// ==========================================================
 // VIEWER
 // ==========================================================
 
-async function abrirViewer(
-  idx
-) {
-
-  const item =
-    itens[idx];
+async function abrirViewer(idx) {
+  const item = itens[idx];
 
   if (!item) {
     return;
   }
 
   viewerEditandoIndex =
-    null;
+    idx;
 
   viewerTitulo.textContent =
-    item.nome;
+    item.nome || 'Arquivo';
 
   viewerCorpo.innerHTML =
     '';
 
-  btnEditarViewer.style.display =
-    'none';
-
-  // IA só aparece para anotação
-  const viewerIA =
-    document.getElementById(
-      'viewerIA'
-    );
-
-  const resultadoIAViewer =
-    document.getElementById(
-      'resultadoIAViewer'
-    );
-
-  if (viewerIA) {
-
-    viewerIA.style.display =
-      'none';
-  }
-
-  if (
-    resultadoIAViewer
-  ) {
-
-    resultadoIAViewer.innerHTML =
-      '';
-  }
-
-  ultimoResultadoIAViewer =
-    '';
-
+  // ── Anotação
   if (
     item.tipo ===
     'anotacao'
   ) {
-
-    // Renderiza anotação
-    btnEditarViewer.style.display =
-      'inline-flex';
-
-    viewerEditandoIndex =
-      idx;
+    const texto =
+      item.conteudo ||
+      '';
 
     const pre =
       document.createElement(
-        'div'
+        'pre'
       );
 
     pre.className =
       'viewerTexto';
 
     pre.textContent =
-      item.conteudo ||
-      '';
+      texto;
 
     viewerCorpo.appendChild(
       pre
     );
 
-    // Mostra a IA
+    btnEditarViewer.style.display =
+      'inline-flex';
+
+    if (btnAbrirIAViewer) {
+      btnAbrirIAViewer.style.display = "inline-flex";
+    }
+
+    // IA começa fechada
+    const viewerIA =
+      document.getElementById(
+        'viewerIA'
+      );
+
     if (viewerIA) {
-
       viewerIA.style.display =
-        'block';
-
-      viewerIA
-        .querySelectorAll(
-          '.viewerIAButton'
-        )
-        .forEach(
-          (botao) => {
-
-            botao.onclick =
-              () => {
-
-                usarIAViewer(
-                  botao.dataset.ia,
-                  item,
-                  idx
-                );
-              };
-          }
-        );
+        'none';
     }
 
   } else {
-
-    // Busca binário
+    // ── Arquivo
     const registro =
       await dbGet(
         `${materiaId}_${item.id}`
       );
 
     if (!registro) {
-
       viewerCorpo.innerHTML = `
-        <div class="viewerSemDados">
-
-          <svg
-            width="48"
-            height="48"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="#ccc"
-            stroke-width="1.5"
-          >
-
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-
-            <polyline
-              points="14 2 14 8 20 8"
-            />
-
-          </svg>
-
-          <p>
-
-            Arquivo não disponível
-            para visualização.
-
-            <br>
-
-            Possivelmente foi
-            adicionado em outra sessão.
-
-          </p>
-
+        <div class="erroViewerIA">
+          ⚠️ Arquivo não encontrado no armazenamento.
         </div>
       `;
 
-    } else {
+      btnEditarViewer.style.display =
+        'none';
 
-      const {
-        dataURL,
-        mimeType
-      } = registro;
+      viewerOverlay.classList.add(
+        'aberto'
+      );
 
-      if (
-        mimeType &&
-        mimeType.startsWith(
-          'image/'
-        )
-      ) {
+      document.body.style.overflow =
+        'hidden';
 
-        const img =
-          document.createElement(
-            'img'
-          );
+      return;
+    }
 
-        img.src =
-          dataURL;
+    const {
+      dataURL,
+      mimeType
+    } = registro;
 
-        img.className =
-          'viewerImagem';
+    btnEditarViewer.style.display =
+      'none';
 
-        viewerCorpo.appendChild(
-          img
+    if (btnAbrirIAViewer) {
+      btnAbrirIAViewer.style.display = "none";
+    }
+
+    if (
+      mimeType &&
+      mimeType.startsWith(
+        'image/'
+      )
+    ) {
+      const img =
+        document.createElement(
+          'img'
         );
 
-      } else if (
-        mimeType ===
-        'application/pdf'
-      ) {
+      img.src =
+        dataURL;
 
-        const iframe =
-          document.createElement(
-            'iframe'
-          );
+      img.className =
+        'viewerImagem';
 
-        iframe.src =
-          dataURL;
+      img.alt =
+        item.nome;
 
-        iframe.className =
-          'viewerPDF';
+      viewerCorpo.appendChild(
+        img
+      );
 
-        iframe.title =
-          item.nome;
-
-        viewerCorpo.appendChild(
-          iframe
+    } else if (
+      mimeType ===
+      'application/pdf'
+    ) {
+      const iframe =
+        document.createElement(
+          'iframe'
         );
 
-      } else {
+      iframe.src =
+        dataURL;
 
-        try {
+      iframe.className =
+        'viewerPDF';
 
-          const base64 =
-            dataURL.split(',')[1];
+      iframe.title =
+        item.nome;
 
-          const decoded =
-            atob(base64);
+      viewerCorpo.appendChild(
+        iframe
+      );
 
-          const pre =
-            document.createElement(
-              'pre'
-            );
+    } else if (
+      mimeType ===
+      'text/plain' ||
+      item.ext?.toUpperCase() ===
+      'TXT'
+    ) {
+      try {
+        const base64 =
+          dataURL.split(',')[1];
 
-          pre.className =
-            'viewerTexto';
-
-          pre.textContent =
-            decoded;
-
-          viewerCorpo.appendChild(
-            pre
+        const decoded =
+          decodeURIComponent(
+            escape(
+              atob(base64)
+            )
           );
 
-        } catch {
-
-          const link =
-            document.createElement(
-              'a'
-            );
-
-          link.href =
-            dataURL;
-
-          link.download =
-            item.nome;
-
-          link.className =
-            'btnPrimario viewerDownload';
-
-          link.textContent =
-            '⬇ Baixar arquivo';
-
-          viewerCorpo.appendChild(
-            link
+        const pre =
+          document.createElement(
+            'pre'
           );
-        }
+
+        pre.className =
+          'viewerTexto';
+
+        pre.textContent =
+          decoded;
+
+        viewerCorpo.appendChild(
+          pre
+        );
+      } catch {
+        criarLinkDownloadViewer(
+          dataURL,
+          item.nome
+        );
       }
+
+    } else {
+      criarLinkDownloadViewer(
+        dataURL,
+        item.nome
+      );
     }
   }
 
@@ -2266,8 +2096,130 @@ async function abrirViewer(
     'hidden';
 }
 
-function fecharViewer() {
+// ── Link de download no viewer
+function criarLinkDownloadViewer(
+  dataURL,
+  nome
+) {
+  const link =
+    document.createElement(
+      'a'
+    );
 
+  link.href =
+    dataURL;
+
+  link.download =
+    nome;
+
+  link.className =
+    'btnPrimario viewerDownload';
+
+  link.textContent =
+    '⬇ Baixar arquivo';
+
+  viewerCorpo.appendChild(
+    link
+  );
+}
+
+// ==========================================================
+// 🤖 ABRIR ANOTAÇÃO COM IA
+// ==========================================================
+if (viewerIA) {
+  viewerIA.addEventListener('click', (e) => {
+    const botao = e.target.closest('.viewerIAButton');
+    if (!botao) return;
+
+    const item = itens[viewerEditandoIndex];
+    if (!item) return;
+
+    usarIAViewer(botao.dataset.ia, item, viewerEditandoIndex);
+  });
+}
+function abrirViewerComIA(idx) {
+  const item =
+    itens[idx];
+
+  if (
+    !item ||
+    item.tipo !==
+    'anotacao'
+  ) {
+    return;
+  }
+
+  // Primeiro abre normalmente
+  abrirViewer(idx);
+
+  // Depois mostra a área da IA
+  setTimeout(() => {
+    const viewerIA =
+      document.getElementById(
+        'viewerIA'
+      );
+
+    const resultadoIAViewer =
+      document.getElementById(
+        'resultadoIAViewer'
+      );
+
+    if (!viewerIA) {
+      return;
+    }
+
+    viewerIA.style.display =
+      'block';
+
+    viewerIA
+      .querySelectorAll(
+        '.viewerIAButton'
+      )
+      .forEach(
+        (botao) => {
+          botao.onclick =
+            () => {
+              usarIAViewer(
+                botao.dataset.ia,
+                item,
+                idx
+              );
+            };
+        }
+      );
+
+    if (resultadoIAViewer) {
+      resultadoIAViewer.innerHTML = `
+        <div class="viewerIAEscolha">
+
+          <div class="viewerIAEscolhaIcone">
+            ✨
+          </div>
+
+          <div>
+
+            <strong>
+              Como posso ajudar?
+            </strong>
+
+            <span>
+              Escolha uma opção acima
+              para estudar esta anotação.
+            </span>
+
+          </div>
+
+        </div>
+      `;
+    }
+  }, 100);
+}
+
+// ==========================================================
+// FECHAR VIEWER
+// ==========================================================
+
+function fecharViewer() {
   viewerOverlay.classList.remove(
     'aberto'
   );
@@ -2277,6 +2229,16 @@ function fecharViewer() {
 
   viewerEditandoIndex =
     null;
+
+  const viewerIA =
+    document.getElementById(
+      'viewerIA'
+    );
+
+  if (viewerIA) {
+    viewerIA.style.display =
+      'none';
+  }
 }
 
 btnFecharViewer.addEventListener(
@@ -2287,12 +2249,10 @@ btnFecharViewer.addEventListener(
 viewerOverlay.addEventListener(
   'click',
   (e) => {
-
     if (
       e.target ===
       viewerOverlay
     ) {
-
       fecharViewer();
     }
   }
@@ -2301,23 +2261,22 @@ viewerOverlay.addEventListener(
 document.addEventListener(
   'keydown',
   (e) => {
-
     if (
       e.key ===
       'Escape'
     ) {
-
       fecharViewer();
-      fecharDropdownArquivo();
     }
   }
 );
 
-// ── Editar anotação ───────────────────────────────────────
+// ==========================================================
+// ✏️ EDITAR ANOTAÇÃO
+// ==========================================================
+
 btnEditarViewer.addEventListener(
   'click',
   () => {
-
     if (
       viewerEditandoIndex ===
       null
@@ -2325,10 +2284,19 @@ btnEditarViewer.addEventListener(
       return;
     }
 
+    const index =
+      viewerEditandoIndex;
+
     const item =
-      itens[
-        viewerEditandoIndex
-      ];
+      itens[index];
+
+    if (
+      !item ||
+      item.tipo !==
+      'anotacao'
+    ) {
+      return;
+    }
 
     fecharViewer();
 
@@ -2344,13 +2312,14 @@ btnEditarViewer.addEventListener(
 
     areaAnotacao.dataset
       .editandoIndex =
-        viewerEditandoIndex;
+      index;
 
     tituloAnotacao.focus();
 
     areaAnotacao.scrollIntoView({
       behavior:
         'smooth',
+
       block:
         'start'
     });
@@ -2364,7 +2333,6 @@ btnEditarViewer.addEventListener(
 function iconeArquivoPorExt(
   ext
 ) {
-
   const e =
     (ext || '')
       .toUpperCase();
@@ -2379,7 +2347,6 @@ function iconeArquivoPorExt(
       'SVG'
     ].includes(e)
   ) {
-
     return `
       <svg
         width="20"
@@ -2389,7 +2356,6 @@ function iconeArquivoPorExt(
         stroke="currentColor"
         stroke-width="2"
       >
-
         <rect
           x="3"
           y="3"
@@ -2407,7 +2373,6 @@ function iconeArquivoPorExt(
         <polyline
           points="21 15 16 10 5 21"
         />
-
       </svg>
     `;
   }
@@ -2416,7 +2381,6 @@ function iconeArquivoPorExt(
     e ===
     'PDF'
   ) {
-
     return `
       <svg
         width="20"
@@ -2426,7 +2390,6 @@ function iconeArquivoPorExt(
         stroke="currentColor"
         stroke-width="2"
       >
-
         <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
 
         <polyline
@@ -2439,7 +2402,6 @@ function iconeArquivoPorExt(
           x2="15"
           y2="13"
         />
-
       </svg>
     `;
   }
@@ -2453,19 +2415,16 @@ function iconeArquivoPorExt(
       stroke="currentColor"
       stroke-width="2"
     >
-
       <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
 
       <polyline
         points="14 2 14 8 20 8"
       />
-
     </svg>
   `;
 }
 
 function iconeLapis() {
-
   return `
     <svg
       width="20"
@@ -2475,15 +2434,9 @@ function iconeLapis() {
       stroke="currentColor"
       stroke-width="2"
     >
+      <path d="M12 20h9"/>
 
-      <path
-        d="M12 20h9"
-      />
-
-      <path
-        d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"
-      />
-
+      <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
     </svg>
   `;
 }
@@ -2491,7 +2444,6 @@ function iconeLapis() {
 function extParaClasse(
   ext
 ) {
-
   const e =
     (ext || '')
       .toUpperCase();
@@ -2506,7 +2458,6 @@ function extParaClasse(
       'SVG'
     ].includes(e)
   ) {
-
     return 'imagem';
   }
 
@@ -2514,7 +2465,6 @@ function extParaClasse(
     e ===
     'PDF'
   ) {
-
     return 'pdf';
   }
 
@@ -2522,7 +2472,7 @@ function extParaClasse(
 }
 
 // ==========================================================
-// ADICIONAR ARQUIVO
+// 📎 ADICIONAR ARQUIVO
 // ==========================================================
 
 btnAddArquivo.addEventListener(
@@ -2534,7 +2484,6 @@ btnAddArquivo.addEventListener(
 inputArquivo.addEventListener(
   'change',
   async () => {
-
     const files =
       Array.from(
         inputArquivo.files
@@ -2546,66 +2495,75 @@ inputArquivo.addEventListener(
       return;
     }
 
-    for (
-      const file of files
-    ) {
+    try {
+      for (
+        const file of files
+      ) {
+        const ext =
+          file.name
+            .split('.')
+            .pop()
+            .toUpperCase();
 
-      const ext =
-        file.name
-          .split('.')
-          .pop()
-          .toUpperCase();
+        const id =
+          Date.now() +
+          Math.random();
 
-      const id =
-        Date.now() +
-        Math.random();
+        const dataURL =
+          await lerArquivoComoDataURL(
+            file
+          );
 
-      const dataURL =
-        await lerArquivoComoDataURL(
-          file
-        );
+        await dbPut({
+          chaveId:
+            `${materiaId}_${id}`,
 
-      await dbPut({
+          dataURL,
 
-        chaveId:
-          `${materiaId}_${id}`,
+          mimeType:
+            file.type
+        });
 
-        dataURL,
+        itens.push({
+          id,
 
-        mimeType:
-          file.type
-      });
+          nome:
+            file.name,
 
-      itens.push({
+          tipo:
+            'arquivo',
 
-        id,
+          ext,
 
-        nome:
-          file.name,
+          mimeType:
+            file.type,
 
-        tipo:
-          'arquivo',
+          data:
+            new Date()
+              .toLocaleDateString(
+                'pt-BR'
+              )
+        });
+      }
 
-        ext,
+      salvar();
 
-        mimeType:
-          file.type,
+      renderizar();
 
-        data:
-          new Date()
-            .toLocaleDateString(
-              'pt-BR'
-            )
-      });
+      mostrarToast(
+        `📎 ${files.length} arquivo(s) adicionado(s)`
+      );
+
+    } catch (erro) {
+      console.error(
+        'Erro ao adicionar arquivo:',
+        erro
+      );
+
+      mostrarToast(
+        '⚠️ Não foi possível adicionar o arquivo.'
+      );
     }
-
-    salvar();
-
-    renderizar();
-
-    mostrarToast(
-      `📎 ${files.length} arquivo(s) adicionado(s)`
-    );
 
     inputArquivo.value =
       '';
@@ -2615,13 +2573,11 @@ inputArquivo.addEventListener(
 function lerArquivoComoDataURL(
   file
 ) {
-
   return new Promise(
     (
       resolve,
       reject
     ) => {
-
       const reader =
         new FileReader();
 
@@ -2645,7 +2601,7 @@ function lerArquivoComoDataURL(
 }
 
 // ==========================================================
-// DROPDOWN — AÇÕES
+// DROPDOWN
 // ==========================================================
 
 dropdownArquivo
@@ -2654,31 +2610,30 @@ dropdownArquivo
   )
   .forEach(
     btn => {
-
       btn.addEventListener(
         'click',
         async () => {
-
           const acao =
             btn.dataset.acao;
 
           const item =
             itens[
-              dropdownAlvoIndex
+            dropdownAlvoIndex
             ];
 
-          fecharDropdownArquivo();
+          dropdownArquivo.classList.remove(
+            'visivel'
+          );
 
           if (!item) {
             return;
           }
 
-          // Excluir
+          // ── Excluir
           if (
             acao ===
             'excluir'
           ) {
-
             if (
               !confirm(
                 `Excluir "${item.nome}"? Essa ação não pode ser desfeita.`
@@ -2691,7 +2646,6 @@ dropdownArquivo
               item.tipo ===
               'arquivo'
             ) {
-
               await dbDelete(
                 `${materiaId}_${item.id}`
               );
@@ -2700,26 +2654,15 @@ dropdownArquivo
             if (
               estadoPlayer.ativo &&
               estadoPlayer.origemId ===
-                item.id
+              item.id
             ) {
-
               fecharPlayer();
             }
 
-            const idxRemovido =
-              itens.indexOf(
-                item
-              );
-
-            if (
-              idxRemovido > -1
-            ) {
-
-              itens.splice(
-                idxRemovido,
-                1
-              );
-            }
+            itens.splice(
+              dropdownAlvoIndex,
+              1
+            );
 
             salvar();
 
@@ -2729,46 +2672,51 @@ dropdownArquivo
               '🗑️ Item excluído'
             );
 
+            dropdownAlvoIndex =
+              null;
+
             return;
           }
 
-          // Abrir
+          // ── Abrir
           if (
             acao ===
             'abrir'
           ) {
+            const idx =
+              dropdownAlvoIndex;
+
+            dropdownAlvoIndex =
+              null;
 
             abrirViewer(
-              itens.indexOf(
-                item
-              )
+              idx
             );
 
             return;
           }
 
-          // Narrar
+          // ── Narrar
           if (
             acao ===
             'narrar'
           ) {
+            dropdownAlvoIndex =
+              null;
 
             const tocandoEsteItem =
               estadoPlayer.ativo &&
               estadoPlayer.origemId ===
-                item.id;
+              item.id;
 
             if (
               tocandoEsteItem
             ) {
-
               playerPlayPauseBtn.click();
-
               return;
             }
 
             narrarConteudo({
-
               titulo:
                 item.nome,
 
@@ -2777,7 +2725,6 @@ dropdownArquivo
 
               obterPartes:
                 async () => {
-
                   const texto =
                     await processarItemNarracao(
                       item,
@@ -2787,8 +2734,7 @@ dropdownArquivo
 
                   const limpo =
                     limparTextoParaNarracao(
-                      texto ||
-                        ''
+                      texto || ''
                     );
 
                   return dividirTextoEmPartes(
@@ -2800,17 +2746,45 @@ dropdownArquivo
             return;
           }
 
-          // Download
+          // ── IA
+          if (
+            acao ===
+            'ia'
+          ) {
+            const idx =
+              dropdownAlvoIndex;
+
+            dropdownAlvoIndex =
+              null;
+
+            if (
+              item.tipo !==
+              'anotacao'
+            ) {
+              mostrarToast(
+                '⚠️ A IA está disponível apenas para anotações.'
+              );
+
+              return;
+            }
+
+            abrirViewerComIA(
+              idx
+            );
+
+            return;
+          }
+
+          // ── Download
           if (
             item.tipo ===
             'anotacao'
           ) {
-
             const blob =
               new Blob(
                 [
                   item.conteudo ||
-                    ''
+                  ''
                 ],
                 {
                   type:
@@ -2823,11 +2797,10 @@ dropdownArquivo
                 blob
               ),
               item.nome +
-                '.txt'
+              '.txt'
             );
 
           } else {
-
             const registro =
               await dbGet(
                 `${materiaId}_${item.id}`
@@ -2836,14 +2809,11 @@ dropdownArquivo
             if (
               registro
             ) {
-
               baixar(
                 registro.dataURL,
                 item.nome
               );
-
             } else {
-
               mostrarToast(
                 '⚠️ Arquivo não encontrado no armazenamento'
               );
@@ -2855,6 +2825,9 @@ dropdownArquivo
           mostrarToast(
             '💾 Download iniciado'
           );
+
+          dropdownAlvoIndex =
+            null;
         }
       );
     }
@@ -2864,7 +2837,6 @@ function baixar(
   url,
   nome
 ) {
-
   const a =
     document.createElement(
       'a'
@@ -2876,50 +2848,44 @@ function baixar(
   a.download =
     nome;
 
+  document.body.appendChild(a);
+
   a.click();
+
+  a.remove();
 }
 
 // ==========================================================
-// FECHAR DROPDOWN AO CLICAR FORA / ROLAR / REDIMENSIONAR
+// FECHAR DROPDOWN
 // ==========================================================
 
 document.addEventListener(
   'click',
   (e) => {
-
     if (
       !dropdownArquivo.contains(
         e.target
       ) &&
-      !e.target.closest(
-        '.btnOpcoesArquivo'
+      !e.target.classList.contains(
+        'btnOpcoesArquivo'
       )
     ) {
+      dropdownArquivo.classList.remove(
+        'visivel'
+      );
 
-      fecharDropdownArquivo();
+      dropdownAlvoIndex =
+        null;
     }
   }
 );
-
-window.addEventListener(
-  'scroll',
-  () => fecharDropdownArquivo(),
-  true
-);
-
-window.addEventListener(
-  'resize',
-  () => fecharDropdownArquivo()
-);
-
 // ==========================================================
-// CRIAR / EDITAR ANOTAÇÃO
+// 📝 CRIAR / EDITAR ANOTAÇÃO
 // ==========================================================
 
 btnCriarAnotacao.addEventListener(
   'click',
   () => {
-
     delete areaAnotacao
       .dataset
       .editandoIndex;
@@ -2938,6 +2904,7 @@ btnCriarAnotacao.addEventListener(
     areaAnotacao.scrollIntoView({
       behavior:
         'smooth',
+
       block:
         'start'
     });
@@ -2945,7 +2912,6 @@ btnCriarAnotacao.addEventListener(
 );
 
 function fecharAnotacao() {
-
   areaAnotacao.style.display =
     'none';
 
@@ -2967,7 +2933,6 @@ btnCancelarAnotacao.addEventListener(
 btnSalvarAnotacao.addEventListener(
   'click',
   () => {
-
     const titulo =
       tituloAnotacao.value.trim() ||
       'Anotação';
@@ -2976,9 +2941,7 @@ btnSalvarAnotacao.addEventListener(
       textoAnotacao.value.trim();
 
     if (!texto) {
-
       textoAnotacao.focus();
-
       return;
     }
 
@@ -2991,19 +2954,25 @@ btnSalvarAnotacao.addEventListener(
       editIdx !==
       undefined
     ) {
-
-      itens[
+      const index =
         parseInt(
           editIdx
-        )
-      ].nome =
+        );
+
+      if (
+        !itens[index]
+      ) {
+        mostrarToast(
+          '⚠️ Anotação não encontrada.'
+        );
+
+        return;
+      }
+
+      itens[index].nome =
         titulo;
 
-      itens[
-        parseInt(
-          editIdx
-        )
-      ].conteudo =
+      itens[index].conteudo =
         texto;
 
       mostrarToast(
@@ -3011,9 +2980,7 @@ btnSalvarAnotacao.addEventListener(
       );
 
     } else {
-
       itens.push({
-
         id:
           Date.now(),
 
@@ -3050,11 +3017,10 @@ btnSalvarAnotacao.addEventListener(
 );
 
 // ==========================================================
-// PERSISTÊNCIA
+// 💾 PERSISTÊNCIA
 // ==========================================================
 
 function salvar() {
-
   localStorage.setItem(
     chave,
     JSON.stringify(
@@ -3077,7 +3043,6 @@ function salvar() {
     );
 
   if (m) {
-
     m.arquivos =
       itens.length;
 
@@ -3091,20 +3056,18 @@ function salvar() {
 }
 
 // ==========================================================
-// TOAST
+// 🔔 TOAST
 // ==========================================================
 
 function mostrarToast(
   msg
 ) {
-
   let toast =
     document.getElementById(
       'toastGlobal'
     );
 
   if (!toast) {
-
     toast =
       document.createElement(
         'div'
@@ -3143,21 +3106,11 @@ function mostrarToast(
 }
 
 // ==========================================================
-// INIT
+// 🔊 TESTE DE VOZ
 // ==========================================================
-
-abrirDB().then(
-  () => {
-
-    renderizarIconePlayPause();
-
-    renderizar();
-  }
-);
 
 window.testarVozJoviClass =
   function () {
-
     const teste =
       new SpeechSynthesisUtterance(
         'Olá! Este é um teste de voz do JoviClass.'
@@ -3188,97 +3141,92 @@ window.testarVozJoviClass =
     );
   };
 
-// =====================================================
-// SISTEMA DE NOTIFICAÇÕES POR PROXIMIDADE
-// =====================================================
+// ==========================================================
+// 🔔 SISTEMA DE NOTIFICAÇÕES
+// ==========================================================
 
 const EVENTOS = [
-
   {
     id:
-      "prova-calculo",
+      'prova-calculo',
 
     titulo:
-      "Prova de Cálculo I",
+      'Prova de Cálculo I',
 
     tipo:
-      "prova",
+      'prova',
 
     materia:
-      "Cálculo I",
+      'Cálculo I',
 
     data:
-      "2024-05-25T08:00"
+      '2024-05-25T08:00'
   },
 
   {
     id:
-      "prova-fisica",
+      'prova-fisica',
 
     titulo:
-      "Prova de Física II",
+      'Prova de Física II',
 
     tipo:
-      "prova",
+      'prova',
 
     materia:
-      "Física II",
+      'Física II',
 
     data:
-      "2024-06-02T08:00"
+      '2024-06-02T08:00'
   },
 
   {
     id:
-      "trabalho-eco",
+      'trabalho-eco',
 
     titulo:
-      "Entrega do trabalho de Economia",
+      'Entrega do trabalho de Economia',
 
     tipo:
-      "trabalho",
+      'trabalho',
 
     materia:
-      "Economia",
+      'Economia',
 
     data:
-      "2024-06-05T23:59"
+      '2024-06-05T23:59'
   },
 
   {
     id:
-      "reuniao-grupo",
+      'reuniao-grupo',
 
     titulo:
-      "Reunião do grupo de estudos",
+      'Reunião do grupo de estudos',
 
     tipo:
-      "reuniao",
+      'reuniao',
 
     materia:
-      "Cálculo I",
+      'Cálculo I',
 
     data:
-      "2024-05-20T19:00"
+      '2024-05-20T19:00'
   }
-
 ];
 
 const ICONE_TIPO = {
-
   prova:
-    "📝",
+    '📝',
 
   trabalho:
-    "📁",
+    '📁',
 
   reuniao:
-    "🗓️"
-
+    '🗓️'
 };
 
 const LIMIARES_ALERTA = {
-
   aviso7dias:
     7 *
     24 *
@@ -3296,21 +3244,18 @@ const LIMIARES_ALERTA = {
     60 *
     60 *
     1000
-
 };
 
 const CHAVE_LIDAS =
-  "joviclass_notif_lidas";
+  'joviclass_notif_lidas';
 
 const CHAVE_DISPARADAS =
-  "joviclass_notif_disparadas";
+  'joviclass_notif_disparadas';
 
 function carregarSet(
   chave
 ) {
-
   try {
-
     return new Set(
       JSON.parse(
         localStorage.getItem(
@@ -3318,9 +3263,7 @@ function carregarSet(
         )
       ) || []
     );
-
   } catch {
-
     return new Set();
   }
 }
@@ -3329,7 +3272,6 @@ function salvarSet(
   chave,
   set
 ) {
-
   localStorage.setItem(
     chave,
     JSON.stringify(
@@ -3351,7 +3293,6 @@ let disparadas =
 function calcularStatus(
   evento
 ) {
-
   const agora =
     new Date();
 
@@ -3383,21 +3324,18 @@ function calcularStatus(
     24;
 
   let urgencia =
-    "normal";
+    'normal';
 
   if (
     diffHoras <= 24
   ) {
-
     urgencia =
-      "urgente";
-
+      'urgente';
   } else if (
     diffDias <= 3
   ) {
-
     urgencia =
-      "breve";
+      'breve';
   }
 
   let prazoTexto;
@@ -3405,21 +3343,23 @@ function calcularStatus(
   if (
     diffHoras < 1
   ) {
-
     prazoTexto =
-      "em menos de 1h";
+      'em menos de 1h';
 
   } else if (
     diffHoras < 24
   ) {
-
     prazoTexto =
       `em ${Math.round(diffHoras)}h`;
 
   } else {
+    const dias =
+      Math.ceil(
+        diffDias
+      );
 
     prazoTexto =
-      `em ${Math.ceil(diffDias)} dia${Math.ceil(diffDias) > 1 ? "s" : ""}`;
+      `em ${dias} dia${dias > 1 ? 's' : ''}`;
   }
 
   return {
@@ -3432,12 +3372,9 @@ function calcularStatus(
 }
 
 function gerarNotificacoes() {
-
   return EVENTOS
-
     .map(
       (evento) => {
-
         const status =
           calcularStatus(
             evento
@@ -3446,10 +3383,8 @@ function gerarNotificacoes() {
         if (
           !status ||
           status.diffMs >
-            LIMIARES_ALERTA
-              .aviso7dias
+          LIMIARES_ALERTA.aviso7dias
         ) {
-
           return null;
         }
 
@@ -3459,11 +3394,9 @@ function gerarNotificacoes() {
         };
       }
     )
-
     .filter(
       Boolean
     )
-
     .sort(
       (a, b) =>
         a.diffMs -
@@ -3472,27 +3405,25 @@ function gerarNotificacoes() {
 }
 
 const TIPO_LABEL = {
-
   prova:
-    "Prova",
+    'Prova',
 
   trabalho:
-    "Trabalho",
+    'Trabalho',
 
   reuniao:
-    "Reunião"
+    'Reunião'
 };
 
 function renderizarPainel() {
-
   const lista =
     document.getElementById(
-      "notifLista"
+      'notifLista'
     );
 
   const dot =
     document.getElementById(
-      "notifDot"
+      'notifDot'
     );
 
   if (
@@ -3517,18 +3448,15 @@ function renderizarPainel() {
     naoLidas.length >
     0
   ) {
-
     dot.hidden =
       false;
 
     dot.textContent =
       naoLidas.length >
-      9
-        ? "9+"
+        9
+        ? '9+'
         : naoLidas.length;
-
   } else {
-
     dot.hidden =
       true;
   }
@@ -3537,9 +3465,12 @@ function renderizarPainel() {
     notificacoes.length ===
     0
   ) {
-
     lista.innerHTML =
-      `<div class="notif-vazio">Nenhuma prova, trabalho ou reunião chegando perto!</div>`;
+      `
+      <div class="notif-vazio">
+        Nenhuma prova, trabalho ou reunião chegando perto!
+      </div>
+      `;
 
     return;
   }
@@ -3548,27 +3479,38 @@ function renderizarPainel() {
     notificacoes
       .map(
         (n) => `
-
           <div
-            class="notif-item ${lidas.has(n.id) ? "" : "nao-lida"}"
+            class="notif-item ${lidas.has(n.id)
+            ? ''
+            : 'nao-lida'
+          }"
             data-id="${n.id}"
           >
 
             <span
               class="notif-icone ${n.urgencia}"
             >
-              ${ICONE_TIPO[n.tipo] || "🔔"}
+              ${ICONE_TIPO[n.tipo] || '🔔'}
             </span>
 
             <div class="notif-corpo">
 
               <div class="notif-titulo">
-                ${n.titulo}
+                ${escaparHTML(n.titulo)}
               </div>
 
               <div class="notif-sub">
-                ${TIPO_LABEL[n.tipo] || "Evento"}
-                ${n.materia ? " · " + n.materia : ""}
+                ${TIPO_LABEL[n.tipo] ||
+          'Evento'
+          }
+
+                ${n.materia
+            ? ' · ' +
+            escaparHTML(
+              n.materia
+            )
+            : ''
+          }
               </div>
 
               <span
@@ -3582,19 +3524,17 @@ function renderizarPainel() {
           </div>
         `
       )
-      .join("");
+      .join('');
 
   lista
     .querySelectorAll(
-      ".notif-item"
+      '.notif-item'
     )
     .forEach(
       (el) => {
-
         el.addEventListener(
-          "click",
+          'click',
           () => {
-
             lidas.add(
               el.dataset.id
             );
@@ -3615,16 +3555,11 @@ function dispararNotificacaoDoNavegador(
   evento,
   status
 ) {
-
   if (
-    !(
-      "Notification" in
-      window
-    ) ||
+    !('Notification' in window) ||
     Notification.permission !==
-      "granted"
+    'granted'
   ) {
-
     return;
   }
 
@@ -3636,7 +3571,6 @@ function dispararNotificacaoDoNavegador(
       chaveDisparo
     )
   ) {
-
     return;
   }
 
@@ -3647,7 +3581,7 @@ function dispararNotificacaoDoNavegador(
         `Vence ${status.prazoTexto}.`,
 
       icon:
-        "./src/assets/img/logo.png"
+        './src/assets/img/logo.png'
     }
   );
 
@@ -3662,28 +3596,23 @@ function dispararNotificacaoDoNavegador(
 }
 
 function verificarAlertasDoSistema() {
-
   EVENTOS.forEach(
     (evento) => {
-
       const status =
         calcularStatus(
           evento
         );
 
-      if (
-        !status
-      ) {
+      if (!status) {
         return;
       }
 
       if (
         status.diffMs <=
-          LIMIARES_ALERTA.aviso1hora ||
+        LIMIARES_ALERTA.aviso1hora ||
         status.diffMs <=
-          LIMIARES_ALERTA.aviso1dia
+        LIMIARES_ALERTA.aviso1dia
       ) {
-
         dispararNotificacaoDoNavegador(
           evento,
           status
@@ -3694,20 +3623,19 @@ function verificarAlertasDoSistema() {
 }
 
 function iniciarSistemaDeNotificacoes() {
-
   const notifBtn =
     document.getElementById(
-      "notifBtn"
+      'notifBtn'
     );
 
   const notifPanel =
     document.getElementById(
-      "notifPanel"
+      'notifPanel'
     );
 
   const notifMarcarLidas =
     document.getElementById(
-      "notifMarcarLidas"
+      'notifMarcarLidas'
     );
 
   renderizarPainel();
@@ -3715,12 +3643,10 @@ function iniciarSistemaDeNotificacoes() {
   verificarAlertasDoSistema();
 
   if (
-    "Notification" in
-      window &&
+    'Notification' in window &&
     Notification.permission ===
-      "default"
+    'default'
   ) {
-
     Notification.requestPermission();
   }
 
@@ -3728,11 +3654,9 @@ function iniciarSistemaDeNotificacoes() {
     notifBtn &&
     notifPanel
   ) {
-
     notifBtn.addEventListener(
-      "click",
+      'click',
       (e) => {
-
         e.stopPropagation();
 
         const aberto =
@@ -3742,7 +3666,7 @@ function iniciarSistemaDeNotificacoes() {
           aberto;
 
         notifBtn.setAttribute(
-          "aria-expanded",
+          'aria-expanded',
           String(
             !aberto
           )
@@ -3751,24 +3675,22 @@ function iniciarSistemaDeNotificacoes() {
     );
 
     document.addEventListener(
-      "click",
+      'click',
       (e) => {
-
         if (
           !notifPanel.hidden &&
           !notifPanel.contains(
             e.target
           ) &&
           e.target !==
-            notifBtn
+          notifBtn
         ) {
-
           notifPanel.hidden =
             true;
 
           notifBtn.setAttribute(
-            "aria-expanded",
-            "false"
+            'aria-expanded',
+            'false'
           );
         }
       }
@@ -3778,11 +3700,9 @@ function iniciarSistemaDeNotificacoes() {
   if (
     notifMarcarLidas
   ) {
-
     notifMarcarLidas.addEventListener(
-      "click",
+      'click',
       () => {
-
         gerarNotificacoes()
           .forEach(
             (n) =>
@@ -3803,23 +3723,18 @@ function iniciarSistemaDeNotificacoes() {
 
   setInterval(
     () => {
-
       renderizarPainel();
 
       verificarAlertasDoSistema();
-
     },
     5 *
     60 *
     1000
   );
 }
-
-iniciarSistemaDeNotificacoes();
-
-// =====================================================
+// ==========================================================
 // 🤖 IA DENTRO DA ANOTAÇÃO ABERTA
-// =====================================================
+// ==========================================================
 
 let ultimoResultadoIAViewer =
   '';
@@ -3830,32 +3745,25 @@ let iaViewerProcessando =
 function escaparHTML(
   texto
 ) {
-
   return String(
-    texto ||
-      ''
+    texto || ''
   )
-
     .replace(
       /&/g,
       '&amp;'
     )
-
     .replace(
       /</g,
       '&lt;'
     )
-
     .replace(
       />/g,
       '&gt;'
     )
-
     .replace(
       /"/g,
       '&quot;'
     )
-
     .replace(
       /'/g,
       '&#039;'
@@ -3865,7 +3773,6 @@ function escaparHTML(
 function formatarResultadoIAViewer(
   texto
 ) {
-
   return escaparHTML(
     texto
   ).replace(
@@ -3877,9 +3784,7 @@ function formatarResultadoIAViewer(
 function nomeAcaoIAViewer(
   acao
 ) {
-
   const nomes = {
-
     resumo:
       'Resumo',
 
@@ -3905,14 +3810,12 @@ function nomeAcaoIAViewer(
 function definirBotoesIAViewer(
   desabilitado
 ) {
-
   document
     .querySelectorAll(
       '.viewerIAButton'
     )
     .forEach(
       (botao) => {
-
         botao.disabled =
           desabilitado;
       }
@@ -3924,24 +3827,20 @@ async function usarIAViewer(
   item,
   index
 ) {
-
   const resultado =
     document.getElementById(
       'resultadoIAViewer'
     );
 
-  if (
-    !resultado
-  ) {
+  if (!resultado) {
     return;
   }
 
   if (
     !item ||
     item.tipo !==
-      'anotacao'
+    'anotacao'
   ) {
-
     resultado.innerHTML = `
       <div class="erroViewerIA">
         ⚠️ A IA está disponível para anotações abertas.
@@ -3954,13 +3853,10 @@ async function usarIAViewer(
   const texto =
     String(
       item.conteudo ||
-        ''
+      ''
     ).trim();
 
-  if (
-    !texto
-  ) {
-
+  if (!texto) {
     resultado.innerHTML = `
       <div class="erroViewerIA">
         ⚠️ Esta anotação não possui conteúdo para analisar.
@@ -3973,7 +3869,6 @@ async function usarIAViewer(
   if (
     iaViewerProcessando
   ) {
-
     return;
   }
 
@@ -3985,7 +3880,6 @@ async function usarIAViewer(
   );
 
   resultado.innerHTML = `
-
     <div class="viewerIALoading">
 
       <span class="viewerIALoadingIcon">
@@ -3997,11 +3891,9 @@ async function usarIAViewer(
       </span>
 
     </div>
-
   `;
 
   try {
-
     const resposta =
       await fetch(
         'http://localhost:3000/ia',
@@ -4025,12 +3917,9 @@ async function usarIAViewer(
     let dados;
 
     try {
-
       dados =
         await resposta.json();
-
     } catch {
-
       throw new Error(
         'O servidor retornou uma resposta que não é JSON. Verifique se o backend está rodando.'
       );
@@ -4039,17 +3928,15 @@ async function usarIAViewer(
     if (
       !resposta.ok
     ) {
-
       throw new Error(
         dados.erro ||
-          'Erro no servidor.'
+        'Erro no servidor.'
       );
     }
 
     if (
       !dados.resultado
     ) {
-
       throw new Error(
         'A IA não retornou nenhum resultado.'
       );
@@ -4061,13 +3948,16 @@ async function usarIAViewer(
       );
 
     resultado.innerHTML = `
-
       <div class="resultadoIABox">
 
         <div class="resultadoIAHeader">
 
           <div class="resultadoIATitulo">
-            ✨ ${escaparHTML(nomeAcaoIAViewer(acao))} gerado pela Jovi
+            ✨ ${escaparHTML(
+      nomeAcaoIAViewer(
+        acao
+      )
+    )} gerado pela Jovi
           </div>
 
           <button
@@ -4081,15 +3971,11 @@ async function usarIAViewer(
 
         </div>
 
-
         <div class="resultadoIATexto">
-
           ${formatarResultadoIAViewer(
-            ultimoResultadoIAViewer
-          )}
-
+      ultimoResultadoIAViewer
+    )}
         </div>
-
 
         <div class="resultadoIAAcoes">
 
@@ -4100,7 +3986,6 @@ async function usarIAViewer(
           >
             ✏️ Adicionar à anotação
           </button>
-
 
           <button
             type="button"
@@ -4113,13 +3998,11 @@ async function usarIAViewer(
         </div>
 
       </div>
-
     `;
 
   } catch (
-    erro
+  erro
   ) {
-
     console.error(
       '❌ Erro na IA:',
       erro
@@ -4129,7 +4012,6 @@ async function usarIAViewer(
       '';
 
     resultado.innerHTML = `
-
       <div class="erroViewerIA">
 
         <strong>
@@ -4139,8 +4021,8 @@ async function usarIAViewer(
         <br>
 
         ${escaparHTML(
-          erro.message
-        )}
+      erro.message
+    )}
 
         <br><br>
 
@@ -4149,11 +4031,9 @@ async function usarIAViewer(
         </small>
 
       </div>
-
     `;
 
   } finally {
-
     iaViewerProcessando =
       false;
 
@@ -4164,7 +4044,6 @@ async function usarIAViewer(
 }
 
 function fecharResultadoIAViewer() {
-
   const resultado =
     document.getElementById(
       'resultadoIAViewer'
@@ -4176,18 +4055,15 @@ function fecharResultadoIAViewer() {
   if (
     resultado
   ) {
-
     resultado.innerHTML =
       '';
   }
 }
 
 async function copiarIAViewer() {
-
   if (
     !ultimoResultadoIAViewer
   ) {
-
     mostrarToast(
       '⚠️ Não há resultado da IA para copiar.'
     );
@@ -4196,7 +4072,6 @@ async function copiarIAViewer() {
   }
 
   try {
-
     await navigator
       .clipboard
       .writeText(
@@ -4208,9 +4083,8 @@ async function copiarIAViewer() {
     );
 
   } catch (
-    erro
+  erro
   ) {
-
     console.error(
       'Erro ao copiar resultado da IA:',
       erro
@@ -4225,11 +4099,9 @@ async function copiarIAViewer() {
 function adicionarIAAnotacaoViewer(
   index
 ) {
-
   if (
     !ultimoResultadoIAViewer
   ) {
-
     mostrarToast(
       '⚠️ Não há resultado da IA para adicionar.'
     );
@@ -4243,9 +4115,8 @@ function adicionarIAAnotacaoViewer(
   if (
     !item ||
     item.tipo !==
-      'anotacao'
+    'anotacao'
   ) {
-
     mostrarToast(
       '⚠️ A anotação não foi encontrada.'
     );
@@ -4256,7 +4127,7 @@ function adicionarIAAnotacaoViewer(
   const atual =
     String(
       item.conteudo ||
-        ''
+      ''
     ).trim();
 
   const separador =
@@ -4282,22 +4153,20 @@ function adicionarIAAnotacaoViewer(
   );
 }
 
-// Compatibilidade com qualquer trecho antigo
+// ── Compatibilidade
 function usarIA(
   acao
 ) {
-
   const item =
     itens[
-      viewerEditandoIndex
+    viewerEditandoIndex
     ];
 
   if (
     item &&
     item.tipo ===
-      'anotacao'
+    'anotacao'
   ) {
-
     return usarIAViewer(
       acao,
       item,
@@ -4310,181 +4179,613 @@ function usarIA(
   );
 }
 
+// ==========================================================
+// 🔎 BUSCA
+// ==========================================================
+
 function buscar() {
-  const termo = inputBuscar.value.trim().toLowerCase();
-  const cards = listaArquivos.querySelectorAll('.itemArquivo');
-  let encontrados = 0;
+  const termo =
+    inputBuscar.value
+      .trim()
+      .toLowerCase();
 
-  cards.forEach((card) => {
-    const index = Number(card.dataset.index);
-    const item = itens[index];
-    const textoPesquisavel = `${item.nome} ${item.conteudo || ''}`.toLowerCase();
-    const corresponde = textoPesquisavel.includes(termo);
+  const cards =
+    listaArquivos
+      .querySelectorAll(
+        '.itemArquivo'
+      );
 
-    card.style.display = corresponde ? '' : 'none';
-    if (corresponde) encontrados++;
-  });
+  let encontrados =
+    0;
 
-  if (itens.length === 0) return;
+  cards.forEach(
+    (card) => {
+      const index =
+        Number(
+          card.dataset.index
+        );
 
-  semArquivos.style.display = encontrados > 0 ? 'none' : 'flex';
-  semArquivos.textContent = encontrados > 0
-    ? 'Ainda não há arquivos.'
-    : 'Nenhum arquivo ou anotação encontrado.';
-}
+      const item =
+        itens[index];
 
-btnBuscar.addEventListener('click', buscar);
-inputBuscar.addEventListener('keydown', (e) => {
-  if (e.key === 'Enter') buscar();
-});
+      const textoPesquisavel =
+        `${item.nome} ${item.conteudo || ''
+          }`.toLowerCase();
 
-async function listarArquivosDrive() {
-  const resp = await fetch('http://localhost:3000/api/drive/arquivos', { credentials: 'include' });
-  if (!resp.ok) {
-    mostrarToast('⚠️ Conecte sua conta Google primeiro.');
+      const corresponde =
+        textoPesquisavel.includes(
+          termo
+        );
+
+      card.style.display =
+        corresponde
+          ? ''
+          : 'none';
+
+      if (
+        corresponde
+      ) {
+        encontrados++;
+      }
+    }
+  );
+
+  if (
+    itens.length ===
+    0
+  ) {
     return;
   }
-  return await resp.json();
+
+  semArquivos.style.display =
+    encontrados > 0
+      ? 'none'
+      : 'flex';
+
+  semArquivos.textContent =
+    encontrados > 0
+      ? 'Ainda não há arquivos.'
+      : 'Nenhum arquivo ou anotação encontrado.';
 }
 
-async function importarArquivoDrive(fileId) {
-  const resp = await fetch(`http://localhost:3000/api/drive/arquivo/${fileId}`, { credentials: 'include' });
-  const { nome, mimeType, dataURL } = await resp.json();
+btnBuscar.addEventListener(
+  'click',
+  buscar
+);
 
-  const id = Date.now() + Math.random();
-  const ext = nome.split('.').pop().toUpperCase();
+inputBuscar.addEventListener(
+  'keydown',
+  (e) => {
+    if (
+      e.key ===
+      'Enter'
+    ) {
+      buscar();
+    }
+  }
+);
 
-  await dbPut({ chaveId: `${materiaId}_${id}`, dataURL, mimeType });
+// ==========================================================
+// ☁️ GOOGLE DRIVE
+// ==========================================================
 
-  itens.push({
-    id, nome, tipo: 'arquivo', ext, mimeType,
-    data: new Date().toLocaleDateString('pt-BR')
-  });
+async function listarArquivosDrive() {
+  try {
+    const resp =
+      await fetch(
+        'http://localhost:3000/api/drive/arquivos',
+        {
+          credentials:
+            'include'
+        }
+      );
 
-  salvar();
-  renderizar();
-  mostrarToast('📥 Arquivo importado do Drive!');
+    if (!resp.ok) {
+      mostrarToast(
+        '⚠️ Conecte sua conta Google primeiro.'
+      );
+
+      return null;
+    }
+
+    return await resp.json();
+
+  } catch (erro) {
+    console.error(
+      'Erro ao listar arquivos do Drive:',
+      erro
+    );
+
+    mostrarToast(
+      '⚠️ Não foi possível conectar ao Google Drive.'
+    );
+
+    return null;
+  }
 }
+
+async function importarArquivoDrive(
+  fileId
+) {
+  try {
+    const resp =
+      await fetch(
+        `http://localhost:3000/api/drive/arquivo/${fileId}`,
+        {
+          credentials:
+            'include'
+        }
+      );
+
+    if (!resp.ok) {
+      throw new Error(
+        'Não foi possível importar o arquivo do Drive.'
+      );
+    }
+
+    const {
+      nome,
+      mimeType,
+      dataURL
+    } = await resp.json();
+
+    const id =
+      Date.now() +
+      Math.random();
+
+    const ext =
+      nome
+        .split('.')
+        .pop()
+        .toUpperCase();
+
+    await dbPut({
+      chaveId:
+        `${materiaId}_${id}`,
+
+      dataURL,
+
+      mimeType
+    });
+
+    itens.push({
+      id,
+      nome,
+      tipo:
+        'arquivo',
+      ext,
+      mimeType,
+      data:
+        new Date()
+          .toLocaleDateString(
+            'pt-BR'
+          )
+    });
+
+    salvar();
+
+    renderizar();
+
+    mostrarToast(
+      '📥 Arquivo importado do Drive!'
+    );
+
+  } catch (erro) {
+    console.error(
+      'Erro ao importar arquivo do Drive:',
+      erro
+    );
+
+    mostrarToast(
+      `⚠️ ${erro.message}`
+    );
+  }
+}
+
+// ==========================================================
+// 📝 NOTION
+// ==========================================================
 
 async function listarPaginasNotion() {
-  const resp = await fetch('http://localhost:3000/api/notion/paginas', { credentials: 'include' });
-  if (!resp.ok) {
-    mostrarToast('⚠️ Não foi possível conectar ao Notion.');
+  try {
+    const resp =
+      await fetch(
+        'http://localhost:3000/api/notion/paginas'
+      );
+
+    if (!resp.ok) {
+      mostrarToast(
+        '⚠️ Não foi possível conectar ao Notion.'
+      );
+
+      return [];
+    }
+
+    return await resp.json();
+
+  } catch (erro) {
+    console.error(
+      'Erro ao listar páginas do Notion:',
+      erro
+    );
+
+    mostrarToast(
+      '⚠️ Não foi possível conectar ao Notion.'
+    );
+
     return [];
   }
-  return await resp.json();
 }
 
-async function importarPaginaNotion(pageId, titulo) {
-  const resp = await fetch(`http://localhost:3000/api/notion/pagina/${pageId}/texto`, { credentials: 'include' });
-  const { texto } = await resp.json();
+async function importarPaginaNotion(
+  pageId,
+  titulo
+) {
+  try {
+    const resp =
+      await fetch(
+        `http://localhost:3000/api/notion/pagina/${pageId}/texto`
+      );
 
-  itens.push({
-    id: Date.now(),
-    nome: titulo,
-    tipo: 'anotacao',
-    ext: null,
-    conteudo: texto,
-    data: new Date().toLocaleDateString('pt-BR')
-  });
+    if (!resp.ok) {
+      throw new Error(
+        'Não foi possível importar a página do Notion.'
+      );
+    }
 
-  salvar();
-  renderizar();
-  mostrarToast('📥 Página do Notion importada como anotação!');
+    const {
+      texto
+    } = await resp.json();
+
+    itens.push({
+      id:
+        Date.now(),
+
+      nome:
+        titulo,
+
+      tipo:
+        'anotacao',
+
+      ext:
+        null,
+
+      conteudo:
+        texto,
+
+      data:
+        new Date()
+          .toLocaleDateString(
+            'pt-BR'
+          )
+    });
+
+    salvar();
+
+    renderizar();
+
+    mostrarToast(
+      '📥 Página do Notion importada como anotação!'
+    );
+
+  } catch (erro) {
+    console.error(
+      'Erro ao importar página do Notion:',
+      erro
+    );
+
+    mostrarToast(
+      `⚠️ ${erro.message}`
+    );
+  }
 }
 
 // ==========================================================
-// 🗂️ MODAL DE SELEÇÃO (Drive / Notion)
+// 🗂️ MODAL DE SELEÇÃO
 // ==========================================================
 
-function abrirModalSelecao(titulo, itensParaEscolher, aoSelecionar) {
-  // Remove modal anterior se existir
+function abrirModalSelecao(
+  titulo,
+  itensParaEscolher,
+  aoSelecionar
+) {
   fecharModalSelecao();
 
-  const overlay = document.createElement('div');
-  overlay.id = 'modalSelecaoOverlay';
+  const overlay =
+    document.createElement(
+      'div'
+    );
+
+  overlay.id =
+    'modalSelecaoOverlay';
+
   overlay.style.cssText = `
-    position: fixed; inset: 0; background: rgba(0,0,0,.5);
-    display: flex; align-items: center; justify-content: center;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
     z-index: 9999;
   `;
 
-  const caixa = document.createElement('div');
+  const caixa =
+    document.createElement(
+      'div'
+    );
+
   caixa.style.cssText = `
-    background: #fff; border-radius: 12px; padding: 20px;
-    width: 90%; max-width: 420px; max-height: 70vh;
-    display: flex; flex-direction: column; gap: 12px;
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    width: 90%;
+    max-width: 420px;
+    max-height: 70vh;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
   `;
 
   caixa.innerHTML = `
-    <div style="display:flex; justify-content:space-between; align-items:center;">
-      <h2 style="margin:0; font-size:18px;">${titulo}</h2>
-      <button id="btnFecharModalSelecao" style="border:none;background:none;font-size:20px;cursor:pointer;">✕</button>
+    <div
+      style="
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+      "
+    >
+
+      <h2
+        style="
+          margin:0;
+          font-size:18px;
+        "
+      >
+        ${escaparHTML(titulo)}
+      </h2>
+
+      <button
+        id="btnFecharModalSelecao"
+        style="
+          border:none;
+          background:none;
+          font-size:20px;
+          cursor:pointer;
+        "
+      >
+        ✕
+      </button>
+
     </div>
-    <div id="listaModalSelecao" style="overflow-y:auto; display:flex; flex-direction:column; gap:8px;"></div>
+
+    <div
+      id="listaModalSelecao"
+      style="
+        overflow-y:auto;
+        display:flex;
+        flex-direction:column;
+        gap:8px;
+      "
+    ></div>
   `;
 
-  overlay.appendChild(caixa);
-  document.body.appendChild(overlay);
+  overlay.appendChild(
+    caixa
+  );
 
-  const lista = caixa.querySelector('#listaModalSelecao');
+  document.body.appendChild(
+    overlay
+  );
 
-  if (!itensParaEscolher || !itensParaEscolher.length) {
-    lista.innerHTML = `<p style="color:#888; text-align:center;">Nenhum item encontrado.</p>`;
+  const lista =
+    caixa.querySelector(
+      '#listaModalSelecao'
+    );
+
+  if (
+    !itensParaEscolher ||
+    !itensParaEscolher.length
+  ) {
+    lista.innerHTML = `
+      <p
+        style="
+          color:#888;
+          text-align:center;
+        "
+      >
+        Nenhum item encontrado.
+      </p>
+    `;
   } else {
-    itensParaEscolher.forEach(item => {
-      const btn = document.createElement('button');
-      btn.className = 'btnSecundario';
-      btn.style.cssText = 'text-align:left; width:100%;';
-      btn.textContent = item.nome || item.titulo;
-      btn.addEventListener('click', () => {
-        fecharModalSelecao();
-        aoSelecionar(item);
-      });
-      lista.appendChild(btn);
-    });
+    itensParaEscolher.forEach(
+      item => {
+        const btn =
+          document.createElement(
+            'button'
+          );
+
+        btn.className =
+          'btnSecundario';
+
+        btn.style.cssText =
+          'text-align:left; width:100%;';
+
+        btn.textContent =
+          item.nome ||
+          item.titulo;
+
+        btn.addEventListener(
+          'click',
+          () => {
+            fecharModalSelecao();
+
+            aoSelecionar(
+              item
+            );
+          }
+        );
+
+        lista.appendChild(
+          btn
+        );
+      }
+    );
   }
 
-  caixa.querySelector('#btnFecharModalSelecao')
-    .addEventListener('click', fecharModalSelecao);
+  caixa
+    .querySelector(
+      '#btnFecharModalSelecao'
+    )
+    .addEventListener(
+      'click',
+      fecharModalSelecao
+    );
 
-  overlay.addEventListener('click', (e) => {
-    if (e.target === overlay) fecharModalSelecao();
-  });
+  overlay.addEventListener(
+    'click',
+    (e) => {
+      if (
+        e.target ===
+        overlay
+      ) {
+        fecharModalSelecao();
+      }
+    }
+  );
 }
 
 function fecharModalSelecao() {
-  const existente = document.getElementById('modalSelecaoOverlay');
-  if (existente) existente.remove();
+  const existente =
+    document.getElementById(
+      'modalSelecaoOverlay'
+    );
+
+  if (existente) {
+    existente.remove();
+  }
 }
+
 // ==========================================================
-// 🔗 EVENTOS DOS BOTÕES DE IMPORTAÇÃO
+// 🔗 BOTÕES DE IMPORTAÇÃO
 // ==========================================================
 
-btnImportarDrive.addEventListener('click', async () => {
-  mostrarToast('🔎 Buscando arquivos do Drive...');
+if (btnImportarDrive) {
+  btnImportarDrive.addEventListener(
+    'click',
+    async () => {
+      mostrarToast(
+        '🔎 Buscando arquivos do Drive...'
+      );
 
-  const arquivos = await listarArquivosDrive();
-  if (!arquivos) return;
+      const arquivos =
+        await listarArquivosDrive();
 
-  // Normaliza "name" (Google) para "nome" (usado no modal)
-  const arquivosFormatados = arquivos.map(a => ({
-    ...a,
-    nome: a.name
-  }));
+      if (!arquivos) {
+        return;
+      }
 
-  abrirModalSelecao('Escolha um arquivo do Drive', arquivosFormatados, (arquivo) => {
-    importarArquivoDrive(arquivo.id);
+      abrirModalSelecao(
+        'Escolha um arquivo do Drive',
+        arquivos,
+        (arquivo) => {
+          importarArquivoDrive(
+            arquivo.id
+          );
+        }
+      );
+    }
+  );
+}
+
+if (btnImportarNotion) {
+  btnImportarNotion.addEventListener(
+    'click',
+    async () => {
+      mostrarToast(
+        '🔎 Buscando páginas do Notion...'
+      );
+
+      const paginas =
+        await listarPaginasNotion();
+
+      if (
+        !paginas ||
+        !paginas.length
+      ) {
+        return;
+      }
+
+      abrirModalSelecao(
+        'Escolha uma página do Notion',
+        paginas,
+        (pagina) => {
+          importarPaginaNotion(
+            pagina.id,
+            pagina.titulo
+          );
+        }
+      );
+    }
+  );
+}
+
+// ==========================================================
+// 🚀 INICIALIZAÇÃO
+// ==========================================================
+
+async function inicializarPaginaMateria() {
+  try {
+    await abrirDB();
+
+    renderizarIconePlayPause();
+
+    renderizar();
+
+    iniciarSistemaDeNotificacoes();
+
+  } catch (erro) {
+    console.error(
+      '❌ Erro ao inicializar JoviClass:',
+      erro
+    );
+
+    mostrarToast(
+      '⚠️ Não foi possível carregar os arquivos da matéria.'
+    );
+  }
+}
+
+// ==========================================
+// BOTÃO JOVIAI DENTRO DO VIEWER
+// ==========================================
+
+if (btnAbrirIAViewer && viewerIA) {
+
+  btnAbrirIAViewer.addEventListener("click", () => {
+
+    const estaAberto = viewerIA.style.display !== "none";
+
+    if (estaAberto) {
+      // Fecha a área da IA
+      viewerIA.style.display = "none";
+
+    } else {
+      // Abre a área da IA
+      viewerIA.style.display = "block";
+
+      // Rola suavemente até a IA
+      setTimeout(() => {
+        viewerIA.scrollIntoView({
+          behavior: "smooth",
+          block: "nearest"
+        });
+      }, 50);
+    }
+
   });
-});
 
-btnImportarNotion.addEventListener('click', async () => {
-  mostrarToast('🔎 Buscando páginas do Notion...');
+}
 
-  const paginas = await listarPaginasNotion();
-  if (!paginas || !paginas.length) return;
 
-  abrirModalSelecao('Escolha uma página do Notion', paginas, (pagina) => {
-    importarPaginaNotion(pagina.id, pagina.titulo);
-  });
-});
+
+inicializarPaginaMateria();

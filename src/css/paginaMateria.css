@@ -2503,3 +2503,51 @@ body {
     max-width: 980px;
   }
 }
+/* =========================
+   BOTÃO "JOVIAI" (viewer header)
+========================= */
+.btnAbrirIAViewer {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  padding: 7px 14px;
+
+  border: none;
+  border-radius: 8px;
+
+  background: var(--bg-color4);
+  color: var(--bg-color2);
+
+  font-family: "Manrope", Arial, sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+
+  cursor: pointer;
+
+  box-shadow: 0 4px 12px rgba(0, 15, 176, 0.28);
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease;
+}
+
+.btnAbrirIAViewer span:first-child {
+  font-size: 14px;
+}
+
+.btnAbrirIAViewer:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(0, 15, 176, 0.38);
+}
+
+.btnAbrirIAViewer:active {
+  transform: translateY(0);
+}
+
+/* Estado "aberto" — quando o painel viewerIA está visível */
+.btnAbrirIAViewer.iaAberta {
+  background: linear-gradient(135deg, var(--acento-menta) 0%, #1fa97a 100%);
+  box-shadow: 0 4px 12px rgba(52, 211, 153, 0.32);
+}
+

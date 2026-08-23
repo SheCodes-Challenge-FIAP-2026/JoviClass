@@ -4,262 +4,795 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <link rel="stylesheet" href="../css/paginaMateria.css">
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&display=swap" rel="stylesheet">
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&display=swap"
+    rel="stylesheet"
+  >
+
   <title>JoviClass – Matéria</title>
 </head>
 
 <body>
+
   <!-- TOPO / MENU -->
   <header class="menu">
+
     <div class="menu-header">
+
       <div class="logoJovi">
-        <img src="../assets/img/logo.png" alt="Logo JoviClass" id="logo">
+        <img
+          src="../assets/img/logo.png"
+          alt="Logo JoviClass"
+          id="logo"
+        >
+
         <h2>JoviClass</h2>
       </div>
 
       <div class="menu-actions">
+
+        <!-- NOTIFICAÇÕES -->
         <div class="notif-wrapper">
-          <button class="icon-btn" id="notifBtn" aria-label="Notificações" aria-haspopup="true" aria-expanded="false">
-            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+
+          <button
+            class="icon-btn"
+            id="notifBtn"
+            aria-label="Notificações"
+            aria-haspopup="true"
+            aria-expanded="false"
+          >
+
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
               <path
                 d="M12 3a6 6 0 0 0-6 6v3.586l-1.707 1.707A1 1 0 0 0 5 16h14a1 1 0 0 0 .707-1.707L18 12.586V9a6 6 0 0 0-6-6Z"
-                stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" />
-              <path d="M9.5 19a2.5 2.5 0 0 0 5 0" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" />
+                stroke="currentColor"
+                stroke-width="1.7"
+                stroke-linejoin="round"
+              />
+
+              <path
+                d="M9.5 19a2.5 2.5 0 0 0 5 0"
+                stroke="currentColor"
+                stroke-width="1.7"
+                stroke-linecap="round"
+              />
             </svg>
-            <span class="notif-dot" id="notifDot" hidden>0</span>
+
+            <span
+              class="notif-dot"
+              id="notifDot"
+              hidden
+            >
+              0
+            </span>
+
           </button>
 
-          <div class="notif-panel" id="notifPanel" hidden>
+          <div
+            class="notif-panel"
+            id="notifPanel"
+            hidden
+          >
+
             <div class="notif-panel-header">
+
               <strong>Notificações</strong>
-              <button id="notifMarcarLidas" class="notif-marcar">Marcar todas como lidas</button>
+
+              <button
+                id="notifMarcarLidas"
+                class="notif-marcar"
+              >
+                Marcar todas como lidas
+              </button>
+
             </div>
-            <div class="notif-lista" id="notifLista">
-              <!-- preenchido via script.js -->
+
+            <div
+              class="notif-lista"
+              id="notifLista"
+            >
+              <!-- preenchido via paginaMateria.js -->
             </div>
+
           </div>
+
         </div>
 
-        <div class="hamburger" id="hamburger">
+        <!-- HAMBÚRGUER -->
+        <div
+          class="hamburger"
+          id="hamburger"
+        >
           <span></span>
           <span></span>
           <span></span>
         </div>
+
       </div>
+
     </div>
 
-    <nav class="menu-links" id="menuLinks">
-      <a href="../../index.html" class="ativo">Início</a>
-      <a href="materias.html">Matérias</a>
-      <a href="calendario.html">Calendário</a>
-      <a href="comunidade.html">Comunidades</a>
-      <a href="expansaoConhecimento.html">Expansão do Conhecimento</a>
-      <a href="camera.html">Voltar a câmera ↩</a>
+    <!-- MENU -->
+    <nav
+      class="menu-links"
+      id="menuLinks"
+    >
+
+      <a
+        href="../../index.html"
+        class="ativo"
+      >
+        Início
+      </a>
+
+      <a href="materias.html">
+        Matérias
+      </a>
+
+      <a href="calendario.html">
+        Calendário
+      </a>
+
+      <a href="comunidade.html">
+        Comunidades
+      </a>
+
+      <a href="expansaoConhecimento.html">
+        Expansão do Conhecimento
+      </a>
+
+      <a href="camera.html">
+        Voltar a câmera ↩
+      </a>
+
     </nav>
+
   </header>
 
 
+  <!-- CONTEÚDO PRINCIPAL -->
   <main class="materias">
+
+    <!-- CABEÇALHO DA MATÉRIA -->
     <section class="headerMaterias">
-      <a href="./materias.html" class="voltarBtn">← Voltar</a>
+
+      <a
+        href="./materias.html"
+        class="voltarBtn"
+      >
+        ← Voltar
+      </a>
 
       <div class="tituloBusca">
-        <h1 id="tituloPagina">Matéria</h1>
+
+        <h1 id="tituloPagina">
+          Matéria
+        </h1>
 
         <div class="campoBuscar">
-          <span class="buscaIcone" aria-hidden="true">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
-              stroke="currentColor" stroke-width="2">
-              <circle cx="11" cy="11" r="8"></circle>
-              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+
+          <span
+            class="buscaIcone"
+            aria-hidden="true"
+          >
+
+            <svg
+              width="22"
+              height="22"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <circle
+                cx="11"
+                cy="11"
+                r="8"
+              />
+
+              <line
+                x1="21"
+                y1="21"
+                x2="16.65"
+                y2="16.65"
+              />
             </svg>
+
           </span>
 
-          <input type="text" id="inputBuscar" placeholder="Buscar arquivos...">
+          <input
+            type="text"
+            id="inputBuscar"
+            placeholder="Buscar arquivos..."
+          >
 
-          <button id="btnBuscar" aria-label="Buscar">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
-              stroke="currentColor" stroke-width="2">
-              <circle cx="11" cy="11" r="8"></circle>
-              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          <button
+            id="btnBuscar"
+            type="button"
+            aria-label="Buscar"
+          >
+
+            <svg
+              width="22"
+              height="22"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <circle
+                cx="11"
+                cy="11"
+                r="8"
+              />
+
+              <line
+                x1="21"
+                y1="21"
+                x2="16.65"
+                y2="16.65"
+              />
             </svg>
+
           </button>
+
         </div>
+
       </div>
+
     </section>
 
+
+    <!-- AÇÕES RÁPIDAS -->
     <section class="acoesRapidas">
+
       <h2>Ações rápidas</h2>
 
       <div class="acoesGrid">
-        <button class="acaoCard acaoAnotacao" id="btnCriarAnotacao">
+
+        <!-- ANOTAÇÕES -->
+        <button
+          class="acaoCard acaoAnotacao"
+          id="btnCriarAnotacao"
+          type="button"
+        >
+
           <span class="acaoIcone">
-            <svg width="26" height="26" viewBox="0 0 24 24" fill="none"
-              stroke="currentColor" stroke-width="2">
-              <path d="M12 20h9"></path>
-              <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+
+            <svg
+              width="26"
+              height="26"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="M12 20h9" />
+              <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
             </svg>
+
           </span>
+
           <strong>Anotações</strong>
-          <span class="acaoDescricao">Crie e organize<br>suas ideias</span>
-          <span class="acaoSeta">→</span>
-        </button>
 
-        <button class="acaoCard" id="btnAddArquivo">
-          <span class="acaoIcone">
-            <svg width="26" height="26" viewBox="0 0 24 24" fill="none"
-              stroke="currentColor" stroke-width="2">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-              <polyline points="17 8 12 3 7 8"></polyline>
-              <line x1="12" y1="3" x2="12" y2="15"></line>
-            </svg>
+          <span class="acaoDescricao">
+            Crie e organize<br>
+            suas ideias
           </span>
+
+          <span class="acaoSeta">
+            →
+          </span>
+
+        </button>
+
+
+        <!-- ENVIAR ARQUIVO -->
+        <button
+          class="acaoCard"
+          id="btnAddArquivo"
+          type="button"
+        >
+
+          <span class="acaoIcone">
+
+            <svg
+              width="26"
+              height="26"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+              <polyline points="17 8 12 3 7 8" />
+              <line
+                x1="12"
+                y1="3"
+                x2="12"
+                y2="15"
+              />
+            </svg>
+
+          </span>
+
           <strong>Enviar arquivo</strong>
-          <span class="acaoDescricao">Envie arquivos do<br>seu dispositivo</span>
-          <span class="acaoSeta">→</span>
+
+          <span class="acaoDescricao">
+            Envie arquivos do<br>
+            seu dispositivo
+          </span>
+
+          <span class="acaoSeta">
+            →
+          </span>
+
         </button>
 
-        <button class="acaoCard" id="importarArquivoDrive" type="button">
-          <span class="acaoIcone acaoIconeLogo"><img src="../assets/img/google-drive.png" alt=""></span>
+
+        <!-- GOOGLE DRIVE -->
+        <button
+          class="acaoCard"
+          id="importarArquivoDrive"
+          type="button"
+        >
+
+          <span class="acaoIcone acaoIconeLogo">
+            <img
+              src="../assets/img/google-drive.png"
+              alt="Google Drive"
+            >
+          </span>
+
           <strong>Google Drive</strong>
-          <span class="acaoDescricao">Importe arquivos<br>do Drive</span>
-          <span class="acaoSeta">→</span>
+
+          <span class="acaoDescricao">
+            Importe arquivos<br>
+            do Drive
+          </span>
+
+          <span class="acaoSeta">
+            →
+          </span>
+
         </button>
 
-        <button class="acaoCard" id="importarPaginaNotion" type="button">
-          <span class="acaoIcone acaoIconeNotion"><img src="../assets/img/Notion-Logo.png" alt=""></span>
+
+        <!-- NOTION -->
+        <button
+          class="acaoCard"
+          id="importarPaginaNotion"
+          type="button"
+        >
+
+          <span class="acaoIcone acaoIconeNotion">
+
+            <img
+              src="../assets/img/Notion-Logo.png"
+              alt="Notion"
+            >
+
+          </span>
+
           <strong>Notion</strong>
-          <span class="acaoDescricao">Importe arquivos<br>do Notion</span>
-          <span class="acaoSeta">→</span>
+
+          <span class="acaoDescricao">
+            Importe arquivos<br>
+            do Notion
+          </span>
+
+          <span class="acaoSeta">
+            →
+          </span>
+
         </button>
+
       </div>
+
     </section>
 
-    <!-- O JS usa este botão para narrar toda a matéria -->
-    <div id="areaConteudoNarrado" class="areaConteudoNarrado">
-      <button class="btnConteudoNarrado" id="btnConteudoNarrado" type="button">
-        <span class="btnConteudoIcone">▶</span>
 
-        <span class="conteudoNarradoTexto">
-          <strong>Conteúdo narrado</strong>
-          <small>Ouça todo o conteúdo desta matéria</small>
+    <!-- CONTEÚDO NARRADO -->
+    <div
+      id="areaConteudoNarrado"
+      class="areaConteudoNarrado"
+    >
+
+      <button
+        class="btnConteudoNarrado"
+        id="btnConteudoNarrado"
+        type="button"
+      >
+
+        <span class="btnConteudoIcone">
+          ▶
         </span>
 
-        <span class="conteudoNarradoOnda" aria-hidden="true">〰〰〰</span>
-        <span class="conteudoNarradoSeta">›</span>
+        <span class="conteudoNarradoTexto">
+
+          <strong>
+            Conteúdo narrado
+          </strong>
+
+          <small>
+            Ouça todo o conteúdo desta matéria
+          </small>
+
+        </span>
+
+        <span
+          class="conteudoNarradoOnda"
+          aria-hidden="true"
+        >
+          〰〰〰
+        </span>
+
+        <span class="conteudoNarradoSeta">
+          ›
+        </span>
+
       </button>
 
-      <span id="statusConteudoNarrado" class="statusConteudoNarrado"></span>
+      <span
+        id="statusConteudoNarrado"
+        class="statusConteudoNarrado"
+      ></span>
+
     </div>
 
+
+    <!-- ARQUIVOS -->
     <section class="arquivosSecao">
+
       <div class="arquivosTitulo">
-        <h2>Arquivos e anotações</h2>
+
+        <h2>
+          Arquivos e anotações
+        </h2>
 
       </div>
 
-      <div class="listaArquivos" id="listaArquivos"></div>
-      <p class="semArquivos" id="semArquivos">Ainda não há arquivos.</p>
+      <div
+        class="listaArquivos"
+        id="listaArquivos"
+      ></div>
+
+      <p
+        class="semArquivos"
+        id="semArquivos"
+      >
+        Ainda não há arquivos.
+      </p>
+
     </section>
 
-    <!-- Área de anotações -->
-    <div class="areaAnotacao" id="areaAnotacao" style="display:none">
+
+    <!-- ÁREA DE ANOTAÇÃO -->
+    <div
+      class="areaAnotacao"
+      id="areaAnotacao"
+      style="display: none;"
+    >
+
       <div class="anotacaoHeader">
-        <h2>Nova Anotação</h2>
-        <button class="btnFecharAnotacao" id="btnFecharAnotacao">✕</button>
+
+        <h2>
+          Nova Anotação
+        </h2>
+
+        <button
+          class="btnFecharAnotacao"
+          id="btnFecharAnotacao"
+          type="button"
+        >
+          ✕
+        </button>
+
       </div>
 
-      <input type="text" id="tituloAnotacao" class="inputAnotacao"
-        placeholder="Título da anotação...">
+      <input
+        type="text"
+        id="tituloAnotacao"
+        class="inputAnotacao"
+        placeholder="Título da anotação..."
+      >
 
-      <textarea id="textoAnotacao" class="textareaAnotacao"
-        placeholder="Escreva suas anotações aqui..."></textarea>
+      <textarea
+        id="textoAnotacao"
+        class="textareaAnotacao"
+        placeholder="Escreva suas anotações aqui..."
+      ></textarea>
 
       <div class="acoesAnotacao">
-        <button class="btnSecundario" id="btnCancelarAnotacao">Cancelar</button>
-        <button class="btnPrimario" id="btnSalvarAnotacao">Salvar anotação</button>
+
+        <button
+          class="btnSecundario"
+          id="btnCancelarAnotacao"
+          type="button"
+        >
+          Cancelar
+        </button>
+
+        <button
+          class="btnPrimario"
+          id="btnSalvarAnotacao"
+          type="button"
+        >
+          Salvar anotação
+        </button>
+
       </div>
+
     </div>
+
   </main>
 
-  <!-- Input de arquivo oculto -->
-  <input type="file" id="inputArquivo" multiple accept="image/*,.pdf,.txt,.doc,.docx" style="display:none">
 
-  <!-- Dropdown de arquivo (3 pontinhos) -->
-  <div class="dropdownMenu" id="dropdownArquivo">
-    <button class="dropItem" data-acao="abrir">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+  <!-- INPUT DE ARQUIVO OCULTO -->
+  <input
+    type="file"
+    id="inputArquivo"
+    multiple
+    accept="image/*,.pdf,.txt,.doc,.docx"
+    style="display: none;"
+  >
+
+
+  <!-- DROPDOWN DE ARQUIVO -->
+  <div
+    class="dropdownMenu"
+    id="dropdownArquivo"
+  >
+
+    <!-- ABRIR -->
+    <button
+      class="dropItem"
+      data-acao="abrir"
+      type="button"
+    >
+
+      <svg
+        width="16"
+        height="16"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+      >
         <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-        <circle cx="12" cy="12" r="3" />
+        <circle
+          cx="12"
+          cy="12"
+          r="3"
+        />
       </svg>
+
       Abrir
+
     </button>
-    <button class="dropItem" data-acao="narrar">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+
+
+    <!-- NARRAR -->
+    <button
+      class="dropItem"
+      data-acao="narrar"
+      type="button"
+    >
+
+      <svg
+        width="16"
+        height="16"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+      >
         <path d="M11 5 6 9H2v6h4l5 4V5Z" />
         <path d="M15.5 8.5a5 5 0 0 1 0 7" />
         <path d="M18.5 5.5a9 9 0 0 1 0 13" />
       </svg>
+
       Narrar
+
     </button>
-    <button class="dropItem" data-acao="ia">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+
+
+    <!-- IA -->
+    <button
+      class="dropItem"
+      data-acao="ia"
+      type="button"
+    >
+
+      <svg
+        width="16"
+        height="16"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+      >
         <path d="M12 2a7 7 0 0 0-7 7c0 2.8 1.6 5.1 4 6.2V18a3 3 0 0 0 6 0v-2.8c2.4-1.1 4-3.4 4-6.2a7 7 0 0 0-7-7Z" />
         <path d="M9 21h6" />
         <path d="M10 9h4" />
         <path d="M12 7v4" />
       </svg>
+
       IA
+
     </button>
-    <button class="dropItem" data-acao="download">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+
+
+    <!-- DOWNLOAD -->
+    <button
+      class="dropItem"
+      data-acao="download"
+      type="button"
+    >
+
+      <svg
+        width="16"
+        height="16"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+      >
         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
         <polyline points="7 10 12 15 17 10" />
-        <line x1="12" y1="15" x2="12" y2="3" />
+        <line
+          x1="12"
+          y1="15"
+          x2="12"
+          y2="3"
+        />
       </svg>
+
       Baixar
+
     </button>
-    <button class="dropItem dropDanger" data-acao="excluir">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+
+
+    <!-- EXCLUIR -->
+    <button
+      class="dropItem dropDanger"
+      data-acao="excluir"
+      type="button"
+    >
+
+      <svg
+        width="16"
+        height="16"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+      >
         <polyline points="3 6 5 6 21 6" />
         <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
         <path d="M10 11v6" />
         <path d="M14 11v6" />
         <path d="M9 6V4h6v2" />
       </svg>
+
       Excluir
+
     </button>
+
   </div>
 
-  <!-- VIEWER MODAL -->
-  <div class="viewerOverlay" id="viewerOverlay">
+
+  <!-- ==========================================================
+       VIEWER MODAL
+  =========================================================== -->
+
+  <div
+    class="viewerOverlay"
+    id="viewerOverlay"
+  >
 
     <div class="viewerModal">
 
-      <!-- CABEÇALHO -->
+
+      <!-- CABEÇALHO DO VIEWER -->
       <div class="viewerHeader">
 
-        <span class="viewerTitulo" id="viewerTitulo"></span>
+        <!-- TÍTULO -->
+        <span
+          class="viewerTitulo"
+          id="viewerTitulo"
+        ></span>
 
+
+        <!-- AÇÕES DO CABEÇALHO -->
         <div class="viewerHeaderAcoes">
 
-          <button class="btnEditarViewer btnSecundario" id="btnEditarViewer" style="display:none">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+
+          <!-- BOTÃO EDITAR -->
+          <button
+            class="btnEditarViewer btnSecundario"
+            id="btnEditarViewer"
+            type="button"
+            style="display: none;"
+          >
+
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
               <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+
               <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
             </svg>
 
             Editar
+
           </button>
 
-          <button class="btnFecharViewer" id="btnFecharViewer" title="Fechar">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-              <line x1="18" y1="6" x2="6" y2="18" />
-              <line x1="6" y1="6" x2="18" y2="18" />
+
+          <!-- BOTÃO JOVIAI -->
+          <button
+            class="btnAbrirIAViewer"
+            id="btnAbrirIAViewer"
+            type="button"
+            title="Estudar com a JoviAI"
+          >
+
+            <span>
+              📚
+            </span>
+
+            JoviAI
+
+          </button>
+
+
+          <!-- BOTÃO FECHAR -->
+          <button
+            class="btnFecharViewer"
+            id="btnFecharViewer"
+            type="button"
+            title="Fechar"
+            aria-label="Fechar"
+          >
+
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+            >
+              <line
+                x1="18"
+                y1="6"
+                x2="6"
+                y2="18"
+              />
+
+              <line
+                x1="6"
+                y1="6"
+                x2="18"
+                y2="18"
+              />
             </svg>
+
           </button>
 
         </div>
@@ -267,16 +800,25 @@
       </div>
 
 
-      <!-- CONTEÚDO -->
-      <div class="viewerCorpo" id="viewerCorpo"></div>
+      <!-- CONTEÚDO DO ARQUIVO -->
+      <div
+        class="viewerCorpo"
+        id="viewerCorpo"
+      ></div>
 
 
-      <!-- =====================================================
-         IA DENTRO DA ANOTAÇÃO
-         ===================================================== -->
+      <!-- ========================================================
+           PAINEL DA JOVIAI
+      ========================================================= -->
 
-      <div class="viewerIA" id="viewerIA" style="display:none">
+      <div
+        class="viewerIA"
+        id="viewerIA"
+        style="display: none;"
+      >
 
+
+        <!-- CABEÇALHO DA IA -->
         <div class="viewerIAHeader">
 
           <div class="viewerIAInfo">
@@ -286,14 +828,19 @@
             </div>
 
             <div>
-              <strong>Estude com a JoviAI</strong>
+
+              <strong>
+                Estude com a JoviAI
+              </strong>
 
               <span>
                 Use a JoviAI para estudar esta anotação
               </span>
+
             </div>
 
           </div>
+
 
           <span class="viewerIABadge">
             JoviAI
@@ -302,33 +849,54 @@
         </div>
 
 
+        <!-- BOTÕES DA IA -->
         <div class="viewerIABotoes">
 
-          <button type="button" class="viewerIAButton" data-ia="resumo">
+          <button
+            type="button"
+            class="viewerIAButton"
+            data-ia="resumo"
+          >
             <span>📚</span>
             <span>Resumir</span>
           </button>
 
 
-          <button type="button" class="viewerIAButton" data-ia="questoes">
+          <button
+            type="button"
+            class="viewerIAButton"
+            data-ia="questoes"
+          >
             <span>📝</span>
             <span>Questões</span>
           </button>
 
 
-          <button type="button" class="viewerIAButton" data-ia="flashcards">
+          <button
+            type="button"
+            class="viewerIAButton"
+            data-ia="flashcards"
+          >
             <span>🧠</span>
             <span>Flashcards</span>
           </button>
 
 
-          <button type="button" class="viewerIAButton" data-ia="simulado">
+          <button
+            type="button"
+            class="viewerIAButton"
+            data-ia="simulado"
+          >
             <span>📋</span>
             <span>Simulado</span>
           </button>
 
 
-          <button type="button" class="viewerIAButton" data-ia="explicar">
+          <button
+            type="button"
+            class="viewerIAButton"
+            data-ia="explicar"
+          >
             <span>👨‍🏫</span>
             <span>Explicar</span>
           </button>
@@ -336,7 +904,11 @@
         </div>
 
 
-        <div id="resultadoIAViewer" class="resultadoIAViewer"></div>
+        <!-- RESULTADO DA IA -->
+        <div
+          id="resultadoIAViewer"
+          class="resultadoIAViewer"
+        ></div>
 
       </div>
 
@@ -344,75 +916,232 @@
 
   </div>
 
-  <!-- ═══════════════════════════════════════════
+
+  <!-- ==========================================================
        PLAYER DE NARRAÇÃO
-  ════════════════════════════════════════════ -->
-  <div class="playerNarracao" id="playerNarracao" aria-hidden="true">
+  =========================================================== -->
+
+  <div
+    class="playerNarracao"
+    id="playerNarracao"
+    aria-hidden="true"
+  >
+
     <div class="playerTopo">
+
       <div class="playerInfo">
-        <span class="playerIcone">▶</span>
+
+        <span class="playerIcone">
+          ▶
+        </span>
+
         <div class="playerTextos">
-          <span class="playerTitulo" id="playerTitulo">Conteúdo narrado</span>
-          <span class="playerStatus" id="playerStatus">Preparando...</span>
+
+          <span
+            class="playerTitulo"
+            id="playerTitulo"
+          >
+            Conteúdo narrado
+          </span>
+
+          <span
+            class="playerStatus"
+            id="playerStatus"
+          >
+            Preparando...
+          </span>
+
         </div>
+
       </div>
-      <button class="playerFechar" id="playerFechar" title="Fechar" aria-label="Fechar player">✕</button>
+
+
+      <button
+        class="playerFechar"
+        id="playerFechar"
+        type="button"
+        title="Fechar"
+        aria-label="Fechar player"
+      >
+        ✕
+      </button>
+
     </div>
 
-    <div class="playerBarraWrapper" id="playerBarraWrapper">
+
+    <!-- BARRA DE PROGRESSO -->
+    <div
+      class="playerBarraWrapper"
+      id="playerBarraWrapper"
+    >
+
       <div class="playerBarraFundo">
-        <div class="playerBarraProgresso" id="playerBarraProgresso"></div>
+
+        <div
+          class="playerBarraProgresso"
+          id="playerBarraProgresso"
+        ></div>
+
       </div>
+
     </div>
 
+
+    <!-- CONTROLES -->
     <div class="playerControles">
-      <span class="playerParte" id="playerParte"></span>
+
+      <span
+        class="playerParte"
+        id="playerParte"
+      ></span>
 
       <div class="playerBotoes">
-        <button class="playerBtn" id="playerVoltar" title="Parte anterior" aria-label="Voltar">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+
+        <!-- VOLTAR -->
+        <button
+          class="playerBtn"
+          id="playerVoltar"
+          type="button"
+          title="Parte anterior"
+          aria-label="Voltar"
+        >
+
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+          >
             <path d="M6 6h2v12H6zM20 6L10 12l10 6z" />
           </svg>
+
         </button>
 
-        <button class="playerBtn playerBtnPlay" id="playerPlayPause" title="Play/Pausa" aria-label="Play ou pausa">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+
+        <!-- PLAY / PAUSA -->
+        <button
+          class="playerBtn playerBtnPlay"
+          id="playerPlayPause"
+          type="button"
+          title="Play/Pausa"
+          aria-label="Play ou pausa"
+        >
+
+          <svg
+            width="22"
+            height="22"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+          >
             <path d="M8 5v14l11-7z" />
           </svg>
+
         </button>
 
-        <button class="playerBtn" id="playerAvancar" title="Próxima parte" aria-label="Avançar">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+
+        <!-- AVANÇAR -->
+        <button
+          class="playerBtn"
+          id="playerAvancar"
+          type="button"
+          title="Próxima parte"
+          aria-label="Avançar"
+        >
+
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+          >
             <path d="M16 6h2v12h-2zM4 6l10 6-10 6z" />
           </svg>
+
         </button>
+
       </div>
+
     </div>
+
   </div>
 
-  <!-- NAV INFERIOR (mobile) -->
+
+  <!-- ==========================================================
+       NAV INFERIOR - MOBILE
+  =========================================================== -->
+
   <nav class="nav-mobile">
-    <a href="../../index.html" class="ativo">
-      <span class="nav-icone">🏠︎</span>
-      <span>Início</span>
+
+    <a
+      href="../../index.html"
+      class="ativo"
+    >
+      <span class="nav-icone">
+        🏠︎
+      </span>
+
+      <span>
+        Início
+      </span>
     </a>
+
+
     <a href="../pages/materias.html">
-      <span class="nav-icone">📖</span>
-      <span>Matérias</span>
+
+      <span class="nav-icone">
+        📖
+      </span>
+
+      <span>
+        Matérias
+      </span>
+
     </a>
-    <a href="../pages/camera.html" class="nav-camera">
-      <span class="nav-icone-camera">📷</span>
+
+
+    <a
+      href="../pages/camera.html"
+      class="nav-camera"
+    >
+
+      <span class="nav-icone-camera">
+        📷
+      </span>
+
     </a>
+
+
     <a href="../pages/calendario.html">
-      <span class="nav-icone">📝</span>
-      <span>Tarefas</span>
+
+      <span class="nav-icone">
+        📝
+      </span>
+
+      <span>
+        Tarefas
+      </span>
+
     </a>
+
+
     <a href="../pages/perfil.html">
-      <span class="nav-icone">👤</span>
-      <span>Perfil</span>
+
+      <span class="nav-icone">
+        👤
+      </span>
+
+      <span>
+        Perfil
+      </span>
+
     </a>
+
   </nav>
+
+
+  <!-- JAVASCRIPT -->
   <script src="../js/paginaMateria.js"></script>
+
 </body>
 
 </html>
