@@ -1504,6 +1504,47 @@ async function processarItemNarracao(
 }
 
 // ==========================================================
+// 🤖 TEXTO DO ARQUIVO PARA A IA (com cache)
+// ==========================================================
+
+async function obterTextoArquivoParaIA(item) {
+  if (item.tipo === 'anotacao') {
+    return item.conteudo || '';
+  }
+
+  if (item.textoExtraido && item.textoExtraido.trim()) {
+    return item.textoExtraido;
+  }
+
+  const texto = await processarItemNarracao(item, 0, 1);
+  const limpo = (texto || '').trim();
+
+  if (limpo) {
+    item.textoExtraido = limpo;
+    salvar();
+  }
+
+  return limpo;
+}
+
+function arquivoSuportaIA(item) {
+  if (!item || item.tipo !== 'arquivo') {
+    return false;
+  }
+
+  const mime = item.mimeType || '';
+  const ext = (item.ext || '').toUpperCase();
+
+  return (
+    mime.startsWith('image/') ||
+    mime === 'application/pdf' ||
+    mime === 'text/plain' ||
+    ext === 'PDF' ||
+    ext === 'TXT'
+  );
+}
+
+// ==========================================================
 // 🔊 PREPARAR CONTEÚDO COMPLETO
 // ==========================================================
 
@@ -1871,10 +1912,10 @@ function renderizar() {
               );
 
             if (btnIA) {
-              btnIA.style.display =
-                item?.tipo === 'anotacao'
-                  ? ''
-                  : 'none';
+              const podeUsarIA =
+                item?.tipo === 'anotacao' || arquivoSuportaIA(item);
+
+              btnIA.style.display = podeUsarIA ? '' : 'none';
             }
 
             dropdownArquivo.classList.add(
@@ -1915,6 +1956,10 @@ async function abrirViewer(idx) {
   viewerCorpo.innerHTML =
     '';
 
+  if (viewerIA) {
+    viewerIA.style.display = 'none';
+  }
+
   // ── Anotação
   if (
     item.tipo ===
@@ -1946,17 +1991,6 @@ async function abrirViewer(idx) {
       btnAbrirIAViewer.style.display = "inline-flex";
     }
 
-    // IA começa fechada
-    const viewerIA =
-      document.getElementById(
-        'viewerIA'
-      );
-
-    if (viewerIA) {
-      viewerIA.style.display =
-        'none';
-    }
-
   } else {
     // ── Arquivo
     const registro =
@@ -1974,6 +2008,10 @@ async function abrirViewer(idx) {
       btnEditarViewer.style.display =
         'none';
 
+      if (btnAbrirIAViewer) {
+        btnAbrirIAViewer.style.display = 'none';
+      }
+
       viewerOverlay.classList.add(
         'aberto'
       );
@@ -1990,10 +2028,12 @@ async function abrirViewer(idx) {
     } = registro;
 
     btnEditarViewer.style.display =
-      'none';
+      'inline-flex';
 
     if (btnAbrirIAViewer) {
-      btnAbrirIAViewer.style.display = "none";
+      btnAbrirIAViewer.style.display = arquivoSuportaIA(item)
+        ? "inline-flex"
+        : "none";
     }
 
     if (
@@ -2124,8 +2164,9 @@ function criarLinkDownloadViewer(
 }
 
 // ==========================================================
-// 🤖 ABRIR ANOTAÇÃO COM IA
+// 🤖 DELEGAÇÃO DE EVENTOS DOS BOTÕES DA IA
 // ==========================================================
+
 if (viewerIA) {
   viewerIA.addEventListener('click', (e) => {
     const botao = e.target.closest('.viewerIAButton');
@@ -2137,15 +2178,18 @@ if (viewerIA) {
     usarIAViewer(botao.dataset.ia, item, viewerEditandoIndex);
   });
 }
-function abrirViewerComIA(idx) {
-  const item =
-    itens[idx];
 
-  if (
-    !item ||
-    item.tipo !==
-    'anotacao'
-  ) {
+// ==========================================================
+// 🤖 ABRIR VIEWER COM IA (anotação ou arquivo suportado)
+// ==========================================================
+
+function abrirViewerComIA(idx) {
+  const item = itens[idx];
+
+  const podeUsarIA =
+    item && (item.tipo === 'anotacao' || arquivoSuportaIA(item));
+
+  if (!podeUsarIA) {
     return;
   }
 
@@ -2154,39 +2198,17 @@ function abrirViewerComIA(idx) {
 
   // Depois mostra a área da IA
   setTimeout(() => {
-    const viewerIA =
-      document.getElementById(
-        'viewerIA'
-      );
+    if (!viewerIA) {
+      return;
+    }
 
     const resultadoIAViewer =
       document.getElementById(
         'resultadoIAViewer'
       );
 
-    if (!viewerIA) {
-      return;
-    }
-
     viewerIA.style.display =
       'block';
-
-    viewerIA
-      .querySelectorAll(
-        '.viewerIAButton'
-      )
-      .forEach(
-        (botao) => {
-          botao.onclick =
-            () => {
-              usarIAViewer(
-                botao.dataset.ia,
-                item,
-                idx
-              );
-            };
-        }
-      );
 
     if (resultadoIAViewer) {
       resultadoIAViewer.innerHTML = `
@@ -2204,7 +2226,7 @@ function abrirViewerComIA(idx) {
 
             <span>
               Escolha uma opção acima
-              para estudar esta anotação.
+              para estudar este conteúdo.
             </span>
 
           </div>
@@ -2229,11 +2251,6 @@ function fecharViewer() {
 
   viewerEditandoIndex =
     null;
-
-  const viewerIA =
-    document.getElementById(
-      'viewerIA'
-    );
 
   if (viewerIA) {
     viewerIA.style.display =
@@ -2277,54 +2294,207 @@ document.addEventListener(
 btnEditarViewer.addEventListener(
   'click',
   () => {
-    if (
-      viewerEditandoIndex ===
-      null
-    ) {
+    if (viewerEditandoIndex === null) {
       return;
     }
 
-    const index =
-      viewerEditandoIndex;
+    const index = viewerEditandoIndex;
+    const item = itens[index];
 
-    const item =
-      itens[index];
-
-    if (
-      !item ||
-      item.tipo !==
-      'anotacao'
-    ) {
+    if (!item) {
       return;
     }
 
-    fecharViewer();
+    // ── Anotação de texto (comportamento original)
+    if (item.tipo === 'anotacao') {
+      fecharViewer();
 
-    areaAnotacao.style.display =
-      'block';
+      areaAnotacao.style.display = 'block';
+      tituloAnotacao.value = item.nome;
+      textoAnotacao.value = item.conteudo || '';
+      areaAnotacao.dataset.editandoIndex = index;
+      tituloAnotacao.focus();
 
-    tituloAnotacao.value =
-      item.nome;
+      areaAnotacao.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start'
+      });
 
-    textoAnotacao.value =
-      item.conteudo ||
-      '';
+      return;
+    }
 
-    areaAnotacao.dataset
-      .editandoIndex =
-      index;
-
-    tituloAnotacao.focus();
-
-    areaAnotacao.scrollIntoView({
-      behavior:
-        'smooth',
-
-      block:
-        'start'
-    });
+    // ── Arquivo enviado (imagem, PDF, etc.)
+    if (item.tipo === 'arquivo') {
+      abrirEdicaoArquivo(index);
+      return;
+    }
   }
 );
+
+// ==========================================================
+// ✏️ EDITAR ARQUIVO ENVIADO (renomear / excluir imagem)
+// ==========================================================
+
+function abrirEdicaoArquivo(index) {
+  const item = itens[index];
+
+  if (!item) {
+    return;
+  }
+
+  fecharModalEdicaoArquivo();
+
+  const ehImagem =
+    (item.mimeType || '').startsWith('image/');
+
+  const rotuloExcluir = ehImagem
+    ? '🗑️ Excluir imagem'
+    : '🗑️ Excluir arquivo';
+
+  const overlay = document.createElement('div');
+  overlay.id = 'modalEdicaoArquivoOverlay';
+  overlay.className = 'modalEdicaoOverlay';
+
+  overlay.innerHTML = `
+    <div class="modalEdicaoArquivo">
+      <div class="modalEdicaoHeader">
+        <h2>Editar arquivo</h2>
+        <button id="btnFecharModalEdicaoArquivo" class="modalEdicaoFechar">✕</button>
+      </div>
+
+      <div class="modalEdicaoCampo">
+        <label for="inputNomeEdicaoArquivo">Nome</label>
+        <input
+          id="inputNomeEdicaoArquivo"
+          class="inputEdicaoNome"
+          type="text"
+          value="${escaparHTML(item.nome)}"
+        />
+      </div>
+
+      <div class="modalEdicaoRodape">
+        <button id="btnExcluirImagemEdicaoArquivo" class="btnExcluirArquivo">
+          ${rotuloExcluir}
+        </button>
+
+        <div class="modalEdicaoAcoes">
+          <button id="btnCancelarEdicaoArquivo" class="btnSecundario">
+            Cancelar
+          </button>
+          <button id="btnSalvarNomeEdicaoArquivo" class="btnPrimario">
+            💾 Salvar nome
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(overlay);
+
+  const caixa = overlay.querySelector('.modalEdicaoArquivo');
+  const inputNome = caixa.querySelector('#inputNomeEdicaoArquivo');
+
+  caixa.querySelector('#btnFecharModalEdicaoArquivo')
+    .addEventListener('click', fecharModalEdicaoArquivo);
+
+  caixa.querySelector('#btnCancelarEdicaoArquivo')
+    .addEventListener('click', fecharModalEdicaoArquivo);
+
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) {
+      fecharModalEdicaoArquivo();
+    }
+  });
+
+  // ── Salvar novo nome
+  caixa.querySelector('#btnSalvarNomeEdicaoArquivo')
+    .addEventListener('click', () => {
+      const novoNome = inputNome.value.trim();
+
+      if (!novoNome) {
+        inputNome.classList.add('erro');
+        inputNome.focus();
+        return;
+      }
+
+      inputNome.classList.remove('erro');
+
+      const itemAtual = itens[index];
+
+      if (!itemAtual) {
+        fecharModalEdicaoArquivo();
+        return;
+      }
+
+      itemAtual.nome = novoNome;
+
+      salvar();
+      renderizar();
+
+      mostrarToast('✏️ Nome atualizado!');
+
+      fecharModalEdicaoArquivo();
+
+      if (viewerOverlay.classList.contains('aberto')) {
+        abrirViewer(index);
+      }
+    });
+
+  // ── Excluir imagem/arquivo
+  caixa.querySelector('#btnExcluirImagemEdicaoArquivo')
+    .addEventListener('click', async () => {
+      const itemAtual = itens[index];
+
+      if (!itemAtual) {
+        fecharModalEdicaoArquivo();
+        return;
+      }
+
+      if (
+        !confirm(
+          `Excluir "${itemAtual.nome}"? Essa ação não pode ser desfeita.`
+        )
+      ) {
+        return;
+      }
+
+      try {
+        await dbDelete(`${materiaId}_${itemAtual.id}`);
+      } catch (erro) {
+        console.warn('Erro ao excluir arquivo do armazenamento:', erro);
+      }
+
+      if (
+        estadoPlayer.ativo &&
+        estadoPlayer.origemId === itemAtual.id
+      ) {
+        fecharPlayer();
+      }
+
+      itens.splice(index, 1);
+
+      salvar();
+      renderizar();
+
+      mostrarToast(
+        ehImagem ? '🗑️ Imagem excluída' : '🗑️ Arquivo excluído'
+      );
+
+      fecharModalEdicaoArquivo();
+      fecharViewer();
+    });
+
+  inputNome.focus();
+  inputNome.select();
+}
+
+function fecharModalEdicaoArquivo() {
+  const existente = document.getElementById('modalEdicaoArquivoOverlay');
+
+  if (existente) {
+    existente.remove();
+  }
+}
 
 // ==========================================================
 // ÍCONES SVG
@@ -2757,12 +2927,12 @@ dropdownArquivo
             dropdownAlvoIndex =
               null;
 
-            if (
-              item.tipo !==
-              'anotacao'
-            ) {
+            const podeUsarIA =
+              item.tipo === 'anotacao' || arquivoSuportaIA(item);
+
+            if (!podeUsarIA) {
               mostrarToast(
-                '⚠️ A IA está disponível apenas para anotações.'
+                '⚠️ A IA está disponível para anotações, imagens, PDFs e arquivos TXT.'
               );
 
               return;
@@ -3733,7 +3903,7 @@ function iniciarSistemaDeNotificacoes() {
   );
 }
 // ==========================================================
-// 🤖 IA DENTRO DA ANOTAÇÃO ABERTA
+// 🤖 IA DENTRO DA ANOTAÇÃO / ARQUIVO ABERTO
 // ==========================================================
 
 let ultimoResultadoIAViewer =
@@ -3822,144 +3992,127 @@ function definirBotoesIAViewer(
     );
 }
 
-async function usarIAViewer(
-  acao,
-  item,
-  index
-) {
-  const resultado =
-    document.getElementById(
-      'resultadoIAViewer'
-    );
+async function usarIAViewer(acao, item, index) {
+  const resultado = document.getElementById('resultadoIAViewer');
 
   if (!resultado) {
     return;
   }
 
-  if (
-    !item ||
-    item.tipo !==
-    'anotacao'
-  ) {
+  const podeUsarIA =
+    item && (item.tipo === 'anotacao' || arquivoSuportaIA(item));
+
+  if (!podeUsarIA) {
     resultado.innerHTML = `
       <div class="erroViewerIA">
-        ⚠️ A IA está disponível para anotações abertas.
+        ⚠️ A IA está disponível para anotações, imagens, PDFs e arquivos TXT.
       </div>
     `;
-
     return;
   }
 
-  const texto =
-    String(
-      item.conteudo ||
-      ''
-    ).trim();
-
-  if (!texto) {
-    resultado.innerHTML = `
-      <div class="erroViewerIA">
-        ⚠️ Esta anotação não possui conteúdo para analisar.
-      </div>
-    `;
-
+  if (iaViewerProcessando) {
     return;
   }
 
-  if (
-    iaViewerProcessando
-  ) {
-    return;
-  }
+  iaViewerProcessando = true;
+  definirBotoesIAViewer(true);
 
-  iaViewerProcessando =
-    true;
-
-  definirBotoesIAViewer(
-    true
-  );
+  const mensagemExtraindo =
+    item.tipo === 'arquivo'
+      ? 'A Jovi está lendo o arquivo...'
+      : 'A Jovi está analisando sua anotação...';
 
   resultado.innerHTML = `
     <div class="viewerIALoading">
+      <span class="viewerIALoadingIcon">🤖</span>
+      <span>${mensagemExtraindo}</span>
+    </div>
+  `;
 
-      <span class="viewerIALoadingIcon">
-        🤖
-      </span>
+  let texto = '';
 
-      <span>
-        A Jovi está analisando sua anotação...
-      </span>
+  try {
+    texto = await obterTextoArquivoParaIA(item);
+  } catch (erro) {
+    console.error('Erro ao extrair texto do arquivo:', erro);
 
+    iaViewerProcessando = false;
+    definirBotoesIAViewer(false);
+
+    resultado.innerHTML = `
+      <div class="erroViewerIA">
+        ⚠️ Não foi possível ler o conteúdo deste arquivo.
+      </div>
+    `;
+    return;
+  }
+
+  if (!texto) {
+    iaViewerProcessando = false;
+    definirBotoesIAViewer(false);
+
+    resultado.innerHTML = `
+      <div class="erroViewerIA">
+        ⚠️ Não encontramos texto neste ${item.tipo === 'arquivo' ? 'arquivo' : 'conteúdo'} para analisar.
+      </div>
+    `;
+    return;
+  }
+
+  resultado.innerHTML = `
+    <div class="viewerIALoading">
+      <span class="viewerIALoadingIcon">🤖</span>
+      <span>A Jovi está analisando o conteúdo...</span>
     </div>
   `;
 
   try {
-    const resposta =
-      await fetch(
-        'http://localhost:3000/ia',
-        {
-          method:
-            'POST',
-
-          headers: {
-            'Content-Type':
-              'application/json'
-          },
-
-          body:
-            JSON.stringify({
-              acao,
-              texto
-            })
-        }
-      );
+    const resposta = await fetch('http://localhost:3000/ia', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ acao, texto })
+    });
 
     let dados;
 
     try {
-      dados =
-        await resposta.json();
+      dados = await resposta.json();
     } catch {
       throw new Error(
         'O servidor retornou uma resposta que não é JSON. Verifique se o backend está rodando.'
       );
     }
 
-    if (
-      !resposta.ok
-    ) {
-      throw new Error(
-        dados.erro ||
-        'Erro no servidor.'
-      );
+    if (!resposta.ok) {
+      throw new Error(dados.erro || 'Erro no servidor.');
     }
 
-    if (
-      !dados.resultado
-    ) {
-      throw new Error(
-        'A IA não retornou nenhum resultado.'
-      );
+    if (!dados.resultado) {
+      throw new Error('A IA não retornou nenhum resultado.');
     }
 
-    ultimoResultadoIAViewer =
-      String(
-        dados.resultado
-      );
+    ultimoResultadoIAViewer = String(dados.resultado);
+
+    const botaoAdicionar =
+      item.tipo === 'anotacao'
+        ? `
+          <button
+            type="button"
+            class="btnResultadoIA btnAdicionarResultado"
+            onclick="adicionarIAAnotacaoViewer(${index})"
+          >
+            ✏️ Adicionar à anotação
+          </button>
+        `
+        : '';
 
     resultado.innerHTML = `
       <div class="resultadoIABox">
-
         <div class="resultadoIAHeader">
-
           <div class="resultadoIATitulo">
-            ✨ ${escaparHTML(
-      nomeAcaoIAViewer(
-        acao
-      )
-    )} gerado pela Jovi
+            ✨ ${escaparHTML(nomeAcaoIAViewer(acao))} gerado pela Jovi
           </div>
-
           <button
             type="button"
             class="resultadoIAFechar"
@@ -3968,25 +4121,14 @@ async function usarIAViewer(
           >
             ×
           </button>
-
         </div>
 
         <div class="resultadoIATexto">
-          ${formatarResultadoIAViewer(
-      ultimoResultadoIAViewer
-    )}
+          ${formatarResultadoIAViewer(ultimoResultadoIAViewer)}
         </div>
 
         <div class="resultadoIAAcoes">
-
-          <button
-            type="button"
-            class="btnResultadoIA btnAdicionarResultado"
-            onclick="adicionarIAAnotacaoViewer(${index})"
-          >
-            ✏️ Adicionar à anotação
-          </button>
-
+          ${botaoAdicionar}
           <button
             type="button"
             class="btnResultadoIA btnCopiarResultado"
@@ -3994,52 +4136,26 @@ async function usarIAViewer(
           >
             📋 Copiar
           </button>
-
         </div>
-
       </div>
     `;
+  } catch (erro) {
+    console.error('❌ Erro na IA:', erro);
 
-  } catch (
-  erro
-  ) {
-    console.error(
-      '❌ Erro na IA:',
-      erro
-    );
-
-    ultimoResultadoIAViewer =
-      '';
+    ultimoResultadoIAViewer = '';
 
     resultado.innerHTML = `
       <div class="erroViewerIA">
-
-        <strong>
-          ❌ Não foi possível utilizar a IA.
-        </strong>
-
+        <strong>❌ Não foi possível utilizar a IA.</strong>
         <br>
-
-        ${escaparHTML(
-      erro.message
-    )}
-
+        ${escaparHTML(erro.message)}
         <br><br>
-
-        <small>
-          Verifique se o backend está rodando em http://localhost:3000.
-        </small>
-
+        <small>Verifique se o backend está rodando em http://localhost:3000.</small>
       </div>
     `;
-
   } finally {
-    iaViewerProcessando =
-      false;
-
-    definirBotoesIAViewer(
-      false
-    );
+    iaViewerProcessando = false;
+    definirBotoesIAViewer(false);
   }
 }
 
@@ -4162,11 +4278,7 @@ function usarIA(
     viewerEditandoIndex
     ];
 
-  if (
-    item &&
-    item.tipo ===
-    'anotacao'
-  ) {
+  if (item) {
     return usarIAViewer(
       acao,
       item,
@@ -4175,7 +4287,7 @@ function usarIA(
   }
 
   mostrarToast(
-    'ℹ️ Abra uma anotação para usar a IA.'
+    'ℹ️ Abra uma anotação ou arquivo para usar a IA.'
   );
 }
 
@@ -4382,8 +4494,10 @@ async function listarPaginasNotion() {
   try {
     const resp =
       await fetch(
-        'http://localhost:3000/api/notion/paginas', { credentials: 'include'  
-      }
+        'http://localhost:3000/api/notion/paginas',
+        {
+          credentials: 'include'
+        }
       );
 
     if (!resp.ok) {
@@ -4417,9 +4531,10 @@ async function importarPaginaNotion(
   try {
     const resp =
       await fetch(
-        `http://localhost:3000/api/notion/pagina/${pageId}/texto`, {
-      credentials: 'include'   
-}
+        `http://localhost:3000/api/notion/pagina/${pageId}/texto`,
+        {
+          credentials: 'include'
+        }
       );
 
     if (!resp.ok) {
@@ -4479,13 +4594,10 @@ async function importarPaginaNotion(
 // 🗂️ MODAL DE SELEÇÃO
 // ==========================================================
 
-
-
 function abrirModalSelecao(
   titulo,
   itensParaEscolher,
   aoSelecionar
-  
 ) {
   fecharModalSelecao();
 
@@ -4608,7 +4720,7 @@ function abrirModalSelecao(
         btn.style.cssText =
           'text-align:left; width:100%;';
 
-        btn.textContent = item.nome || item.titulo || item.name; 
+        btn.textContent = item.nome || item.titulo || item.name;
 
         btn.addEventListener(
           'click',
@@ -4753,6 +4865,9 @@ async function inicializarPaginaMateria() {
 
 // ==========================================
 // BOTÃO JOVIAI DENTRO DO VIEWER
+// (mostra/esconde o painel; o clique nos
+// botões internos é tratado pela delegação
+// de eventos definida acima)
 // ==========================================
 
 if (btnAbrirIAViewer && viewerIA) {
@@ -4769,6 +4884,21 @@ if (btnAbrirIAViewer && viewerIA) {
       // Abre a área da IA
       viewerIA.style.display = "block";
 
+      const resultadoIAViewer =
+        document.getElementById('resultadoIAViewer');
+
+      if (resultadoIAViewer && !resultadoIAViewer.innerHTML.trim()) {
+        resultadoIAViewer.innerHTML = `
+          <div class="viewerIAEscolha">
+            <div class="viewerIAEscolhaIcone">✨</div>
+            <div>
+              <strong>Como posso ajudar?</strong>
+              <span>Escolha uma opção acima para estudar este conteúdo.</span>
+            </div>
+          </div>
+        `;
+      }
+
       // Rola suavemente até a IA
       setTimeout(() => {
         viewerIA.scrollIntoView({
@@ -4781,7 +4911,5 @@ if (btnAbrirIAViewer && viewerIA) {
   });
 
 }
-
-
 
 inicializarPaginaMateria();
