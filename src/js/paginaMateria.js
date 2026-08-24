@@ -4271,35 +4271,27 @@ inputBuscar.addEventListener(
 
 async function listarArquivosDrive() {
   try {
-    const resp =
-      await fetch(
-        'http://localhost:3000/api/drive/arquivos',
-        {
-          credentials:
-            'include'
-        }
-      );
+    const resp = await fetch('http://localhost:3000/api/drive/arquivos', {
+      credentials: 'include'
+    });
 
     if (!resp.ok) {
-      mostrarToast(
-        '⚠️ Conecte sua conta Google primeiro.'
-      );
-
+      mostrarToast('⚠️ Conecte sua conta Google primeiro.');
       return null;
     }
 
-    return await resp.json();
+    const arquivos = await resp.json();
+
+    // normaliza os campos vindos crus do Google
+    return arquivos.map(a => ({
+      id: a.id,
+      nome: a.name,
+      mimeType: a.mimeType
+    }));
 
   } catch (erro) {
-    console.error(
-      'Erro ao listar arquivos do Drive:',
-      erro
-    );
-
-    mostrarToast(
-      '⚠️ Não foi possível conectar ao Google Drive.'
-    );
-
+    console.error('Erro ao listar arquivos do Drive:', erro);
+    mostrarToast('⚠️ Não foi possível conectar ao Google Drive.');
     return null;
   }
 }
@@ -4390,7 +4382,8 @@ async function listarPaginasNotion() {
   try {
     const resp =
       await fetch(
-        'http://localhost:3000/api/notion/paginas'
+        'http://localhost:3000/api/notion/paginas', { credentials: 'include'  
+      }
       );
 
     if (!resp.ok) {
@@ -4424,7 +4417,9 @@ async function importarPaginaNotion(
   try {
     const resp =
       await fetch(
-        `http://localhost:3000/api/notion/pagina/${pageId}/texto`
+        `http://localhost:3000/api/notion/pagina/${pageId}/texto`, {
+      credentials: 'include'   
+}
       );
 
     if (!resp.ok) {
@@ -4484,10 +4479,13 @@ async function importarPaginaNotion(
 // 🗂️ MODAL DE SELEÇÃO
 // ==========================================================
 
+
+
 function abrirModalSelecao(
   titulo,
   itensParaEscolher,
   aoSelecionar
+  
 ) {
   fecharModalSelecao();
 
@@ -4610,9 +4608,7 @@ function abrirModalSelecao(
         btn.style.cssText =
           'text-align:left; width:100%;';
 
-        btn.textContent =
-          item.nome ||
-          item.titulo;
+        btn.textContent = item.nome || item.titulo || item.name; 
 
         btn.addEventListener(
           'click',
