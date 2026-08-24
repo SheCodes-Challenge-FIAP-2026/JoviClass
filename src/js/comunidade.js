@@ -72,7 +72,7 @@ function salvarNoStorage() {
         });
         localStorage.setItem("joviclass_comunidades", JSON.stringify(comunidadesSemFoto));
 
-        // Salvar salas (mensagens e nomes de arquivos)
+        // Salvar salas (mensagens, arquivos e status de compartilhamento)
         localStorage.setItem("joviclass_salas", JSON.stringify(dadosSalas));
 
         // Salvar fotos separadamente (são base64, podem ser grandes)
@@ -205,7 +205,7 @@ function criarComunidade() {
     // Inicializar salas da comunidade
     dadosSalas[id] = {};
     salasPadrao.forEach(s => {
-        dadosSalas[id][s.nome] = { mensagens: [], arquivos: [] };
+        dadosSalas[id][s.nome] = { mensagens: [], arquivos: [], compartilhada: false };
     });
 
     // Guardar dados da comunidade
@@ -387,7 +387,7 @@ function excluirComunidade(id) {
 
 
 /* =====================
-   MODAL CONVIDAR
+   MODAL CONVIDAR (acessado pelo menu de três pontinhos)
 ===================== */
 function abrirModalConvidar(id) {
     comunidadeAtiva = id;
@@ -460,6 +460,7 @@ function enviarConviteEmail() {
 
     salvarNoStorage();
     renderizarConvidados(comunidadeAtiva);
+    renderizarConvidadosPasta(comunidadeAtiva); // mantém a lista da pasta sincronizada
 }
 
 function renderizarConvidados(id) {
@@ -495,6 +496,125 @@ function removerConvite(id, idx) {
     dadosComunidades[id].convidados.splice(idx, 1);
     salvarNoStorage();
     renderizarConvidados(id);
+    renderizarConvidadosPasta(id); // mantém a lista da pasta sincronizada
+}
+
+
+/* =====================================================
+   COMPARTILHAR PASTA (sala de Arquivos)
+   Ao ativar o switch, mostra link da comunidade + convite
+   por e-mail direto dentro da sala de arquivos.
+===================================================== */
+function alternarCompartilharPasta(comId, checked) {
+    const dados = dadosSalas[comId] && dadosSalas[comId]["Arquivos"];
+    if (!dados) return;
+
+    dados.compartilhada = checked;
+    salvarNoStorage();
+
+    const opcoes = document.getElementById("opcoesCompartilharPasta");
+    if (opcoes) opcoes.style.display = checked ? "block" : "none";
+
+    if (checked) {
+        prepararCompartilhamentoPasta(comId);
+    }
+}
+
+function prepararCompartilhamentoPasta(comId) {
+    const link = `https://joviclass.app/convite/${comId}`;
+    const inputLink = document.getElementById("inputLinkPasta");
+    if (inputLink) inputLink.value = link;
+
+    const status = document.getElementById("statusCopiarPasta");
+    if (status) status.textContent = "";
+
+    const emailInput = document.getElementById("emailConvitePasta");
+    if (emailInput) emailInput.value = "";
+
+    renderizarConvidadosPasta(comId);
+}
+
+function copiarLinkPasta() {
+    const input = document.getElementById("inputLinkPasta");
+    if (!input) return;
+
+    input.select();
+    input.setSelectionRange(0, 99999);
+
+    try {
+        navigator.clipboard.writeText(input.value).then(() => {
+            mostrarStatusCopiarPasta("✅ Link copiado!");
+        }).catch(() => {
+            document.execCommand("copy");
+            mostrarStatusCopiarPasta("✅ Link copiado!");
+        });
+    } catch (e) {
+        document.execCommand("copy");
+        mostrarStatusCopiarPasta("✅ Link copiado!");
+    }
+}
+
+function mostrarStatusCopiarPasta(msg) {
+    const status = document.getElementById("statusCopiarPasta");
+    if (!status) return;
+    status.textContent = msg;
+    setTimeout(() => { status.textContent = ""; }, 3000);
+}
+
+function enviarConvitePastaEmail(comId) {
+    const emailInput = document.getElementById("emailConvitePasta");
+    const email = emailInput.value.trim();
+
+    if (!email || !email.includes("@")) {
+        alert("Digite um e-mail válido.");
+        return;
+    }
+
+    const com = dadosComunidades[comId];
+    if (!com) return;
+
+    if (com.convidados.find(c => c.email === email)) {
+        alert("Este e-mail já recebeu um convite.");
+        return;
+    }
+
+    com.convidados.push({ email, status: "pendente" });
+    emailInput.value = "";
+
+    salvarNoStorage();
+    renderizarConvidadosPasta(comId);
+    renderizarConvidados(comId); // mantém a lista do modal sincronizada
+}
+
+function renderizarConvidadosPasta(comId) {
+    const com = dadosComunidades[comId];
+    const container = document.getElementById("convidadosItensPasta");
+    if (!container) return; // sala de arquivos não está aberta
+
+    container.innerHTML = "";
+
+    if (!com || com.convidados.length === 0) {
+        document.getElementById("listaConvidadosPasta").style.display = "none";
+        return;
+    }
+
+    document.getElementById("listaConvidadosPasta").style.display = "block";
+
+    com.convidados.forEach((c, idx) => {
+        const item = document.createElement("div");
+        item.classList.add("convidadoItem");
+        item.innerHTML = `
+            <div class="convidadoEmail">
+                <span class="iconEmail">✉️</span>
+                <span>${c.email}</span>
+            </div>
+            <div class="convidadoAcoes">
+                <span class="badgePendente">Pendente</span>
+                <button class="btnRemoverConvite" onclick="removerConvite('${comId}', ${idx})" title="Remover convite">✕</button>
+            </div>
+        `;
+        container.appendChild(item);
+    });
 }
 
 
@@ -560,7 +680,9 @@ function abrirSala(comId, sala) {
 
     // Garantir que dados da sala existam (caso seja carregado do storage)
     if (!dadosSalas[comId]) dadosSalas[comId] = {};
-    if (!dadosSalas[comId][sala.nome]) dadosSalas[comId][sala.nome] = { mensagens: [], arquivos: [] };
+    if (!dadosSalas[comId][sala.nome]) {
+        dadosSalas[comId][sala.nome] = { mensagens: [], arquivos: [], compartilhada: false };
+    }
 
     const dados = dadosSalas[comId][sala.nome];
 
@@ -568,15 +690,62 @@ function abrirSala(comId, sala) {
         // Esconder área de chat na sala de arquivos
         document.getElementById("chatArea").style.display = "none";
 
+        const compartilhada = !!dados.compartilhada;
+
         const arquivoArea = document.getElementById("arquivoArea");
         arquivoArea.innerHTML = `
             <h2 class="tituloArquivos">📁 Arquivos</h2>
+
+            <div class="compartilharPastaBox">
+                <div class="compartilharPastaTopo">
+                    <div>
+                        <span class="compartilharPastaTitulo">Pasta compartilhada</span>
+                        <p class="compartilharPastaDesc">Permita que outras pessoas acessem esta pasta via link ou convite por e-mail.</p>
+                    </div>
+                    <label class="toggleSwitch">
+                        <input type="checkbox" id="toggleCompartilharPasta" ${compartilhada ? "checked" : ""}>
+                        <span class="toggleSlider"></span>
+                    </label>
+                </div>
+
+                <div id="opcoesCompartilharPasta" style="display:${compartilhada ? "block" : "none"}">
+                    <div class="linkConvite">
+                        <input type="text" id="inputLinkPasta" readonly>
+                        <button type="button" onclick="copiarLinkPasta()">Copiar</button>
+                    </div>
+                    <div id="statusCopiarPasta"></div>
+
+                    <div class="divisorConvidar">
+                        <span>ou convide por e-mail</span>
+                    </div>
+
+                    <div class="emailRow">
+                        <input type="email" id="emailConvitePasta" placeholder="exemplo@email.com">
+                        <button type="button" onclick="enviarConvitePastaEmail('${comId}')">Enviar convite</button>
+                    </div>
+
+                    <div id="listaConvidadosPasta">
+                        <p class="labelConvidados">Convites enviados:</p>
+                        <div id="convidadosItensPasta"></div>
+                    </div>
+                </div>
+            </div>
+
             <div class="uploadBox">
                 <label style="font-size:14px;font-weight:600;color:#333;">Enviar arquivo:</label>
                 <input type="file" id="uploadArquivo" style="margin-top:8px;">
             </div>
             <div id="listaArquivos"></div>
         `;
+
+        // Se já estava compartilhada, popular link e convidados
+        if (compartilhada) {
+            prepararCompartilhamentoPasta(comId);
+        }
+
+        document.getElementById("toggleCompartilharPasta").addEventListener("change", function () {
+            alternarCompartilharPasta(comId, this.checked);
+        });
 
         const listaArquivos = document.getElementById("listaArquivos");
         dados.arquivos.forEach(nome => {
@@ -674,11 +843,6 @@ Object.values(dadosComunidades).forEach(com => renderizarCard(com));
 // (provas, trabalhos, reuniões...)
 // =====================================================
 
-/**
- * Fonte de dados dos eventos.
- * Troque isso por dados vindos do seu backend/API quando tiver um.
- * Formato da data: "AAAA-MM-DDTHH:MM" (data e hora do evento)
- */
 const EVENTOS = [
   { id: "prova-calculo",  titulo: "Prova de Cálculo I",      tipo: "prova",    materia: "Cálculo I", data: "2024-05-25T08:00" },
   { id: "prova-fisica",   titulo: "Prova de Física II",      tipo: "prova",    materia: "Física II",  data: "2024-06-02T08:00" },
@@ -686,14 +850,12 @@ const EVENTOS = [
   { id: "reuniao-grupo",  titulo: "Reunião do grupo de estudos", tipo: "reuniao", materia: "Cálculo I", data: "2024-05-20T19:00" },
 ];
 
-// Ícone por tipo de evento
 const ICONE_TIPO = {
   prova: "📝",
   trabalho: "📁",
   reuniao: "🗓️",
 };
 
-// Em quantos milissegundos cada limiar de alerta dispara antes do evento
 const LIMIARES_ALERTA = {
   aviso7dias: 7 * 24 * 60 * 60 * 1000,
   aviso1dia: 24 * 60 * 60 * 1000,
@@ -701,7 +863,7 @@ const LIMIARES_ALERTA = {
 };
 
 const CHAVE_LIDAS = "joviclass_notif_lidas";
-const CHAVE_DISPARADAS = "joviclass_notif_disparadas"; // controla notificações do SO já enviadas
+const CHAVE_DISPARADAS = "joviclass_notif_disparadas";
 
 function carregarSet(chave) {
   try {
@@ -718,13 +880,12 @@ function salvarSet(chave, set) {
 let lidas = carregarSet(CHAVE_LIDAS);
 let disparadas = carregarSet(CHAVE_DISPARADAS);
 
-// Calcula quanto tempo falta e classifica a urgência
 function calcularStatus(evento) {
   const agora = new Date();
   const dataEvento = new Date(evento.data);
   const diffMs = dataEvento - agora;
 
-  if (diffMs <= 0) return null; // evento já passou, não notifica mais
+  if (diffMs <= 0) return null;
 
   const diffHoras = diffMs / (1000 * 60 * 60);
   const diffDias = diffHoras / 24;
@@ -741,7 +902,6 @@ function calcularStatus(evento) {
   return { diffMs, diffHoras, diffDias, urgencia, prazoTexto };
 }
 
-// Monta a lista de notificações ativas (eventos futuros dentro da janela de aviso)
 function gerarNotificacoes() {
   return EVENTOS
     .map((evento) => {
@@ -763,7 +923,6 @@ function renderizarPainel() {
   const notificacoes = gerarNotificacoes();
   const naoLidas = notificacoes.filter((n) => !lidas.has(n.id));
 
-  // badge no sino
   if (naoLidas.length > 0) {
     dot.hidden = false;
     dot.textContent = naoLidas.length > 9 ? "9+" : naoLidas.length;
@@ -789,7 +948,6 @@ function renderizarPainel() {
     `)
     .join("");
 
-  // marcar como lida ao clicar em um item
   lista.querySelectorAll(".notif-item").forEach((el) => {
     el.addEventListener("click", () => {
       lidas.add(el.dataset.id);
@@ -799,12 +957,11 @@ function renderizarPainel() {
   });
 }
 
-// Dispara notificação real do sistema operacional (se o usuário permitiu)
 function dispararNotificacaoDoNavegador(evento, status) {
   if (!("Notification" in window) || Notification.permission !== "granted") return;
 
   const chaveDisparo = `${evento.id}-${status.urgencia}`;
-  if (disparadas.has(chaveDisparo)) return; // evita repetir o mesmo alerta
+  if (disparadas.has(chaveDisparo)) return;
 
   new Notification(`${TIPO_LABEL[evento.tipo]}: ${evento.titulo}`, {
     body: `Vence ${status.prazoTexto}.`,
@@ -815,7 +972,6 @@ function dispararNotificacaoDoNavegador(evento, status) {
   salvarSet(CHAVE_DISPARADAS, disparadas);
 }
 
-// Varre os eventos e dispara alertas do navegador nos limiares certos (24h e 1h antes)
 function verificarAlertasDoSistema() {
   EVENTOS.forEach((evento) => {
     const status = calcularStatus(evento);
@@ -826,7 +982,6 @@ function verificarAlertasDoSistema() {
   });
 }
 
-// Pede permissão para notificações do sistema e liga o painel/sino
 function iniciarSistemaDeNotificacoes() {
   const notifBtn = document.getElementById("notifBtn");
   const notifPanel = document.getElementById("notifPanel");
@@ -835,7 +990,6 @@ function iniciarSistemaDeNotificacoes() {
   renderizarPainel();
   verificarAlertasDoSistema();
 
-  // pede permissão (não bloqueia o app se o usuário recusar)
   if ("Notification" in window && Notification.permission === "default") {
     Notification.requestPermission();
   }
@@ -864,7 +1018,6 @@ function iniciarSistemaDeNotificacoes() {
     });
   }
 
-  // reavalia periodicamente enquanto o app estiver aberto (a cada 5 minutos)
   setInterval(() => {
     renderizarPainel();
     verificarAlertasDoSistema();
