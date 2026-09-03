@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="../css/perfil.css">
+  <link rel="shortcut icon" href="../assets/favicon.ico" type="image/x-icon">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400..900&family=Manrope:wght@200..800&display=swap"
+    rel="stylesheet">
+  <title>Login · JoviClass</title>
+</head>
+<body>
+    
+    <!-- TOPO / MENU -->
+  <header class="menu">
+    <div class="menu-header">
+      <div class="logoJovi">
+        <img src="../assets/img/logo.png" alt="Logo JoviClass" id="logo">
+        <h2>JoviClass</h2>
+      </div>
+
+      <div class="menu-actions">
+        <div class="notif-wrapper">
+          <button class="icon-btn" id="notifBtn" aria-label="Notificações" aria-haspopup="true" aria-expanded="false">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 3a6 6 0 0 0-6 6v3.586l-1.707 1.707A1 1 0 0 0 5 16h14a1 1 0 0 0 .707-1.707L18 12.586V9a6 6 0 0 0-6-6Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+              <path d="M9.5 19a2.5 2.5 0 0 0 5 0" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+            </svg>
+            <span class="notif-dot" id="notifDot" hidden>0</span>
+          </button>
+
+          <div class="notif-panel" id="notifPanel" hidden>
+            <div class="notif-panel-header">
+              <strong>Notificações</strong>
+              <button id="notifMarcarLidas" class="notif-marcar">Marcar todas como lidas</button>
+            </div>
+            <div class="notif-lista" id="notifLista">
+              <!-- preenchido via script.js -->
+            </div>
+          </div>
+        </div>
+
+        <div class="hamburger" id="hamburger">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+      </div>
+    </div>
+
+    <nav class="menu-links" id="menuLinks">
+      <a href="./materias.html">Matérias</a>
+      <a href="./calendario.html">Calendário</a>
+      <a href="./comunidade.html">Comunidades</a>
+      <a href="./expansaoConhecimento.html">Expansão do Conhecimento</a>
+      <a href="./camera.html">Voltar a câmera ↩</a>
+    </nav>
+  </header>
+
+  <!--CONTEÚDO-->
+  <main>
+    <section class="login-container">
+        <div id="login-titulo">
+            <h1>Entre com sua conta Jovi no JoviClass.</h1>
+
+            <nav class="login-nav" id="login-nav">
+                <button type="button" id="btn-login">Já tenho conta</button>
+                <button type="button" id="btn-cadastro">Criar conta</button>
+            </nav>
+
+        </div>
+
+        <div class="div-login">
+            <div class="icons-login">
+
+            </div>
+            
+            <div class="form-login" id="area-login">
+                <p>Entrar com senha</p>
+                
+                <form action="" method="post" id="form-login">
+                    <label for="email-login">Email</label>
+                    <input type="email" id="email-login" placeholder="Digite aqui o seu email">
+                    <label for="senha-login">Senha</label>
+                    <input type="password" id="senha-login" placeholder="Digite aqui a sua senha">
+                    <a href="#">Esqueceu sua senha?</a>
+                    <button type="submit" class="btn-entrar">Entrar</button>
+                </form>
+
+            </div>
+
+            <div class="form-login" id="area-cadastro">
+                <p>Cadastrar com senha</p>
+                
+                <form action="" method="post" id="form-cadastro">
+                    <label for="email-cadastro">Email</label>
+                    <input type="email" id="email-cadastro" placeholder="Digite aqui o seu email">
+                    <label for="email-confirmar">Confirme seu email</label>
+                    <input type="email" id="email-confirmar" placeholder="Agora confirme seu email">
+                    <label for="telefone">Telefone</label>
+                    <input type="tel" id="telefone" placeholder="(00) 00000-0000">
+                    <label for="senha-cadastro">Senha</label>
+                    <input type="password" id="senha-cadastro" placeholder="Agora crie sua senha">
+                    <label for="senha-confirmar">Confirme sua senha</label>
+                    <input type="password" id="senha-confirmar" placeholder="Confirme sua senha">
+                    <input type="checkbox" id="termos-joviclass">Li e Aceito os <a href="#">Termos de Uso</a> e <a href="#">Política de Privacidade</a>
+                    <button type="submit" class="btn-entrar">Criar conta</button>
+                </form>
+
+            </div>
+            
+        </div>
+
+    </section>
+  </main>
+
+
+  <!-- NAV INFERIOR (mobile) -->
+  <nav class="nav-mobile">
+    <a href="#" class="ativo">
+      <span class="nav-icone">🏠︎</span>
+      <span>Início</span>
+    </a>
+    <a href="./src/pages/materias.html">
+      <span class="nav-icone">📖</span>
+      <span>Matérias</span>
+    </a>
+    <a href="./src/pages/camera.html" class="nav-camera">
+      <span class="nav-icone-camera">📷</span>
+    </a>
+    <a href="./src/pages/calendario.html">
+      <span class="nav-icone">📝</span>
+      <span>Tarefas</span>
+    </a>
+    <a href="./src/pages/perfil.html">
+      <span class="nav-icone">👤</span>
+      <span>Perfil</span>
+    </a>
+  </nav>
+
+</body>
+</html>
