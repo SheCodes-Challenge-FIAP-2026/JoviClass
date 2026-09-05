@@ -11,14 +11,10 @@
     <title>Comunidade</title>
 </head>
 <body>
-
-    <!-- OVERLAY FORMULÁRIO -->
     <div id="overlay"></div>
 
-    <!-- OVERLAY MENU DE OPÇÕES -->
     <div id="overlayMenu" onclick="fecharMenuOpcoes()"></div>
 
-    <!-- TOPO / MENU -->
   <header class="menu">
     <div class="menu-header">
       <div class="logoJovi">
@@ -42,7 +38,6 @@
               <button id="notifMarcarLidas" class="notif-marcar">Marcar todas como lidas</button>
             </div>
             <div class="notif-lista" id="notifLista">
-              <!-- preenchido via script.js -->
             </div>
           </div>
         </div>
@@ -63,7 +58,6 @@
       <a href="../pages/camera.html">Voltar a câmera ↩</a>
     </nav>
   </header>
-    <!-- CONTEÚDO -->
     <div id="comunidade">
 
         <div class="topoComunidade">
@@ -76,13 +70,11 @@
             </button>
         </div>
 
-        <!-- FORMULÁRIO CRIAR / EDITAR COMUNIDADE -->
         <div id="formulario">
             <form>
                 <button type="button" onclick="fecharAba()" id="fechar">✕</button>
                 <h2 id="tituloFormulario" style="margin-bottom:8px;">Nova Comunidade</h2>
 
-                <!-- FOTO -->
                 <div class="fotoPreviewBox">
                     <div class="fotoPlaceholder" id="fotoPlaceholder" onclick="document.getElementById('inputFoto').click()">
                         📷
@@ -117,14 +109,12 @@
             </form>
         </div>
 
-        <!-- MENU DE TRÊS PONTINHOS (dropdown) -->
         <div id="menuOpcoes">
             <button onclick="acaoMenuOpcoes('convidar')">🔗 Convidar membros</button>
             <button onclick="acaoMenuOpcoes('editar')">✏️ Editar comunidade</button>
             <button onclick="acaoMenuOpcoes('excluir')" class="btnExcluir">🗑️ Excluir comunidade</button>
         </div>
 
-        <!-- MODAL CONVIDAR -->
         <div id="modalConvidar">
             <div id="conteudoConvidar">
                 <button type="button" onclick="fecharModalConvidar()" id="fecharConvidar">✕</button>
@@ -155,23 +145,19 @@
             </div>
         </div>
 
-        <!-- LISTA DE COMUNIDADES -->
         <div id="listadeComunidades"></div>
 
-        <!-- PÁGINA DA COMUNIDADE -->
         <div id="paginaComunidade">
             <div class="topoPagina">
                 <div class="caminho">
                     <span onclick="voltarComunidades()" id="setaVoltar">←</span>
                     <p>Comunidades › <span id="NomeDiferenciado"></span></p>
 
-                    <!-- TRÊS PONTINHOS na página da comunidade -->
                     <button class="btnTresPontos" id="btnTresPontosPagina" onclick="abrirMenuOpcoesPagina(event)">
                         <span></span><span></span><span></span>
                     </button>
                 </div>
 
-                <!-- BANNER -->
                 <div class="bannerComunidade" id="bannerComunidade">
                     <span class="semFotoBanner" id="bannerEmoji"></span>
                 </div>
@@ -182,23 +168,19 @@
                 </div>
             </div>
 
-            <!-- SALAS -->
             <div id="salasArea">
                 <p class="tituloSalas">Salas</p>
                 <div class="listaSalas" id="listaSalas"></div>
             </div>
 
-            <!-- SALA INTERNA -->
             <div id="salaInterna">
                 <div class="topSalaInterna">
                     <span id="setaVoltarSala" onclick="voltarSalas()">←</span>
                     <span id="nomeSalaAtual"></span>
                 </div>
 
-                <!-- ARQUIVOS (só na sala de arquivos) -->
                 <div id="arquivoArea"></div>
 
-                <!-- CHAT -->
                 <div id="chatArea">
                     <h2>💬 Chat</h2>
                     <div id="mensagensChat"></div>
@@ -212,7 +194,6 @@
 
     </div>
 
-      <!-- NAV INFERIOR (mobile) -->
   <nav class="nav-mobile">
     <a href="../../index.html" class="ativo">
       <span class="nav-icone">🏠︎</span>

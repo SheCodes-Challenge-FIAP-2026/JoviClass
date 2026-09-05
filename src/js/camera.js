@@ -3,7 +3,6 @@ const botaoScanear  = document.getElementById("btn-texto");
 const resultado     = document.getElementById("saida");
 const canvas        = document.getElementById("canvas");
 
-/* ── Câmera ── */
 async function configurarCamera() {
     try {
         const midia = await navigator.mediaDevices.getUserMedia({
@@ -48,7 +47,6 @@ botaoScanear.onclick = async () => {
     }
 };
 
-/*  Dropdown das matérias  */
 const logoBtn      = document.getElementById("logoBtn");
 const dropdownMenu = document.getElementById("dropdownMenu");
 const confirmBtn   = document.getElementById("confirmBtn");
@@ -77,7 +75,6 @@ if (logoBtn && dropdownMenu) {
     });
 }
 
-/* Overlay */
 confirmBtn.addEventListener("click", () => {
     document.getElementById("overlay").classList.add("show");
 });

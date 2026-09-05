@@ -1,4 +1,3 @@
-// ===== Menu hambúrguer (mobile) =====
 const hamburger = document.getElementById("hamburger");
 const menuLinks = document.getElementById("menuLinks");
 
@@ -8,7 +7,6 @@ if (hamburger && menuLinks) {
   });
 }
 
-// ===== Overlay de confirmação =====
 const overlay = document.getElementById("overlay");
 const cancelBtn = document.getElementById("cancelBtn");
 const okBtn = document.getElementById("okBtn");
@@ -17,7 +15,6 @@ const toggleOverlay = (show) => {
   if (overlay) overlay.classList.toggle("show", show);
 };
 
-// Qualquer elemento com [data-confirm] abre o overlay ao ser clicado
 document.querySelectorAll("[data-confirm]").forEach((el) => {
   el.addEventListener("click", (e) => {
     e.preventDefault();
@@ -28,18 +25,6 @@ document.querySelectorAll("[data-confirm]").forEach((el) => {
 if (cancelBtn) cancelBtn.addEventListener("click", () => toggleOverlay(false));
 if (okBtn) okBtn.addEventListener("click", () => toggleOverlay(false));
 
-// =====================================================
-// SISTEMA DE NOTIFICAÇÕES POR PROXIMIDADE
-// (provas, trabalhos, reuniões...)
-// =====================================================
-
-/**
- * Fonte de dados dos eventos.
- * Troque isso por dados vindos do seu backend/API quando tiver um.
- * Formato da data: "AAAA-MM-DDTHH:MM" (data e hora do evento)
- * Datas ajustadas para caírem próximas de "hoje" e servirem de demonstração
- * para as notificações e para o resumo semanal por e-mail.
- */
 const EVENTOS = [
   { id: "prova-calculo",  titulo: "Prova de Cálculo I",      tipo: "prova",    materia: "Cálculo I", data: "2026-08-14T08:00" },
   { id: "reuniao-grupo",  titulo: "Reunião do grupo de estudos", tipo: "reuniao", materia: "Cálculo I", data: "2026-08-13T19:00" },
@@ -47,14 +32,12 @@ const EVENTOS = [
   { id: "prova-fisica",   titulo: "Prova de Física II",      tipo: "prova",    materia: "Física II",  data: "2026-08-20T08:00" },
 ];
 
-// Ícone por tipo de evento
 const ICONE_TIPO = {
   prova: "📝",
   trabalho: "📁",
   reuniao: "🗓️",
 };
 
-// Em quantos milissegundos cada limiar de alerta dispara antes do evento
 const LIMIARES_ALERTA = {
   aviso7dias: 7 * 24 * 60 * 60 * 1000,
   aviso1dia: 24 * 60 * 60 * 1000,
@@ -62,7 +45,7 @@ const LIMIARES_ALERTA = {
 };
 
 const CHAVE_LIDAS = "joviclass_notif_lidas";
-const CHAVE_DISPARADAS = "joviclass_notif_disparadas"; // controla notificações do SO já enviadas
+const CHAVE_DISPARADAS = "joviclass_notif_disparadas";
 
 function carregarSet(chave) {
   try {
@@ -79,14 +62,12 @@ function salvarSet(chave, set) {
 let lidas = carregarSet(CHAVE_LIDAS);
 let disparadas = carregarSet(CHAVE_DISPARADAS);
 
-// Calcula quanto tempo falta e classifica a urgência
 function calcularStatus(evento) {
   const agora = new Date();
   const dataEvento = new Date(evento.data);
   const diffMs = dataEvento - agora;
 
-  if (diffMs <= 0) return null; // evento já passou, não notifica mais
-
+  if (diffMs <= 0) return null; 
   const diffHoras = diffMs / (1000 * 60 * 60);
   const diffDias = diffHoras / 24;
 
@@ -102,7 +83,6 @@ function calcularStatus(evento) {
   return { diffMs, diffHoras, diffDias, urgencia, prazoTexto };
 }
 
-// Monta a lista de notificações ativas (eventos futuros dentro da janela de aviso)
 function gerarNotificacoes() {
   return EVENTOS
     .map((evento) => {
@@ -124,7 +104,6 @@ function renderizarPainel() {
   const notificacoes = gerarNotificacoes();
   const naoLidas = notificacoes.filter((n) => !lidas.has(n.id));
 
-  // badge no sino
   if (naoLidas.length > 0) {
     dot.hidden = false;
     dot.textContent = naoLidas.length > 9 ? "9+" : naoLidas.length;
@@ -150,7 +129,6 @@ function renderizarPainel() {
     `)
     .join("");
 
-  // marcar como lida ao clicar em um item
   lista.querySelectorAll(".notif-item").forEach((el) => {
     el.addEventListener("click", () => {
       lidas.add(el.dataset.id);
@@ -160,12 +138,11 @@ function renderizarPainel() {
   });
 }
 
-// Dispara notificação real do sistema operacional (se o usuário permitiu)
 function dispararNotificacaoDoNavegador(evento, status) {
   if (!("Notification" in window) || Notification.permission !== "granted") return;
 
   const chaveDisparo = `${evento.id}-${status.urgencia}`;
-  if (disparadas.has(chaveDisparo)) return; // evita repetir o mesmo alerta
+  if (disparadas.has(chaveDisparo)) return; 
 
   new Notification(`${TIPO_LABEL[evento.tipo]}: ${evento.titulo}`, {
     body: `Vence ${status.prazoTexto}.`,
@@ -176,7 +153,6 @@ function dispararNotificacaoDoNavegador(evento, status) {
   salvarSet(CHAVE_DISPARADAS, disparadas);
 }
 
-// Varre os eventos e dispara alertas do navegador nos limiares certos (24h e 1h antes)
 function verificarAlertasDoSistema() {
   EVENTOS.forEach((evento) => {
     const status = calcularStatus(evento);
@@ -187,7 +163,6 @@ function verificarAlertasDoSistema() {
   });
 }
 
-// Pede permissão para notificações do sistema e liga o painel/sino
 function iniciarSistemaDeNotificacoes() {
   const notifBtn = document.getElementById("notifBtn");
   const notifPanel = document.getElementById("notifPanel");
@@ -196,7 +171,6 @@ function iniciarSistemaDeNotificacoes() {
   renderizarPainel();
   verificarAlertasDoSistema();
 
-  // pede permissão (não bloqueia o app se o usuário recusar)
   if ("Notification" in window && Notification.permission === "default") {
     Notification.requestPermission();
   }
@@ -225,7 +199,6 @@ function iniciarSistemaDeNotificacoes() {
     });
   }
 
-  // reavalia periodicamente enquanto o app estiver aberto (a cada 5 minutos)
   setInterval(() => {
     renderizarPainel();
     verificarAlertasDoSistema();
@@ -234,9 +207,6 @@ function iniciarSistemaDeNotificacoes() {
 
 iniciarSistemaDeNotificacoes();
 
-// =====================================================
-// PREFERÊNCIAS DA PÁGINA DE PERFIL (toggles)
-// =====================================================
 const CHAVE_PREFERENCIAS = "joviclass_preferencias";
 
 function carregarPreferencias() {
@@ -257,7 +227,6 @@ function iniciarPreferenciasDoPerfil() {
     prefResumoEmail: document.getElementById("prefResumoEmail"),
   };
 
-  // se nenhum toggle existe nessa página, não faz nada
   if (!Object.values(toggles).some(Boolean)) return;
 
   const prefs = carregarPreferencias();
@@ -271,7 +240,6 @@ function iniciarPreferenciasDoPerfil() {
       atuais[chave] = input.checked;
       salvarPreferencias(atuais);
 
-      // liga/desliga as notificações de prazos em tempo real
       if (chave === "prefNotificacoes") {
         const dot = document.getElementById("notifDot");
         if (!input.checked && dot) dot.hidden = true;
@@ -283,9 +251,6 @@ function iniciarPreferenciasDoPerfil() {
 
 iniciarPreferenciasDoPerfil();
 
-// =====================================================
-// EDIÇÃO DE PERFIL (nome, curso, e-mail e foto)
-// =====================================================
 const CHAVE_PERFIL = "joviclass_perfil";
 
 const PERFIL_PADRAO = {
@@ -321,7 +286,7 @@ function aplicarPerfilNaTela(perfil) {
 
 function iniciarEdicaoDePerfil() {
   const modal = document.getElementById("editPerfilOverlay");
-  if (!modal) return; // só existe na página de perfil
+  if (!modal) return; 
 
   const btnEditar = document.getElementById("btnEditarPerfil");
   const form = document.getElementById("formEditarPerfil");
@@ -379,7 +344,6 @@ function iniciarEdicaoDePerfil() {
     });
   }
 
-  // troca de foto real (lê o arquivo escolhido e salva como base64)
   if (trocarFotoBtn && inputFoto) {
     trocarFotoBtn.addEventListener("click", () => inputFoto.click());
 
@@ -405,15 +369,8 @@ function iniciarEdicaoDePerfil() {
 
 iniciarEdicaoDePerfil();
 
-// =====================================================
-// SENHA E SEGURANÇA
-// =====================================================
 const CHAVE_SENHA = "joviclass_senha_hash";
 
-// Hash simples só para não guardar a senha em texto puro no localStorage.
-// Isso é um app front-end de demonstração: numa aplicação real, a troca de
-// senha precisa ser validada e persistida no servidor (com hash + salt,
-// ex. bcrypt/argon2), nunca só no navegador do usuário.
 function hashSimples(texto) {
   let hash = 0;
   for (let i = 0; i < texto.length; i++) {
@@ -508,9 +465,6 @@ function iniciarSenhaSeguranca() {
 
 iniciarSenhaSeguranca();
 
-// =====================================================
-// INSTITUIÇÃO DE ENSINO
-// =====================================================
 const CHAVE_INSTITUICAO = "joviclass_instituicao";
 
 function carregarInstituicao() {
@@ -599,10 +553,6 @@ function iniciarInstituicao() {
 
 iniciarInstituicao();
 
-// =====================================================
-// RESUMO SEMANAL POR E-MAIL
-// Conta acessos por matéria + lista provas/trabalhos/reuniões da semana
-// =====================================================
 const CHAVE_ACESSOS = "joviclass_acessos_materias";
 const CHAVE_ULTIMO_ENVIO_RESUMO = "joviclass_ultimo_envio_resumo";
 
@@ -618,17 +568,6 @@ function salvarAcessos(acessos) {
   localStorage.setItem(CHAVE_ACESSOS, JSON.stringify(acessos));
 }
 
-/**
- * API pública para registrar o acesso a uma matéria.
- * Chame isso na página de matérias/aulas sempre que o usuário abrir uma
- * matéria específica, por exemplo:
- *
- *   window.JoviClassAcessos.registrar("Cálculo I");
- *
- * Sem essa chamada em materias.html (ou onde as aulas são abertas), os
- * acessos ficam zerados no resumo — os números do resumo semanal são reais,
- * refletindo só o que for de fato registrado.
- */
 window.JoviClassAcessos = {
   registrar(nomeMateria) {
     if (!nomeMateria) return;
@@ -639,8 +578,6 @@ window.JoviClassAcessos = {
   obter: carregarAcessos,
 };
 
-// Seed inicial de demonstração (só roda se não houver nenhum acesso salvo ainda,
-// para o preview do resumo não ficar vazio na primeira vez que a página é aberta).
 function seedAcessosDemoSeNecessario() {
   const acessos = carregarAcessos();
   if (Object.keys(acessos).length > 0) return;
@@ -655,7 +592,6 @@ function seedAcessosDemoSeNecessario() {
   salvarAcessos(demo);
 }
 
-// Início (segunda) e fim (domingo) da semana atual
 function limitesDaSemanaAtual() {
   const agora = new Date();
   const diaSemana = agora.getDay(); // 0 = domingo
@@ -693,7 +629,6 @@ function formatarDataCurta(data) {
   return `${dataTexto} às ${horaTexto}`;
 }
 
-// Monta o conteúdo (assunto + corpo) do resumo semanal com dados reais do app
 function gerarResumoSemanal() {
   const acessos = carregarAcessos();
   const materiasUnicas = [...new Set([...EVENTOS.map((e) => e.materia), ...Object.keys(acessos)])].sort();
@@ -752,14 +687,6 @@ function iniciarResumoSemanal() {
 
     assuntoEl.textContent = assunto;
     corpoEl.textContent = corpoTexto;
-
-    // "Enviar" abre o cliente de e-mail do usuário (Gmail/Outlook/app padrão)
-    // já com o assunto e o corpo preenchidos, endereçado ao e-mail do perfil.
-    // Isso realmente dispara um e-mail de verdade — sem precisar de um
-    // servidor de e-mail próprio. Para envio 100% automático (sem o
-    // usuário clicar em nada, ex. toda segunda de manhã), é necessário um
-    // backend com um serviço de SMTP/API de e-mail (ex. um cron job que
-    // chame o Resend, SendGrid ou similar).
     if (btnEnviar) {
       btnEnviar.href =
         `mailto:${encodeURIComponent(perfil.email)}` +

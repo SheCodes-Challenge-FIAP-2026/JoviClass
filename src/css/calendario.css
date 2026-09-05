@@ -16,9 +16,6 @@
   --raio: 18px;
 }
 
-/* =========================
-   RESET
-========================= */
 * {
   margin: 0;
   padding: 0;
@@ -31,16 +28,14 @@ body {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  padding-bottom: 78px; /* espaço p/ nav inferior mobile */
+  padding-bottom: 78px; 
 }
 
 a {
   text-decoration: none;
 }
 
-/* =========================
-   LOGO
-========================= */
+
 .logoJovi {
   display: flex;
   align-items: center;
@@ -61,9 +56,7 @@ a {
   letter-spacing: -0.3px;
 }
 
-/* =========================
-   MENU / TOPO
-========================= */
+
 .menu {
   background: linear-gradient(135deg, var(--grad-inicio) 0%, var(--grad-fim) 100%);
   color: white;
@@ -124,9 +117,6 @@ a {
   border: 2px solid var(--grad-fim);
 }
 
-/* =========================
-   NOTIFICAÇÕES
-========================= */
 .notif-wrapper {
   position: relative;
 }
@@ -241,9 +231,7 @@ a {
 .notif-prazo.breve { color: #d97706; }
 .notif-prazo.normal { color: var(--bg-color1); }
 
-/* =========================
-   BOTÃO HAMBÚRGUER
-========================= */
+
 .hamburger {
   display: flex;
   flex-direction: column;
@@ -260,9 +248,6 @@ a {
   transition: 0.3s;
 }
 
-/* =========================
-   LINKS DO MENU
-========================= */
 .menu-links {
   display: none;
   flex-direction: column;
@@ -300,10 +285,6 @@ a {
 }
 
 
-/* =========================
-   CONTEÚDO PRINCIPAL
-========================= */
-
 .conteudo-principal {
     flex: 1;
     display: flex;
@@ -312,9 +293,6 @@ a {
     padding: 0;
 }
 
-/* =========================
-   TÍTULO DA PÁGINA
-========================= */
 
 .pagina-titulo {
     background: linear-gradient(135deg, #000fb0 0%, #1466ff 100%);
@@ -335,9 +313,6 @@ a {
     font-weight: 500;
 }
 
-/* =========================
-   CALENDÁRIO
-========================= */
 
 .calendario{
     display: grid;
@@ -424,10 +399,6 @@ a {
     height: 30px;
 }
 
-/* =========================
-   MOBILE - CALENDÁRIO
-========================= */
-
 @media (max-width: 699px){
 
     .calendario{
@@ -456,10 +427,6 @@ a {
 }
 
 
-/* =========================
-   LOGO
-========================= */
-
 .logoJovi {
   display: flex;
   align-items: center;
@@ -478,9 +445,6 @@ a {
   margin: 0;
 }
 
-/* =========================
-   MENU
-========================= */
 
 .menu {
   background: linear-gradient(180deg, #0015d6 0%, #000fb0 100%);
@@ -497,10 +461,6 @@ a {
   align-items: center;
 }
 
-/* =========================
-   BOTÃO HAMBÚRGUER
-========================= */
-
 .hamburger {
   display: none;
   flex-direction: column;
@@ -516,9 +476,6 @@ a {
   transition: 0.3s;
 }
 
-/* =========================
-   LINKS DO MENU
-========================= */
 
 .menu-links {
   display: flex;
@@ -553,9 +510,6 @@ a {
   box-shadow: 0 6px 18px rgba(20, 102, 255, 0.4);
 }
 
-/* =========================
-   MOBILE
-========================= */
 
 @media (max-width: 699px) {
 
@@ -616,9 +570,6 @@ a {
   }
 }
 
-/* =========================
-   DESKTOP
-========================= */
 
 @media (min-width: 700px) {
 
@@ -668,9 +619,6 @@ a {
   }
 }
 
-/* =========================
-   EVENTOS
-========================= */
 
 .dia-card {
     display: flex !important;
@@ -709,8 +657,7 @@ a {
     color: var(--bg-color2);
 }
 
-/* Bolinha azul indicando que existe evento do Google Agenda naquele dia */
-.bolinha-evento-google {
+.bolinha-evento {
     position: absolute;
     bottom: 8px;
     left: 50%;
@@ -721,13 +668,11 @@ a {
     background-color: var(--bg-color4);
 }
 
-.today .bolinha-evento-google {
+.today .bolinha-evento {
     background-color: #ffffff;
 }
 
-/* Lista de eventos do Google Agenda mostrada no topo do overlay ao
-   clicar num dia que tenha bolinha */
-.eventos-google-lista {
+.eventos-dia-lista {
     display: flex;
     flex-direction: column;
     gap: 8px;
@@ -736,7 +681,7 @@ a {
     margin-bottom: 4px;
 }
 
-.eventos-google-titulo {
+.eventos-dia-titulo {
     font-size: 0.72rem;
     font-weight: 800;
     color: var(--bg-color1);
@@ -744,14 +689,14 @@ a {
     letter-spacing: 0.5px;
 }
 
-.evento-google-card {
+.evento-dia-card {
     background-color: var(--lilas-suave);
     border: 1px solid var(--lilas-borda);
     border-radius: 10px;
     padding: 10px 12px;
 }
 
-.evento-google-card-topo {
+.evento-dia-card-topo {
     display: flex;
     align-items: center;
     gap: 8px;
@@ -759,7 +704,7 @@ a {
     font-size: 0.9rem;
 }
 
-.evento-google-bolinha {
+.evento-dia-bolinha {
     width: 8px;
     height: 8px;
     border-radius: 50%;
@@ -767,22 +712,20 @@ a {
     flex-shrink: 0;
 }
 
-.evento-google-hora {
+.evento-dia-hora {
     display: block;
     font-size: 0.75rem;
     color: var(--bg-color5);
     margin: 2px 0 4px 16px;
 }
 
-.evento-google-descricao {
+.evento-dia-descricao {
     font-size: 0.82rem;
     color: #333;
     margin-left: 16px;
     white-space: pre-wrap;
 }
-
-/* Aviso para conectar a conta Google, mostrado acima do calendário
-   quando a pessoa ainda não conectou (ou a sessão expirou) */
+ 
 .google-status {
     width: 100%;
     background-color: var(--lilas-suave);
@@ -802,9 +745,6 @@ a {
     font-weight: 700;
 }
 
-/* =========================
-   FORMULÁRIO EVENTO
-========================= */
 
 #formularioEvento,
 #formularioEntrega,
@@ -926,9 +866,6 @@ a {
     cursor: pointer;
 }
 
-/* =========================
-   SEÇÕES (ENTREGAS + CHECKLIST)
-========================= */
 
 .secao-entregas,
 .secao-checklist {
@@ -985,9 +922,6 @@ a {
     padding: 24px 0;
 }
 
-/* =========================
-   PRÓXIMAS ENTREGAS
-========================= */
 
 .entregas-lista {
     display: flex;
@@ -1077,9 +1011,6 @@ a {
     background-color: #fde8e8;
 }
 
-/* =========================
-   CHECKLIST
-========================= */
 
 .checklist-barra-progresso {
     margin-bottom: 18px;
@@ -1158,10 +1089,6 @@ a {
     color: #888;
 }
 
-/* =========================
-   MOBILE - SEÇÕES
-========================= */
-
 @media (max-width: 699px) {
     .dia-card {
         height: 55px;
@@ -1187,7 +1114,7 @@ a {
         padding: 12px;
     }
 
-    .eventos-google-lista {
+    .eventos-dia-lista {
         max-height: 140px;
     }
 
@@ -1204,9 +1131,7 @@ a {
   }
 }
 
-/* =========================
-   NAV INFERIOR (mobile)
-========================= */
+
 .nav-mobile {
   position: fixed;
   bottom: 0;

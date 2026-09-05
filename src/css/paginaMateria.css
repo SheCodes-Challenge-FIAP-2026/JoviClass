@@ -16,9 +16,6 @@
   --raio: 18px;
 }
 
-/* =========================
-   RESET
-========================= */
 * {
   margin: 0;
   padding: 0;
@@ -32,16 +29,13 @@ body {
   flex-direction: column;
   min-height: 100vh;
   padding-bottom: 78px;
-  /* espaço p/ nav inferior mobile */
+  overflow-x: hidden;
 }
 
 a {
   text-decoration: none;
 }
 
-/* =========================
-   LOGO
-========================= */
 .logoJovi {
   display: flex;
   align-items: center;
@@ -62,9 +56,6 @@ a {
   letter-spacing: -0.3px;
 }
 
-/* =========================
-   MENU / TOPO
-========================= */
 .menu {
   background: linear-gradient(135deg, var(--grad-inicio) 0%, var(--grad-fim) 100%);
   color: white;
@@ -125,9 +116,6 @@ a {
   border: 2px solid var(--grad-fim);
 }
 
-/* =========================
-   NOTIFICAÇÕES
-========================= */
 .notif-wrapper {
   position: relative;
 }
@@ -258,9 +246,6 @@ a {
   color: var(--bg-color1);
 }
 
-/* =========================
-   BOTÃO HAMBÚRGUER
-========================= */
 .hamburger {
   display: flex;
   flex-direction: column;
@@ -277,9 +262,6 @@ a {
   transition: 0.3s;
 }
 
-/* =========================
-   LINKS DO MENU
-========================= */
 .menu-links {
   display: none;
   flex-direction: column;
@@ -316,10 +298,6 @@ a {
   box-shadow: 0 6px 18px rgba(20, 102, 255, 0.4);
 }
 
-
-/* =========================
-    CONTEÚDO
-  ========================= */
 .materias {
   padding: 30px;
   width: 100%;
@@ -412,9 +390,6 @@ a {
   opacity: 0.7;
 }
 
-/* =========================
-   BOTÕES AÇÕES CABEÇALHO
-========================= */
 .acoesCabecalho {
   display: flex;
   align-items: center;
@@ -464,9 +439,6 @@ a {
   color: white;
 }
 
-/* =========================
-   LISTA DE ARQUIVOS
-========================= */
 .listaArquivos {
   margin-top: 30px;
   display: flex;
@@ -531,7 +503,6 @@ a {
   margin-top: 2px;
 }
 
-/* Ações do item */
 .itemAcoes {
   display: flex;
   align-items: center;
@@ -580,9 +551,6 @@ a {
   color: #333;
 }
 
-/* =========================
-   SEM ARQUIVOS
-========================= */
 .semArquivos {
   display: flex;
   justify-content: center;
@@ -592,9 +560,6 @@ a {
   font-size: 22px;
 }
 
-/* =========================
-   ÁREA DE ANOTAÇÃO
-========================= */
 .areaAnotacao {
   background: var(--bg-color2);
   border-radius: 16px;
@@ -671,11 +636,8 @@ a {
   margin-top: 16px;
 }
 
-/* =========================
-   DROPDOWN CONTEXTUAL
-========================= */
 .dropdownMenu {
-  position: absolute;
+  position: fixed;
   background: #fff;
   border-radius: 12px;
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
@@ -736,9 +698,6 @@ a {
   background: var(--lilas-suave);
 }
 
-/* =========================
-   BADGES
-========================= */
 .badgeTipo {
   font-size: 11px;
   font-weight: 700;
@@ -768,9 +727,6 @@ a {
   color: #1a8a55;
 }
 
-/* =========================
-   VIEWER MODAL
-========================= */
 .viewerOverlay {
   position: fixed;
   inset: 0;
@@ -824,7 +780,6 @@ a {
   }
 }
 
-/* Cabeçalho do viewer */
 .viewerHeader {
   display: flex;
   align-items: center;
@@ -877,7 +832,6 @@ a {
   color: #111;
 }
 
-/* Corpo do viewer */
 .viewerCorpo {
   flex: 1;
   overflow: auto;
@@ -887,7 +841,6 @@ a {
   align-items: stretch;
 }
 
-/* Texto / anotação */
 .viewerTexto {
   font-size: 15px;
   line-height: 1.75;
@@ -897,7 +850,6 @@ a {
   font-family: "Manrope", Arial, sans-serif;
 }
 
-/* PDF */
 .viewerPDF {
   width: 100%;
   height: 65vh;
@@ -906,7 +858,6 @@ a {
   background: #f8f8f8;
 }
 
-/* Imagem */
 .viewerImagem {
   max-width: 100%;
   max-height: 65vh;
@@ -916,7 +867,6 @@ a {
   display: block;
 }
 
-/* Sem dados */
 .viewerSemDados {
   display: flex;
   flex-direction: column;
@@ -930,15 +880,11 @@ a {
   line-height: 1.6;
 }
 
-/* Download fallback */
 .viewerDownload {
   align-self: center;
   margin-top: 20px;
 }
 
-/* =========================
-   TOAST
-========================= */
 .toast {
   position: fixed;
   bottom: 24px;
@@ -961,9 +907,6 @@ a {
   transform: translateY(0);
 }
 
-/* =========================
-   BOTÃO "CONTEÚDO NARRADO" (matéria inteira)
-========================= */
 .btnConteudoNarrado {
   display: flex;
   align-items: center;
@@ -1009,9 +952,6 @@ a {
   background: linear-gradient(135deg, var(--acento-menta) 0%, #1fa97a 100%);
 }
 
-/* =========================
-   PLAYER DE NARRAÇÃO
-========================= */
 .playerNarracao {
   position: fixed;
   left: 0;
@@ -1217,9 +1157,6 @@ a {
   background: #eef1ff;
 }
 
-/* =========================
-   MOBILE
-========================= */
 @media (max-width: 699px) {
   .menu {
     width: 100%;
@@ -1237,7 +1174,6 @@ a {
   .hamburger {
     display: flex;
   }
-
   .menu-links {
     display: none;
     flex-direction: column;
@@ -1245,124 +1181,96 @@ a {
     margin-top: 20px;
     gap: 10px;
   }
-
   .menu-links.active {
     display: flex;
   }
-
   .menu a {
     width: 100%;
     border-radius: 10px;
     padding: 12px;
     font-size: 15px;
   }
-
   .headerMaterias {
     flex-direction: column;
     align-items: flex-start;
     gap: 20px;
   }
-
   .tituloBusca {
   align-items: flex-start;
   flex-direction: column;
   gap: 10px;
 }
 
-
 .campoBuscar {
   width: min(100%, 320px);
 }
-
-
   .acoesCabecalho {
     width: 100%;
   }
-
   .btnPrimario,
   .btnSecundario {
     flex: 1;
     justify-content: center;
   }
-
   .arquivoNome {
     max-width: 160px;
   }
-
-  /* Esconde botão "Abrir" no mobile (card inteiro é clicável) */
   .btnAbrirArquivo {
     display: none;
   }
-
   .acoesAnotacao {
     flex-direction: column;
   }
-
   .acoesAnotacao button {
     width: 100%;
     justify-content: center;
   }
-
   .viewerOverlay {
     padding: 0;
     align-items: flex-end;
   }
-
   .viewerModal {
     border-radius: 20px 20px 0 0;
     max-height: 92vh;
     max-width: 100%;
   }
-
   .viewerPDF {
     height: 55vh;
   }
-
   .playerNarracao {
     bottom: 78px;
-    /* fica acima do nav-mobile */
     padding: 12px 16px 14px;
   }
-
   .playerTitulo,
   .playerStatus {
     max-width: 180px;
   }
 }
 
-/* =========================
-   DESKTOP
-========================= */
 @media (min-width: 700px) {
   body {
     flex-direction: row;
   }
-
   .menu {
     width: 320px;
     min-height: 100vh;
     padding: 30px 20px;
   }
-
   .menu-header {
     flex-direction: column;
     align-items: center;
     gap: 12px;
   }
-
   #logo {
     width: 110px;
   }
-
   .menu h2 {
     font-size: 1.9rem;
     text-align: center;
   }
-
   .hamburger {
     display: none;
   }
-
   .menu-links {
     display: flex !important;
     flex-direction: column;
@@ -1371,26 +1279,19 @@ a {
     margin-right: 30px;
     margin-left: 30px;
   }
-
   .menu a {
     border-radius: 12px;
     padding: 14px;
     font-size: 15px;
   }
-
   .nav-mobile {
     display: none;
   }
-
   .playerNarracao {
     left: 320px;
-    /* não invade o menu lateral fixo */
   }
 }
 
-/* =========================
-   NAV INFERIOR (mobile)
-========================= */
 .nav-mobile {
   position: fixed;
   bottom: 0;
@@ -1439,162 +1340,95 @@ a {
   font-size: 20px;
 }
 
-/* ==========================================================
-   IA DENTRO DO MODAL DA ANOTAÇÃO
-   ========================================================== */
-
 .viewerModal {
   overflow: hidden;
 }
 
-
-/* ==========================================================
-   CONTAINER IA
-   ========================================================== */
-
 .viewerIA {
   flex-shrink: 0;
-
   padding: 18px 22px 20px;
-
   background:
     linear-gradient(180deg,
       #ffffff 0%,
       #f8f9ff 100%);
-
   border-top: 1px solid #e7e9f2;
-
   box-shadow:
     0 -6px 20px rgba(30, 40, 100, 0.05);
 }
 
-
-/* ==========================================================
-   CABEÇALHO IA
-   ========================================================== */
-
 .viewerIAHeader {
   display: flex;
-
   align-items: center;
-
   justify-content: space-between;
-
   margin-bottom: 14px;
 }
 
-
 .viewerIAInfo {
   display: flex;
-
   align-items: center;
-
   gap: 11px;
 }
-
 
 .viewerIAIcone {
   width: 38px;
   height: 38px;
-
   display: flex;
-
   align-items: center;
   justify-content: center;
-
   border-radius: 11px;
-
   background:
     linear-gradient(135deg,
       #eef0ff,
       #f4ecff);
-
   font-size: 18px;
-
   box-shadow:
     0 3px 10px rgba(82, 72, 180, 0.08);
 }
 
-
 .viewerIAInfo strong {
   display: block;
-
   font-size: 13px;
-
   font-weight: 800;
-
   color: #1e2340;
 }
 
-
 .viewerIAInfo span {
   display: block;
-
   margin-top: 2px;
-
   font-size: 11px;
-
   color: #85899c;
 }
 
-
 .viewerIABadge {
   padding: 5px 9px;
-
   border-radius: 20px;
-
   background: #eef0ff;
-
   color: #3d4bc7;
-
   font-size: 10px;
-
   font-weight: 800;
-
   letter-spacing: .5px;
 }
 
-
-/* ==========================================================
-   BOTÕES IA
-   ========================================================== */
-
 .viewerIABotoes {
   display: flex;
-
   gap: 8px;
-
   flex-wrap: wrap;
 }
 
-
 .viewerIAButton {
   display: inline-flex;
-
   align-items: center;
-
   justify-content: center;
-
   gap: 6px;
-
   padding: 9px 12px;
-
   border: 1px solid #e2e4ed;
-
   border-radius: 10px;
-
   background: #ffffff;
-
   color: #34384d;
-
   font-family: "Manrope", Arial, sans-serif;
-
   font-size: 11px;
-
   font-weight: 700;
-
   cursor: pointer;
-
   transition:
     transform .18s ease,
     box-shadow .18s ease,
@@ -1602,140 +1436,90 @@ a {
     background .18s ease;
 }
 
-
 .viewerIAButton span:first-child {
   font-size: 14px;
 }
 
-
 .viewerIAButton:hover {
   transform: translateY(-1px);
-
   border-color: #bfc5ed;
-
   background: #f9faff;
-
   box-shadow:
     0 5px 14px rgba(44, 56, 150, 0.09);
 }
-
 
 .viewerIAButton:active {
   transform: translateY(0);
 }
 
-
 .viewerIAButton.carregando {
   pointer-events: none;
-
   opacity: .65;
 }
-
-
-/* ==========================================================
-   RESULTADO
-   ========================================================== */
 
 .resultadoIAViewer {
   margin-top: 13px;
 }
 
-
 .resultadoIAViewer:empty {
   display: none;
 }
 
-
 .resultadoIABox {
   border: 1px solid #e1e4f0;
-
   border-radius: 12px;
-
   background: #ffffff;
-
   overflow: hidden;
-
   animation:
     aparecerResultado .25s ease;
 }
 
-
 @keyframes aparecerResultado {
-
   from {
     opacity: 0;
-
     transform:
       translateY(5px);
   }
-
   to {
     opacity: 1;
-
     transform:
       translateY(0);
   }
-
 }
 
 
-/* ==========================================================
-   HEADER RESULTADO
-   ========================================================== */
-
 .resultadoIAHeader {
   display: flex;
-
   align-items: center;
-
   justify-content: space-between;
-
   padding: 11px 13px;
-
   background: #f7f8ff;
-
   border-bottom: 1px solid #e8eaf3;
 }
 
 
 .resultadoIATitulo {
   display: flex;
-
   align-items: center;
-
   gap: 7px;
-
   font-size: 12px;
-
   font-weight: 800;
-
   color: #292e4a;
 }
-
 
 .resultadoIAFechar {
   width: 25px;
   height: 25px;
-
   display: flex;
-
   align-items: center;
-
   justify-content: center;
-
   border: none;
-
   border-radius: 7px;
-
   background: transparent;
-
   color: #999;
-
   font-size: 17px;
-
   cursor: pointer;
 }
-
 
 .resultadoIAFechar:hover {
   background: #e9eaf2;
@@ -1743,10 +1527,6 @@ a {
   color: #444;
 }
 
-
-/* ==========================================================
-   TEXTO RESULTADO
-   ========================================================== */
 
 .resultadoIATexto {
   padding: 13px;
@@ -1761,11 +1541,6 @@ a {
 
   line-height: 1.65;
 }
-
-
-/* ==========================================================
-   AÇÕES
-   ========================================================== */
 
 .resultadoIAAcoes {
   display: flex;
@@ -1820,11 +1595,6 @@ a {
   background: #e5e6eb;
 }
 
-
-/* ==========================================================
-   LOADING
-   ========================================================== */
-
 .viewerIALoading {
   display: flex;
 
@@ -1863,10 +1633,6 @@ a {
 }
 
 
-/* ==========================================================
-   RESPONSIVO
-   ========================================================== */
-
 @media (max-width: 700px) {
 
   .viewerIA {
@@ -1894,12 +1660,6 @@ a {
 
 }
 
-
-/* ==========================================================
-   NOVO DESIGN — PÁGINA DE MATÉRIA / MOBILE
-   Mantém o header e o nav-mobile existentes.
-   ========================================================== */
-
 :root {
   --jovi-blue: #145cff;
   --jovi-dark: #071a8f;
@@ -1913,7 +1673,6 @@ a {
   --shadow-card: 0 8px 24px rgba(18, 42, 110, .07);
 }
 
-/* Fundo e largura */
 body {
   background: var(--page-bg);
 }
@@ -1925,7 +1684,6 @@ body {
   padding: 28px 24px 110px;
 }
 
-/* Cabeçalho da matéria */
 .headerMaterias {
   display: flex;
   flex-direction: column;
@@ -2005,7 +1763,6 @@ body {
   cursor: pointer;
 }
 
-/* Ações rápidas */
 .acoesRapidas {
   margin-top: 34px;
 }
@@ -2112,29 +1869,8 @@ body {
   line-height: 1;
 }
 
-/* Conteúdo narrado */
-.areaConteudoNarrado {
-  width: 100%;
-  margin: 32px 0 34px;
-  display: block;
-}
 
-.btnConteudoNarrado {
-  width: 100%;
-  min-height: 104px;
-  margin: 0;
-  padding: 18px 22px;
-  border: 0;
-  border-radius: 22px;
-  background: linear-gradient(110deg, #113ee8, #0017b9);
-  color: #fff;
-  display: flex;
-  align-items: center;
-  gap: 18px;
-  text-align: left;
-  cursor: pointer;
-  box-shadow: 0 12px 28px rgba(0, 29, 180, .18);
-}
+
 
 .btnConteudoNarrado:hover {
   transform: translateY(-2px);
@@ -2152,38 +1888,6 @@ body {
   font-size: 22px !important;
 }
 
-.conteudoNarradoTexto {
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-
-.conteudoNarradoTexto strong {
-  font-size: 21px;
-  line-height: 1.1;
-}
-
-.conteudoNarradoTexto small {
-  font-size: 14px;
-  opacity: .9;
-  line-height: 1.35;
-}
-
-.conteudoNarradoOnda {
-  margin-left: auto;
-  opacity: .45;
-  font-size: 23px;
-  letter-spacing: -5px;
-  white-space: nowrap;
-}
-
-.conteudoNarradoSeta {
-  font-size: 38px;
-  font-weight: 300;
-  line-height: 1;
-}
-
 .statusConteudoNarrado {
   display: block;
   height: 0;
@@ -2191,7 +1895,6 @@ body {
   opacity: 0;
 }
 
-/* Lista */
 .arquivosSecao {
   width: 100%;
 }
@@ -2297,21 +2000,18 @@ body {
   font-size: 22px;
 }
 
-/* Estado vazio */
 .semArquivos {
   min-height: 260px;
   height: auto;
   font-size: 16px;
 }
 
-/* Mantém o editor existente, apenas refinando */
 .areaAnotacao {
   margin-top: 24px;
   border-radius: 22px;
   box-shadow: var(--shadow-card);
 }
 
-/* Mobile */
 @media (max-width: 699px) {
   .materias {
     padding: 26px 18px 105px;
@@ -2461,7 +2161,6 @@ body {
   }
 }
 
-/* Telas muito estreitas */
 @media (max-width: 380px) {
   .materias {
     padding-left: 14px;
@@ -2481,7 +2180,6 @@ body {
   }
 }
 
-/* Desktop: mantém o header padrão, mas deixa o conteúdo moderno */
 @media (min-width: 700px) {
   .materias {
     padding: 42px 42px 110px;
@@ -2503,9 +2201,7 @@ body {
     max-width: 980px;
   }
 }
-/* =========================
-   BOTÃO "JOVIAI" (viewer header)
-========================= */
+
 .btnAbrirIAViewer {
   display: inline-flex;
   align-items: center;
@@ -2545,15 +2241,10 @@ body {
   transform: translateY(0);
 }
 
-/* Estado "aberto" — quando o painel viewerIA está visível */
 .btnAbrirIAViewer.iaAberta {
   background: linear-gradient(135deg, var(--acento-menta) 0%, #1fa97a 100%);
   box-shadow: 0 4px 12px rgba(52, 211, 153, 0.32);
 }
-
-/* ==========================================================
-   MODAL "EDITAR ARQUIVO"
-   ========================================================== */
 
 .modalEdicaoOverlay {
   position: fixed;
@@ -2689,7 +2380,7 @@ body {
     width: 100%;
   }
 
-  .modalEdicaoAcoes .btnSecundario,
+}
   .modalEdicaoAcoes .btnPrimario {
     flex: 1;
     justify-content: center;
@@ -2697,5 +2388,246 @@ body {
 
   .btnExcluirArquivo {
     text-align: center;
+
+  }
+
+.narracaoOpcoes {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.narracaoOpcoes .btnConteudoNarrado {
+  flex: 1 1 260px;
+  margin: 0;
+  max-width: none;
+  width: auto;
+}
+
+.btnConteudoNarradoSecundario {
+  background: linear-gradient(110deg, #34d399, #0f9e6e);
+  box-shadow: 0 12px 28px rgba(15, 158, 110, .22);
+}
+
+.btnConteudoNarradoSecundario:hover {
+  box-shadow: 0 16px 32px rgba(15, 158, 110, .3);
+}
+
+.btnConteudoNarradoSecundario.narrando {
+  background: linear-gradient(135deg, var(--jovi-blue, #145cff) 0%, var(--jovi-deep, #0015d6) 100%);
+}
+
+@media (max-width: 699px) {
+  .narracaoOpcoes {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .narracaoOpcoes .btnConteudoNarrado {
+    flex: 1 1 auto;
+  }
+}
+
+
+.playerControles {
+  position: relative;
+}
+
+.playerVelocidade {
+  position: absolute;
+  right: 0;
+  min-width: 42px;
+  padding: 6px 10px;
+  border: none;
+  border-radius: 10px;
+  background: var(--bg-color3, rgba(255,255,255,.18));
+  color: #fff;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: .3px;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.15s;
+}
+
+.playerVelocidade:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.05);
+}
+
+.playerVelocidade:active {
+  transform: scale(0.95);
+}
+
+.playerVelocidade:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+}
+
+@media (max-width: 699px) {
+  .playerVelocidade {
+    font-size: 11px;
+    padding: 5px 8px;
+  }
+}
+
+
+.areaConteudoNarrado {
+  width: 100%;
+  margin: 20px 0 26px;
+}
+
+.narracaoBarra {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  background: #ffffff;
+  border: 1px solid #eceffa;
+  border-radius: 14px;
+  padding: 10px 14px;
+  box-shadow: 0 4px 14px rgba(15, 36, 90, .05);
+}
+
+.narracaoBarraInfo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  color: #101b4d;
+}
+
+.narracaoBarraIcone {
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  background: #edf3ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  flex-shrink: 0;
+}
+
+.narracaoBarraTexto {
+  font-size: 13.5px;
+  font-weight: 800;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.narracaoBarraBotoes {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.narracaoBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 13px;
+  border-radius: 10px;
+  border: 1.5px solid #dde2f5;
+  background: #f8f9ff;
+  color: #33395c;
+  font-family: "Manrope", Arial, sans-serif;
+  font-weight: 700;
+  font-size: 12.5px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: transform .15s ease, box-shadow .15s ease, background .15s ease, border-color .15s ease;
+}
+
+.narracaoBtn:hover {
+  background: #eef1ff;
+  border-color: #c7cdf5;
+  transform: translateY(-1px);
+}
+
+.narracaoBtn:active {
+  transform: translateY(0);
+}
+
+.narracaoBtnIcone {
+  font-size: 13px;
+  line-height: 1;
+}
+
+.narracaoBtn.narracaoBtnAtivo {
+  background: linear-gradient(135deg, #145cff, #0015d6);
+  border-color: transparent;
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(20, 92, 255, .28);
+}
+
+.narracaoBtn.narracaoBtnAtivo.resumoAtivo {
+  background: linear-gradient(135deg, #34d399, #0f9e6e);
+  box-shadow: 0 4px 12px rgba(15, 158, 110, .28);
+}
+
+@media (max-width: 480px) {
+  .narracaoBarraTexto {
+    display: inline-block;
+    max-width: 100px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  .narracaoBarraBotoes {
+    width: 100%;
+    justify-content: stretch;
+  }
+
+  .narracaoBtn {
+    flex: 1;
+    justify-content: center;
+    padding: 9px 8px;
+  }
+}
+
+
+.playerControles {
+  position: relative;
+}
+
+.playerVelocidade {
+  position: absolute;
+  right: 0;
+  min-width: 40px;
+  padding: 6px 9px;
+  border: none;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.18);
+  color: #fff;
+  font-size: 11.5px;
+  font-weight: 800;
+  letter-spacing: .3px;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.15s;
+}
+
+.playerVelocidade:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.05);
+}
+
+.playerVelocidade:active {
+  transform: scale(0.95);
+}
+
+.playerVelocidade:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+}
+
+@media (max-width: 699px) {
+  .playerVelocidade {
+    font-size: 10.5px;
+    padding: 5px 7px;
   }
 }

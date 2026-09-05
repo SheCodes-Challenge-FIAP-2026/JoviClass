@@ -12,7 +12,6 @@
 </head>
 <body>
 
-   <!-- TOPO / MENU -->
   <header class="menu">
     <div class="menu-header">
       <div class="logoJovi">
@@ -36,7 +35,6 @@
               <button id="notifMarcarLidas" class="notif-marcar">Marcar todas como lidas</button>
             </div>
             <div class="notif-lista" id="notifLista">
-              <!-- preenchido via script.js -->
             </div>
           </div>
         </div>
@@ -58,16 +56,13 @@
     </nav>
   </header>
 
-    <!-- CONTEÚDO PRINCIPAL -->
     <div class="conteudo-principal">
 
-        <!-- TÍTULO DA PÁGINA -->
         <div class="pagina-titulo">
             <h1>Calendário</h1>
             <p>Organize seus eventos, provas e entregas</p>
         </div>
 
-        <!-- CALENDÁRIO -->
         <div class="calendario">
             <div class="google-status" id="googleStatus" hidden></div>
 
@@ -88,7 +83,6 @@
             <div class="dias" id="dias"></div>
         </div>
 
-        <!-- SEÇÃO: PRÓXIMAS ENTREGAS -->
         <section class="secao-entregas">
             <div class="secao-header">
                 <h2 class="secao-titulo">
@@ -103,7 +97,6 @@
             </div>
         </section>
 
-        <!-- SEÇÃO: CHECKLIST DE ENTREGAS -->
         <section class="secao-checklist">
             <div class="secao-header">
                 <h2 class="secao-titulo">
@@ -127,14 +120,14 @@
             </ul>
         </section>
 
-    </div><!-- /conteudo-principal -->
+    </div>
 
-    <!-- FORMULÁRIO EVENTO -->
     <div id="formularioEvento">
         <form>
             <button type="button" onclick="fecharFormularioEvento()" id="fecharEvento">X</button>
 
-            <div id="eventosGoogleFormulario" class="eventos-google-lista" hidden></div>
+          
+            <div id="eventosDoFormulario" class="eventos-dia-lista" hidden></div>
 
             <h2>Novo Evento</h2>
 
@@ -156,7 +149,6 @@
         </form>
     </div>
 
-    <!-- FORMULÁRIO PRÓXIMAS ENTREGAS -->
     <div id="formularioEntrega">
         <form>
             <button type="button" onclick="fecharFormularioEntrega()" id="fecharEntrega">X</button>
@@ -182,7 +174,6 @@
         </form>
     </div>
 
-    <!-- FORMULÁRIO CHECKLIST -->
     <div id="formularioTarefa">
         <form>
             <button type="button" onclick="fecharFormularioTarefa()" id="fecharTarefa">X</button>
@@ -197,8 +188,8 @@
             <button type="button" onclick="salvarTarefa()">Adicionar Tarefa</button>
         </form>
     </div>
-      <!-- NAV INFERIOR (mobile) -->
-  <nav class="nav-mobile">
+
+    <nav class="nav-mobile">
     <a href="../../index.html" class="ativo">
       <span class="nav-icone">🏠︎</span>
       <span>Início</span>

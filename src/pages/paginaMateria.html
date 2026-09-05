@@ -4,27 +4,20 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
   <link rel="stylesheet" href="../css/paginaMateria.css">
-
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
   <link
     href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&display=swap"
     rel="stylesheet"
   >
-
   <title>JoviClass – Matéria</title>
 </head>
 
 <body>
 
-  <!-- TOPO / MENU -->
   <header class="menu">
-
     <div class="menu-header">
-
       <div class="logoJovi">
         <img
           src="../assets/img/logo.png"
@@ -37,7 +30,6 @@
 
       <div class="menu-actions">
 
-        <!-- NOTIFICAÇÕES -->
         <div class="notif-wrapper">
 
           <button
@@ -101,14 +93,12 @@
               class="notif-lista"
               id="notifLista"
             >
-              <!-- preenchido via paginaMateria.js -->
             </div>
 
           </div>
 
         </div>
 
-        <!-- HAMBÚRGUER -->
         <div
           class="hamburger"
           id="hamburger"
@@ -122,7 +112,6 @@
 
     </div>
 
-    <!-- MENU -->
     <nav
       class="menu-links"
       id="menuLinks"
@@ -159,17 +148,11 @@
 
   </header>
 
-
-  <!-- CONTEÚDO PRINCIPAL -->
   <main class="materias">
 
-    <!-- CABEÇALHO DA MATÉRIA -->
     <section class="headerMaterias">
 
-      <a
-        href="./materias.html"
-        class="voltarBtn"
-      >
+      <a href="materias.html" class="voltarBtn">
         ← Voltar
       </a>
 
@@ -252,15 +235,12 @@
 
     </section>
 
-
-    <!-- AÇÕES RÁPIDAS -->
     <section class="acoesRapidas">
 
       <h2>Ações rápidas</h2>
 
       <div class="acoesGrid">
 
-        <!-- ANOTAÇÕES -->
         <button
           class="acaoCard acaoAnotacao"
           id="btnCriarAnotacao"
@@ -296,8 +276,6 @@
 
         </button>
 
-
-        <!-- ENVIAR ARQUIVO -->
         <button
           class="acaoCard"
           id="btnAddArquivo"
@@ -339,8 +317,6 @@
 
         </button>
 
-
-        <!-- GOOGLE DRIVE -->
         <button
           class="acaoCard"
           id="importarArquivoDrive"
@@ -366,9 +342,6 @@
           </span>
 
         </button>
-
-
-        <!-- NOTION -->
         <button
           class="acaoCard"
           id="importarPaginaNotion"
@@ -401,47 +374,65 @@
 
     </section>
 
-
-    <!-- CONTEÚDO NARRADO -->
     <div
       id="areaConteudoNarrado"
       class="areaConteudoNarrado"
     >
 
-      <button
-        class="btnConteudoNarrado"
-        id="btnConteudoNarrado"
-        type="button"
+      <div
+        class="narracaoBarra"
+        id="narracaoBarra"
       >
 
-        <span class="btnConteudoIcone">
-          ▶
-        </span>
+        <div class="narracaoBarraInfo">
 
-        <span class="conteudoNarradoTexto">
+          <span class="narracaoBarraIcone">
+            🎧
+          </span>
 
-          <strong>
-            Conteúdo narrado
-          </strong>
+          <span class="narracaoBarraTexto">
+            Gerar narração
+          </span>
 
-          <small>
-            Ouça todo o conteúdo desta matéria
-          </small>
+        </div>
 
-        </span>
+        <div class="narracaoBarraBotoes">
 
-        <span
-          class="conteudoNarradoOnda"
-          aria-hidden="true"
-        >
-          〰〰〰
-        </span>
+          <button
+            class="narracaoBtn"
+            id="btnConteudoNarradoCompleto"
+            type="button"
+          >
 
-        <span class="conteudoNarradoSeta">
-          ›
-        </span>
+            <span class="narracaoBtnIcone">
+              ▶
+            </span>
 
-      </button>
+            <span class="narracaoBtnTexto">
+              Completo
+            </span>
+
+          </button>
+
+          <button
+            class="narracaoBtn"
+            id="btnConteudoNarradoResumo"
+            type="button"
+          >
+
+            <span class="narracaoBtnIcone">
+              ▶
+            </span>
+
+            <span class="narracaoBtnTexto">
+              Resumo
+            </span>
+
+          </button>
+
+        </div>
+
+      </div>
 
       <span
         id="statusConteudoNarrado"
@@ -450,8 +441,6 @@
 
     </div>
 
-
-    <!-- ARQUIVOS -->
     <section class="arquivosSecao">
 
       <div class="arquivosTitulo">
@@ -477,7 +466,6 @@
     </section>
 
 
-    <!-- ÁREA DE ANOTAÇÃO -->
     <div
       class="areaAnotacao"
       id="areaAnotacao"
@@ -537,8 +525,6 @@
 
   </main>
 
-
-  <!-- INPUT DE ARQUIVO OCULTO -->
   <input
     type="file"
     id="inputArquivo"
@@ -547,14 +533,11 @@
     style="display: none;"
   >
 
-
-  <!-- DROPDOWN DE ARQUIVO -->
   <div
     class="dropdownMenu"
     id="dropdownArquivo"
   >
 
-    <!-- ABRIR -->
     <button
       class="dropItem"
       data-acao="abrir"
@@ -581,11 +564,9 @@
 
     </button>
 
-
-    <!-- NARRAR -->
     <button
       class="dropItem"
-      data-acao="narrar"
+      data-acao="narrar-completo"
       type="button"
     >
 
@@ -602,12 +583,32 @@
         <path d="M18.5 5.5a9 9 0 0 1 0 13" />
       </svg>
 
-      Narrar
+      Narrar completo
 
     </button>
 
+    <button
+      class="dropItem"
+      data-acao="narrar-resumo"
+      type="button"
+    >
 
-    <!-- IA -->
+      <svg
+        width="16"
+        height="16"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+      >
+        <line x1="4" y1="6" x2="20" y2="6" />
+        <line x1="4" y1="12" x2="14" y2="12" />
+        <line x1="4" y1="18" x2="10" y2="18" />
+      </svg>
+
+      Narrar resumo
+
+    </button>
     <button
       class="dropItem"
       data-acao="ia"
@@ -632,8 +633,6 @@
 
     </button>
 
-
-    <!-- DOWNLOAD -->
     <button
       class="dropItem"
       data-acao="download"
@@ -662,8 +661,6 @@
 
     </button>
 
-
-    <!-- EXCLUIR -->
     <button
       class="dropItem dropDanger"
       data-acao="excluir"
@@ -691,11 +688,6 @@
 
   </div>
 
-
-  <!-- ==========================================================
-       VIEWER MODAL
-  =========================================================== -->
-
   <div
     class="viewerOverlay"
     id="viewerOverlay"
@@ -704,21 +696,16 @@
     <div class="viewerModal">
 
 
-      <!-- CABEÇALHO DO VIEWER -->
       <div class="viewerHeader">
 
-        <!-- TÍTULO -->
         <span
           class="viewerTitulo"
           id="viewerTitulo"
         ></span>
 
-
-        <!-- AÇÕES DO CABEÇALHO -->
         <div class="viewerHeaderAcoes">
 
 
-          <!-- BOTÃO EDITAR -->
           <button
             class="btnEditarViewer btnSecundario"
             id="btnEditarViewer"
@@ -738,30 +725,19 @@
 
               <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
             </svg>
-
             Editar
-
           </button>
 
-
-          <!-- BOTÃO JOVIAI -->
           <button
             class="btnAbrirIAViewer"
             id="btnAbrirIAViewer"
             type="button"
             title="Estudar com a JoviAI"
           >
-
-            <span>
-              📚
-            </span>
-
             JoviAI
 
           </button>
 
-
-          <!-- BOTÃO FECHAR -->
           <button
             class="btnFecharViewer"
             id="btnFecharViewer"
@@ -799,17 +775,10 @@
 
       </div>
 
-
-      <!-- CONTEÚDO DO ARQUIVO -->
       <div
         class="viewerCorpo"
         id="viewerCorpo"
       ></div>
-
-
-      <!-- ========================================================
-           PAINEL DA JOVIAI
-      ========================================================= -->
 
       <div
         class="viewerIA"
@@ -817,14 +786,12 @@
         style="display: none;"
       >
 
-
-        <!-- CABEÇALHO DA IA -->
-        <div class="viewerIAHeader">
+      <div class="viewerIAHeader">
 
           <div class="viewerIAInfo">
 
             <div class="viewerIAIcone">
-              ✨
+              <img src="../assets/img/logo.png" alt="" style="width: 40px; height: 40px;">
             </div>
 
             <div>
@@ -848,8 +815,6 @@
 
         </div>
 
-
-        <!-- BOTÕES DA IA -->
         <div class="viewerIABotoes">
 
           <button
@@ -902,9 +867,6 @@
           </button>
 
         </div>
-
-
-        <!-- RESULTADO DA IA -->
         <div
           id="resultadoIAViewer"
           class="resultadoIAViewer"
@@ -915,11 +877,6 @@
     </div>
 
   </div>
-
-
-  <!-- ==========================================================
-       PLAYER DE NARRAÇÃO
-  =========================================================== -->
 
   <div
     class="playerNarracao"
@@ -968,8 +925,6 @@
 
     </div>
 
-
-    <!-- BARRA DE PROGRESSO -->
     <div
       class="playerBarraWrapper"
       id="playerBarraWrapper"
@@ -986,8 +941,6 @@
 
     </div>
 
-
-    <!-- CONTROLES -->
     <div class="playerControles">
 
       <span
@@ -997,7 +950,6 @@
 
       <div class="playerBotoes">
 
-        <!-- VOLTAR -->
         <button
           class="playerBtn"
           id="playerVoltar"
@@ -1017,8 +969,6 @@
 
         </button>
 
-
-        <!-- PLAY / PAUSA -->
         <button
           class="playerBtn playerBtnPlay"
           id="playerPlayPause"
@@ -1038,8 +988,6 @@
 
         </button>
 
-
-        <!-- AVANÇAR -->
         <button
           class="playerBtn"
           id="playerAvancar"
@@ -1061,14 +1009,19 @@
 
       </div>
 
+      <button
+        class="playerVelocidade"
+        id="playerVelocidade"
+        type="button"
+        title="Velocidade de reprodução"
+        aria-label="Alterar velocidade de reprodução"
+      >
+        1x
+      </button>
+
     </div>
 
   </div>
-
-
-  <!-- ==========================================================
-       NAV INFERIOR - MOBILE
-  =========================================================== -->
 
   <nav class="nav-mobile">
 
@@ -1098,48 +1051,37 @@
 
     </a>
 
-
     <a
       href="../pages/camera.html"
       class="nav-camera"
     >
-
       <span class="nav-icone-camera">
         📷
       </span>
-
     </a>
 
 
     <a href="../pages/calendario.html">
-
       <span class="nav-icone">
         📝
-      </span>
-
+      <span>
       <span>
         Tarefas
       </span>
-
     </a>
 
 
     <a href="../pages/perfil.html">
-
       <span class="nav-icone">
         👤
       </span>
-
       <span>
         Perfil
       </span>
-
     </a>
 
   </nav>
 
-
-  <!-- JAVASCRIPT -->
   <script src="../js/paginaMateria.js"></script>
 
 </body>

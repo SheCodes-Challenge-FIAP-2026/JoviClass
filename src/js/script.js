@@ -1,4 +1,3 @@
-// ===== Menu hambúrguer (mobile) =====
 const hamburger = document.getElementById("hamburger");
 const menuLinks = document.getElementById("menuLinks");
 
@@ -8,7 +7,6 @@ if (hamburger && menuLinks) {
   });
 }
 
-// ===== Overlay de confirmação =====
 const overlay = document.getElementById("overlay");
 const cancelBtn = document.getElementById("cancelBtn");
 const okBtn = document.getElementById("okBtn");
@@ -17,7 +15,6 @@ const toggleOverlay = (show) => {
   if (overlay) overlay.classList.toggle("show", show);
 };
 
-// Qualquer elemento com [data-confirm] abre o overlay ao ser clicado
 document.querySelectorAll("[data-confirm]").forEach((el) => {
   el.addEventListener("click", (e) => {
     e.preventDefault();
@@ -28,16 +25,6 @@ document.querySelectorAll("[data-confirm]").forEach((el) => {
 if (cancelBtn) cancelBtn.addEventListener("click", () => toggleOverlay(false));
 if (okBtn) okBtn.addEventListener("click", () => toggleOverlay(false));
 
-// =====================================================
-// SISTEMA DE NOTIFICAÇÕES POR PROXIMIDADE
-// (provas, trabalhos, reuniões...)
-// =====================================================
-
-/**
- * Fonte de dados dos eventos.
- * Troque isso por dados vindos do seu backend/API quando tiver um.
- * Formato da data: "AAAA-MM-DDTHH:MM" (data e hora do evento)
- */
 const EVENTOS = [
   { id: "prova-calculo",  titulo: "Prova de Cálculo I",      tipo: "prova",    materia: "Cálculo I", data: "2024-05-25T08:00" },
   { id: "prova-fisica",   titulo: "Prova de Física II",      tipo: "prova",    materia: "Física II",  data: "2024-06-02T08:00" },
@@ -45,14 +32,12 @@ const EVENTOS = [
   { id: "reuniao-grupo",  titulo: "Reunião do grupo de estudos", tipo: "reuniao", materia: "Cálculo I", data: "2024-05-20T19:00" },
 ];
 
-// Ícone por tipo de evento
 const ICONE_TIPO = {
   prova: "📝",
   trabalho: "📁",
   reuniao: "🗓️",
 };
 
-// Em quantos milissegundos cada limiar de alerta dispara antes do evento
 const LIMIARES_ALERTA = {
   aviso7dias: 7 * 24 * 60 * 60 * 1000,
   aviso1dia: 24 * 60 * 60 * 1000,
@@ -60,7 +45,7 @@ const LIMIARES_ALERTA = {
 };
 
 const CHAVE_LIDAS = "joviclass_notif_lidas";
-const CHAVE_DISPARADAS = "joviclass_notif_disparadas"; // controla notificações do SO já enviadas
+const CHAVE_DISPARADAS = "joviclass_notif_disparadas";
 
 function carregarSet(chave) {
   try {
@@ -77,14 +62,12 @@ function salvarSet(chave, set) {
 let lidas = carregarSet(CHAVE_LIDAS);
 let disparadas = carregarSet(CHAVE_DISPARADAS);
 
-// Calcula quanto tempo falta e classifica a urgência
 function calcularStatus(evento) {
   const agora = new Date();
   const dataEvento = new Date(evento.data);
   const diffMs = dataEvento - agora;
 
-  if (diffMs <= 0) return null; // evento já passou, não notifica mais
-
+  if (diffMs <= 0) return null;
   const diffHoras = diffMs / (1000 * 60 * 60);
   const diffDias = diffHoras / 24;
 
@@ -100,7 +83,6 @@ function calcularStatus(evento) {
   return { diffMs, diffHoras, diffDias, urgencia, prazoTexto };
 }
 
-// Monta a lista de notificações ativas (eventos futuros dentro da janela de aviso)
 function gerarNotificacoes() {
   return EVENTOS
     .map((evento) => {
@@ -122,7 +104,6 @@ function renderizarPainel() {
   const notificacoes = gerarNotificacoes();
   const naoLidas = notificacoes.filter((n) => !lidas.has(n.id));
 
-  // badge no sino
   if (naoLidas.length > 0) {
     dot.hidden = false;
     dot.textContent = naoLidas.length > 9 ? "9+" : naoLidas.length;
@@ -148,7 +129,6 @@ function renderizarPainel() {
     `)
     .join("");
 
-  // marcar como lida ao clicar em um item
   lista.querySelectorAll(".notif-item").forEach((el) => {
     el.addEventListener("click", () => {
       lidas.add(el.dataset.id);
@@ -158,13 +138,11 @@ function renderizarPainel() {
   });
 }
 
-// Dispara notificação real do sistema operacional (se o usuário permitiu)
 function dispararNotificacaoDoNavegador(evento, status) {
   if (!("Notification" in window) || Notification.permission !== "granted") return;
 
   const chaveDisparo = `${evento.id}-${status.urgencia}`;
-  if (disparadas.has(chaveDisparo)) return; // evita repetir o mesmo alerta
-
+  if (disparadas.has(chaveDisparo)) return; 
   new Notification(`${TIPO_LABEL[evento.tipo]}: ${evento.titulo}`, {
     body: `Vence ${status.prazoTexto}.`,
     icon: "./src/assets/img/logo.png",
@@ -174,7 +152,6 @@ function dispararNotificacaoDoNavegador(evento, status) {
   salvarSet(CHAVE_DISPARADAS, disparadas);
 }
 
-// Varre os eventos e dispara alertas do navegador nos limiares certos (24h e 1h antes)
 function verificarAlertasDoSistema() {
   EVENTOS.forEach((evento) => {
     const status = calcularStatus(evento);
@@ -185,7 +162,6 @@ function verificarAlertasDoSistema() {
   });
 }
 
-// Pede permissão para notificações do sistema e liga o painel/sino
 function iniciarSistemaDeNotificacoes() {
   const notifBtn = document.getElementById("notifBtn");
   const notifPanel = document.getElementById("notifPanel");
@@ -194,7 +170,6 @@ function iniciarSistemaDeNotificacoes() {
   renderizarPainel();
   verificarAlertasDoSistema();
 
-  // pede permissão (não bloqueia o app se o usuário recusar)
   if ("Notification" in window && Notification.permission === "default") {
     Notification.requestPermission();
   }
@@ -223,7 +198,6 @@ function iniciarSistemaDeNotificacoes() {
     });
   }
 
-  // reavalia periodicamente enquanto o app estiver aberto (a cada 5 minutos)
   setInterval(() => {
     renderizarPainel();
     verificarAlertasDoSistema();

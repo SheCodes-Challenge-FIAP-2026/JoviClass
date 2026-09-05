@@ -7,9 +7,6 @@ hamburger.addEventListener("click", () => {
 
 document.addEventListener('DOMContentLoaded', function () {
 
-    // ===========================
-    //   CALENDÁRIO
-    // ===========================
 
     const mesAno = document.getElementById('mes-ano');
     const diasContainer = document.getElementById('dias');
@@ -24,19 +21,20 @@ document.addEventListener('DOMContentLoaded', function () {
 
     let dataAtual = new Date();
     let today = new Date();
+
     let diaSelecionado = null;
 
-    // --- Eventos do Google Agenda ---
 
     const API_BASE = 'http://localhost:3000';
-    let eventosGoogle = [];      // cache dos eventos já convertidos em Date
-    let googleConectado = false; // true assim que conseguirmos ler a agenda da pessoa
+    let eventosGoogle = [];     
+    let googleConectado = false;
+
+
+    let eventosLocais = [];
 
     async function buscarEventosGoogle() {
         try {
             const resp = await fetch(`${API_BASE}/api/calendar/eventos`, { credentials: 'include' });
-
-            // 401/403 = a pessoa ainda não conectou (ou a sessão expirou)
             if (resp.status === 401 || resp.status === 403) {
                 googleConectado = false;
                 eventosGoogle = [];
@@ -68,8 +66,6 @@ document.addEventListener('DOMContentLoaded', function () {
             eventosGoogle = [];
         }
 
-        // Deixa o cache visível para o painel de notificações, que vive
-        // fora deste escopo (fora do DOMContentLoaded).
         window.eventosGoogleCache = eventosGoogle;
 
         atualizarStatusGoogle();
@@ -95,20 +91,30 @@ document.addEventListener('DOMContentLoaded', function () {
         );
     }
 
-    // Evita que título/descrição vindos da API quebrem o HTML do overlay
+    function eventosLocaisDoDia(ano, mes, dia) {
+        return eventosLocais.filter(ev =>
+            ev.data.getFullYear() === ano &&
+            ev.data.getMonth() === mes &&
+            ev.data.getDate() === dia
+        );
+    }
+
     function escapeHTML(texto) {
         const aux = document.createElement('div');
         aux.textContent = texto ?? '';
         return aux.innerHTML;
     }
 
-    // Mostra, no topo do overlay, os eventos do Google Agenda daquele dia
-    // (se houver). O formulário de "Novo Evento" continua logo abaixo.
-    function renderizarEventosGoogleNoFormulario(eventos) {
-        const container = document.getElementById('eventosGoogleFormulario');
+    function renderizarEventosDoFormulario(ano, mes, dia) {
+        const container = document.getElementById('eventosDoFormulario');
         if (!container) return;
 
-        if (!eventos || eventos.length === 0) {
+        const doDia = [
+            ...eventosGoogleDoDia(ano, mes, dia).map(ev => ({ ...ev, origem: 'google' })),
+            ...eventosLocaisDoDia(ano, mes, dia).map(ev => ({ ...ev, origem: 'local' }))
+        ].sort((a, b) => a.data - b.data);
+
+        if (doDia.length === 0) {
             container.hidden = true;
             container.innerHTML = '';
             return;
@@ -116,31 +122,31 @@ document.addEventListener('DOMContentLoaded', function () {
 
         container.hidden = false;
         container.innerHTML = `
-            <span class="eventos-google-titulo">Eventos do Google Agenda</span>
-            ${eventos.map(ev => {
-                const hora = ev.diaTodo
-                    ? 'Dia todo'
-                    : ev.data.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+            <span class="eventos-dia-titulo">Eventos do dia</span>
+            ${doDia.map(ev => {
+                const subtitulo = ev.origem === 'google'
+                    ? (ev.diaTodo
+                        ? 'Dia todo · Google Agenda'
+                        : `${ev.data.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })} · Google Agenda`)
+                    : (ev.categoria || 'Evento');
 
                 return `
-                    <div class="evento-google-card">
-                        <div class="evento-google-card-topo">
-                            <span class="evento-google-bolinha"></span>
+                    <div class="evento-dia-card">
+                        <div class="evento-dia-card-topo">
+                            <span class="evento-dia-bolinha"></span>
                             <strong>${escapeHTML(ev.titulo)}</strong>
                         </div>
-                        <span class="evento-google-hora">${hora}</span>
-                        ${ev.descricao ? `<p class="evento-google-descricao">${escapeHTML(ev.descricao)}</p>` : ''}
+                        <span class="evento-dia-hora">${subtitulo}</span>
+                        ${ev.descricao ? `<p class="evento-dia-descricao">${escapeHTML(ev.descricao)}</p>` : ''}
                     </div>
                 `;
             }).join('')}
         `;
     }
 
-    // --- Formulário de Evento ---
-
-    function abrirFormularioEvento(diaDiv) {
-        diaSelecionado = diaDiv;
-        renderizarEventosGoogleNoFormulario(diaDiv._eventosGoogle);
+    function abrirFormularioEvento(diaDiv, ano, mes, dia) {
+        diaSelecionado = { ano, mes, dia };
+        renderizarEventosDoFormulario(ano, mes, dia);
         document.getElementById("formularioEvento").style.display = "flex";
     }
 
@@ -149,21 +155,25 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function salvarEvento() {
-        let titulo = document.getElementById("tituloEvento").value;
-        let descricao = document.getElementById("descricaoEvento").value;
+        const titulo = document.getElementById("tituloEvento").value.trim();
+        const categoria = document.getElementById("categoria").value;
+        const descricao = document.getElementById("descricaoEvento").value.trim();
 
-        if (titulo) {
-            let eventoDiv = document.createElement('div');
-            eventoDiv.classList.add('evento');
-            eventoDiv.innerHTML = `
-                <strong>${titulo}</strong>
-                <p>${descricao}</p>
-            `;
+        if (titulo && diaSelecionado) {
+            const { ano, mes, dia } = diaSelecionado;
 
-            diaSelecionado.appendChild(eventoDiv);
+            eventosLocais.push({
+                id: `local-${Date.now()}`,
+                titulo,
+                categoria,
+                descricao,
+                data: new Date(ano, mes, dia)
+            });
 
             document.getElementById("tituloEvento").value = "";
             document.getElementById("descricaoEvento").value = "";
+            document.getElementById("categoria").value = "Projeto";
+            calendario(dataAtual);
             fecharFormularioEvento();
         }
     }
@@ -171,7 +181,6 @@ document.addEventListener('DOMContentLoaded', function () {
     window.fecharFormularioEvento = fecharFormularioEvento;
     window.salvarEvento = salvarEvento;
 
-    // --- Renderização do Calendário ---
 
     function calendario(data) {
         const ano = data.getFullYear();
@@ -182,7 +191,6 @@ document.addEventListener('DOMContentLoaded', function () {
         mesAno.textContent = `${meses[mes]} ${ano}`;
         diasContainer.innerHTML = '';
 
-        // Datas do mês anterior
         const ultimoDiaMesAnterior = new Date(ano, mes, 0).getDate();
         for (let i = primeiroDia; i > 0; i--) {
             const diaDiv = document.createElement('div');
@@ -191,39 +199,38 @@ document.addEventListener('DOMContentLoaded', function () {
             diasContainer.appendChild(diaDiv);
         }
 
-        // Dias do mês atual
         for (let i = 1; i <= ultimoDia; i++) {
             const diaDiv = document.createElement('div');
             diaDiv.classList.add('dia-card');
             diaDiv.innerHTML = `<span class="numero-dia">${i}</span>`;
 
             diaDiv.onclick = function () {
-                abrirFormularioEvento(diaDiv);
+                abrirFormularioEvento(diaDiv, ano, mes, i);
             };
 
             if (i === today.getDate() && mes === today.getMonth() && ano === today.getFullYear()) {
                 diaDiv.classList.add('today');
             }
 
-            // Eventos do Google Agenda que caem nesse dia: guarda no elemento
-            // pra abrir no overlay ao clicar, e mostra só uma bolinha azul
-            // indicando que existe evento (sem lotar a célula de texto).
-            const eventosDoDia = eventosGoogleDoDia(ano, mes, i);
-            diaDiv._eventosGoogle = eventosDoDia;
+            const eventosGoogleDia = eventosGoogleDoDia(ano, mes, i);
+            const eventosLocaisDia = eventosLocaisDoDia(ano, mes, i);
+            diaDiv._eventosGoogle = eventosGoogleDia;
+            diaDiv._eventosLocais = eventosLocaisDia;
 
-            if (eventosDoDia.length > 0) {
+            const totalEventosDia = eventosGoogleDia.length + eventosLocaisDia.length;
+
+            if (totalEventosDia > 0) {
                 const bolinha = document.createElement('span');
-                bolinha.classList.add('bolinha-evento-google');
-                bolinha.title = eventosDoDia.length === 1
-                    ? eventosDoDia[0].titulo
-                    : `${eventosDoDia.length} eventos do Google Agenda`;
+                bolinha.classList.add('bolinha-evento');
+                bolinha.title = totalEventosDia === 1
+                    ? (eventosGoogleDia[0]?.titulo || eventosLocaisDia[0]?.titulo)
+                    : `${totalEventosDia} eventos nesse dia`;
                 diaDiv.appendChild(bolinha);
             }
 
             diasContainer.appendChild(diaDiv);
         }
 
-        // Datas do próximo mês
         const primeiroDiaProximoMes = 7 - new Date(ano, mes + 1, 0).getDay();
         if (primeiroDiaProximoMes < 7) {
             for (let i = 1; i <= primeiroDiaProximoMes; i++) {
@@ -245,9 +252,6 @@ document.addEventListener('DOMContentLoaded', function () {
         calendario(dataAtual);
     });
 
-    // Desenha o calendário na hora (sem esperar a rede) e depois busca
-    // os eventos do Google Agenda, se a pessoa já tiver conectado a conta
-    // no perfil, redesenhando o mês assim que eles chegarem.
     calendario(dataAtual);
 
     async function atualizarCalendario() {
@@ -257,11 +261,6 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     atualizarCalendario();
-
-
-    // ===========================
-    //   PRÓXIMAS ENTREGAS
-    // ===========================
 
     let entregas = [];
 
@@ -293,14 +292,12 @@ document.addEventListener('DOMContentLoaded', function () {
         const entrega = { id: entregaId, titulo, materia, data, prioridade };
         entregas.push(entrega);
 
-        // Ordena por data (mais próxima primeiro)
         entregas.sort((a, b) => {
             if (!a.data) return 1;
             if (!b.data) return -1;
             return new Date(a.data) - new Date(b.data);
         });
 
-        // Adiciona automaticamente ao checklist (com mesmo id para sincronizar remoção)
         const tarefa = { id: entregaId, texto: titulo, materia, concluida: false, fromEntrega: true };
         tarefas.push(tarefa);
 
@@ -311,7 +308,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function removerEntrega(id) {
         entregas = entregas.filter(e => e.id !== id);
-        // Remove também a tarefa correspondente no checklist
         tarefas = tarefas.filter(t => t.id !== id);
         renderizarEntregas();
         renderizarChecklist();
@@ -319,13 +315,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function formatarData(dataStr) {
         if (!dataStr) return '';
-        // dataStr vem como YYYY-MM-DD
         const [ano, mes, dia] = dataStr.split('-');
         return `${dia}/${mes}/${ano}`;
     }
 
     function renderizarEntregas() {
-        // Remove itens anteriores (mantém o parágrafo vazio)
         const itens = entregasLista.querySelectorAll('.entrega-item');
         itens.forEach(el => el.remove());
 
@@ -333,15 +327,11 @@ document.addEventListener('DOMContentLoaded', function () {
             entregasVazias.style.display = 'block';
             return;
         }
-
         entregasVazias.style.display = 'none';
-
         entregas.forEach(entrega => {
             const item = document.createElement('div');
             item.classList.add('entrega-item', `prioridade-${entrega.prioridade}`);
-
             const labelPrioridade = { alta: 'Alta', media: 'Média', baixa: 'Baixa' };
-
             item.innerHTML = `
                 <div class="entrega-info">
                     <span class="entrega-titulo-texto">${entrega.titulo}</span>
@@ -364,11 +354,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
     window.fecharFormularioEntrega = fecharFormularioEntrega;
     window.salvarEntrega = salvarEntrega;
-
-
-    // ===========================
-    //   CHECKLIST DE ENTREGAS
-    // ===========================
 
     let tarefas = [];
 
@@ -423,7 +408,6 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function renderizarChecklist() {
-        // Remove itens anteriores
         const itens = checklistLista.querySelectorAll('.tarefa-item');
         itens.forEach(el => el.remove());
 
@@ -434,15 +418,11 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         checklistVazio.style.display = 'none';
-
-        // Pendentes primeiro, concluídas por último
         const ordenadas = [...tarefas].sort((a, b) => a.concluida - b.concluida);
-
         ordenadas.forEach(tarefa => {
             const li = document.createElement('li');
             li.classList.add('tarefa-item');
             if (tarefa.concluida) li.classList.add('concluida');
-
             li.innerHTML = `
                 <input 
                     type="checkbox" 
@@ -456,15 +436,12 @@ document.addEventListener('DOMContentLoaded', function () {
                 </div>
                 <button class="btn-remover-tarefa" data-id="${tarefa.id}" title="Remover">✕</button>
             `;
-
             li.querySelector('.tarefa-checkbox').addEventListener('change', function () {
                 toggleTarefa(tarefa.id);
             });
-
             li.querySelector('.btn-remover-tarefa').addEventListener('click', function () {
                 removerTarefa(tarefa.id);
             });
-
             checklistLista.appendChild(li);
         });
 
@@ -476,17 +453,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
 });
 
-
-// =====================================================
-// SISTEMA DE NOTIFICAÇÕES POR PROXIMIDADE
-// (provas, trabalhos, reuniões...)
-// =====================================================
-
-/**
- * Fonte de dados dos eventos.
- * Troque isso por dados vindos do seu backend/API quando tiver um.
- * Formato da data: "AAAA-MM-DDTHH:MM" (data e hora do evento)
- */
 const EVENTOS = [
   { id: "prova-calculo",  titulo: "Prova de Cálculo I",      tipo: "prova",    materia: "Cálculo I", data: "2024-05-25T08:00" },
   { id: "prova-fisica",   titulo: "Prova de Física II",      tipo: "prova",    materia: "Física II",  data: "2024-06-02T08:00" },
@@ -494,7 +460,6 @@ const EVENTOS = [
   { id: "reuniao-grupo",  titulo: "Reunião do grupo de estudos", tipo: "reuniao", materia: "Cálculo I", data: "2024-05-20T19:00" },
 ];
 
-// Ícone por tipo de evento
 const ICONE_TIPO = {
   prova: "📝",
   trabalho: "📁",
@@ -502,7 +467,6 @@ const ICONE_TIPO = {
   google: "🗓️",
 };
 
-// Em quantos milissegundos cada limiar de alerta dispara antes do evento
 const LIMIARES_ALERTA = {
   aviso7dias: 7 * 24 * 60 * 60 * 1000,
   aviso1dia: 24 * 60 * 60 * 1000,
@@ -510,7 +474,7 @@ const LIMIARES_ALERTA = {
 };
 
 const CHAVE_LIDAS = "joviclass_notif_lidas";
-const CHAVE_DISPARADAS = "joviclass_notif_disparadas"; // controla notificações do SO já enviadas
+const CHAVE_DISPARADAS = "joviclass_notif_disparadas";
 
 function carregarSet(chave) {
   try {
@@ -527,13 +491,12 @@ function salvarSet(chave, set) {
 let lidas = carregarSet(CHAVE_LIDAS);
 let disparadas = carregarSet(CHAVE_DISPARADAS);
 
-// Calcula quanto tempo falta e classifica a urgência
 function calcularStatus(evento) {
   const agora = new Date();
   const dataEvento = new Date(evento.data);
   const diffMs = dataEvento - agora;
 
-  if (diffMs <= 0) return null; // evento já passou, não notifica mais
+  if (diffMs <= 0) return null;
 
   const diffHoras = diffMs / (1000 * 60 * 60);
   const diffDias = diffHoras / 24;
@@ -550,9 +513,6 @@ function calcularStatus(evento) {
   return { diffMs, diffHoras, diffDias, urgencia, prazoTexto };
 }
 
-// Monta a lista de notificações ativas (eventos futuros dentro da janela de aviso).
-// Junta os eventos locais fixos (EVENTOS) com os eventos do Google Agenda já
-// carregados em cache (window.eventosGoogleCache) pelo bloco do calendário.
 function gerarNotificacoes() {
   const eventosGoogleFormatados = (window.eventosGoogleCache || []).map((ev) => ({
     id: ev.id,
@@ -584,7 +544,6 @@ function renderizarPainel() {
   const notificacoes = gerarNotificacoes();
   const naoLidas = notificacoes.filter((n) => !lidas.has(n.id));
 
-  // badge no sino
   if (naoLidas.length > 0) {
     dot.hidden = false;
     dot.textContent = naoLidas.length > 9 ? "9+" : naoLidas.length;
@@ -610,8 +569,7 @@ function renderizarPainel() {
     `)
     .join("");
 
-  // marcar como lida ao clicar em um item
-  lista.querySelectorAll(".notif-item").forEach((el) => {
+    lista.querySelectorAll(".notif-item").forEach((el) => {
     el.addEventListener("click", () => {
       lidas.add(el.dataset.id);
       salvarSet(CHAVE_LIDAS, lidas);
@@ -620,12 +578,11 @@ function renderizarPainel() {
   });
 }
 
-// Dispara notificação real do sistema operacional (se o usuário permitiu)
 function dispararNotificacaoDoNavegador(evento, status) {
   if (!("Notification" in window) || Notification.permission !== "granted") return;
 
   const chaveDisparo = `${evento.id}-${status.urgencia}`;
-  if (disparadas.has(chaveDisparo)) return; // evita repetir o mesmo alerta
+  if (disparadas.has(chaveDisparo)) return;  
 
   new Notification(`${TIPO_LABEL[evento.tipo]}: ${evento.titulo}`, {
     body: `Vence ${status.prazoTexto}.`,
@@ -636,7 +593,6 @@ function dispararNotificacaoDoNavegador(evento, status) {
   salvarSet(CHAVE_DISPARADAS, disparadas);
 }
 
-// Varre os eventos e dispara alertas do navegador nos limiares certos (24h e 1h antes)
 function verificarAlertasDoSistema() {
   EVENTOS.forEach((evento) => {
     const status = calcularStatus(evento);
@@ -647,7 +603,6 @@ function verificarAlertasDoSistema() {
   });
 }
 
-// Pede permissão para notificações do sistema e liga o painel/sino
 function iniciarSistemaDeNotificacoes() {
   const notifBtn = document.getElementById("notifBtn");
   const notifPanel = document.getElementById("notifPanel");
@@ -656,7 +611,6 @@ function iniciarSistemaDeNotificacoes() {
   renderizarPainel();
   verificarAlertasDoSistema();
 
-  // pede permissão (não bloqueia o app se o usuário recusar)
   if ("Notification" in window && Notification.permission === "default") {
     Notification.requestPermission();
   }
@@ -685,7 +639,6 @@ function iniciarSistemaDeNotificacoes() {
     });
   }
 
-  // reavalia periodicamente enquanto o app estiver aberto (a cada 5 minutos)
   setInterval(() => {
     renderizarPainel();
     verificarAlertasDoSistema();

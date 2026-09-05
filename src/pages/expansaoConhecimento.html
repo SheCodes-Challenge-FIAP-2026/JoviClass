@@ -11,14 +11,10 @@
     <title>Comunidade</title>
 </head>
 <body>
-
-    <!-- OVERLAY FORMULÁRIO -->
     <div id="overlay"></div>
 
-    <!-- OVERLAY MENU DE OPÇÕES -->
     <div id="overlayMenu" onclick="fecharMenuOpcoes()"></div>
 
-    <!-- TOPO / MENU -->
   <header class="menu">
     <div class="menu-header">
       <div class="logoJovi">
@@ -42,7 +38,6 @@
               <button id="notifMarcarLidas" class="notif-marcar">Marcar todas como lidas</button>
             </div>
             <div class="notif-lista" id="notifLista">
-              <!-- preenchido via script.js -->
             </div>
           </div>
         </div>
@@ -63,7 +58,6 @@
       <a href="../pages/camera.html">Voltar a câmera ↩</a>
     </nav>
   </header>
-     <!-- ===== CONTEÚDO ===== -->
   <main class="content">
  
     <section class="page-intro">
@@ -86,18 +80,15 @@
     </div>
  
     <section class="resources" id="resourceList" aria-live="polite">
-      <!-- cards injetados via JS -->
     </section>
  
     <p class="empty-state" id="emptyState" hidden>Nenhum resultado por aqui. Tenta outro termo ou categoria.</p>
  
-    <!-- Bloco de artigos publicados pela comunidade -->
     <section class="community" id="communitySection" hidden>
       <h2>Artigos da comunidade</h2>
       <div id="communityList" class="community-list"></div>
     </section>
  
-    <!-- Card discreto de publicação -->
     <button class="publish-card" id="openPublishModal">
       <div class="publish-icon">
         <svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
@@ -110,7 +101,6 @@
  
   </main>
  
-  <!-- ===== MODAL DE PUBLICAÇÃO ===== -->
   <div class="modal-overlay" id="modalOverlay" hidden>
     <div class="modal-sheet" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
       <div class="modal-handle"></div>
@@ -148,11 +138,9 @@
     </div>
   </div>
  
-  <!-- Toast de confirmação -->
   <div class="toast" id="toast">Artigo publicado!</div>
  
 
-      <!-- NAV INFERIOR (mobile) -->
   <nav class="nav-mobile">
     <a href="../../index.html" class="ativo">
       <span class="nav-icone">🏠︎</span>

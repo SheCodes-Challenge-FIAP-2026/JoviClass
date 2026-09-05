@@ -16,9 +16,6 @@
   --raio: 18px;
 }
 
-/* =========================
-   RESET
-========================= */
 * {
   margin: 0;
   padding: 0;
@@ -31,16 +28,13 @@ body {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  padding-bottom: 78px; /* espaço p/ nav inferior mobile */
+  padding-bottom: 78px; 
 }
 
 a {
   text-decoration: none;
 }
 
-/* =========================
-   LOGO
-========================= */
 .logoJovi {
   display: flex;
   align-items: center;
@@ -61,9 +55,6 @@ a {
   letter-spacing: -0.3px;
 }
 
-/* =========================
-   MENU / TOPO
-========================= */
 .menu {
   background: linear-gradient(135deg, var(--grad-inicio) 0%, var(--grad-fim) 100%);
   color: white;
@@ -124,9 +115,6 @@ a {
   border: 2px solid var(--grad-fim);
 }
 
-/* =========================
-   NOTIFICAÇÕES
-========================= */
 .notif-wrapper {
   position: relative;
 }
@@ -241,9 +229,6 @@ a {
 .notif-prazo.breve { color: #d97706; }
 .notif-prazo.normal { color: var(--bg-color1); }
 
-/* =========================
-   BOTÃO HAMBÚRGUER
-========================= */
 .hamburger {
   display: flex;
   flex-direction: column;
@@ -260,9 +245,6 @@ a {
   transition: 0.3s;
 }
 
-/* =========================
-   LINKS DO MENU
-========================= */
 .menu-links {
   display: none;
   flex-direction: column;
@@ -299,7 +281,6 @@ a {
   box-shadow: 0 6px 18px rgba(20, 102, 255, 0.4);
 }
 
-/* ########## */
 .materias {
   padding: 30px;
   width: 100%;
@@ -365,7 +346,6 @@ a {
   font-size: 14px;
 }
 
-/* Card com linha superior para posicionar os 3 pontinhos */
 .cardMateria {
   width: 220px;
   background-color: var(--bg-color2);
@@ -384,7 +364,6 @@ a {
   box-shadow: 0 6px 15px rgba(0, 0, 0, 0.12);
 }
 
-/* Cabeçalho do card com botão de 3 pontinhos */
 .cardTopoRow {
   display: flex;
   justify-content: space-between;
@@ -411,7 +390,6 @@ a {
   color: #333;
 }
 
-/* MODAL */
 .overlay {
   position: fixed;
   inset: 0;
@@ -480,9 +458,6 @@ a {
   border-color: var(--bg-color4);
 }
 
-/* =========================
-   SELETOR DE CORES
-========================= */
 .seletorCores {
   display: flex;
   gap: 10px;
@@ -543,9 +518,6 @@ a {
   background: #ccc;
 }
 
-/* =========================
-   DROPDOWN CONTEXTUAL
-========================= */
 .dropdownMenu {
   position: fixed;
   background: #fff;
@@ -596,9 +568,6 @@ a {
   background: #fff0f0;
 }
 
-/* =========================
-   MOBILE
-========================= */
 @media (max-width: 699px) {
   .menu {
     width: 100%;
@@ -660,9 +629,7 @@ a {
   }
 }
 
-/* =========================
-   DESKTOP
-========================= */
+
 @media (min-width: 700px) {
   body {
     flex-direction: row;
@@ -716,9 +683,7 @@ a {
   }
 }
 
-/* =========================
-   NAV INFERIOR (mobile)
-========================= */
+
 .nav-mobile {
   position: fixed;
   bottom: 0;
