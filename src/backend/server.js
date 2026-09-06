@@ -31,12 +31,30 @@ const ai = new GoogleGenAI({
     apiKey: process.env.GEMINI_API_KEY
 });
 
+// Chama o Gemini com nova tentativa automática caso o modelo esteja sobrecarregado (503/UNAVAILABLE)
+async function chamarGeminiComRetry(config, tentativas = 3) {
+    for (let i = 0; i < tentativas; i++) {
+        try {
+            return await ai.models.generateContent(config);
+        } catch (erro) {
+            const eSobrecarga = erro.message?.includes("UNAVAILABLE") || erro.message?.includes("503");
+            if (eSobrecarga && i < tentativas - 1) {
+                console.log(`⏳ Modelo sobrecarregado, tentando de novo (${i + 1}/${tentativas})...`);
+                await new Promise(r => setTimeout(r, 1500 * (i + 1))); // espera crescente: 1.5s, 3s...
+                continue;
+            }
+            throw erro;
+        }
+    }
+}
+
 // ======================================================
 // ROTAS DE GOOGLE (Drive + Calendar) E NOTION
 // ======================================================
 
 app.use("/", require("./routes/google"));
 app.use("/", require("./routes/notion"));
+
 // ======================================================
 // ROTA PRINCIPAL / TESTE
 // ======================================================
@@ -307,7 +325,7 @@ app.post("/ia", async (req, res) => {
         console.log("✅ Prompt criado.");
         console.log("🤖 Enviando conteúdo para o Gemini...");
 
-        const resposta = await ai.models.generateContent({
+        const resposta = await chamarGeminiComRetry({
             model: "gemini-3.5-flash",
             contents: prompt
         });
@@ -340,15 +358,58 @@ app.post("/ia", async (req, res) => {
 });
 
 // ======================================================
-// INICIAR SERVIDOR (UMA ÚNICA VEZ!)
+// ROTA DE VISÃO (identificar lousa / caderno)
+// ======================================================
+
+app.post("/identificar-imagem", async (req, res) => {
+    console.log("\n======================================");
+    console.log("📥 NOVA REQUISIÇÃO DE IDENTIFICAÇÃO DE IMAGEM");
+    console.log("======================================");
+
+    try {
+        const { imagemBase64 } = req.body;
+
+        if (!imagemBase64) {
+            console.log("❌ Nenhuma imagem foi enviada.");
+            return res.status(400).json({ erro: "Nenhuma imagem foi enviada." });
+        }
+
+        console.log("🤖 Enviando imagem para o Gemini...");
+
+        const resposta = await chamarGeminiComRetry({
+            model: "gemini-3.5-flash",
+            contents: [{
+                role: "user",
+                parts: [
+                    { text: "Classifique esta imagem em uma única palavra: 'lousa', 'caderno' ou 'outro'. Responda só a palavra, sem pontuação." },
+                    { inlineData: { mimeType: "image/jpeg", data: imagemBase64 } }
+                ]
+            }]
+        });
+
+        const tipo = resposta.text?.trim().toLowerCase() || "outro";
+        console.log("✅ Classificação:", tipo);
+        console.log("======================================\n");
+
+        res.json({ tipo });
+
+    } catch (erro) {
+        console.error("❌ ERRO NA IDENTIFICAÇÃO DE IMAGEM");
+        console.error(erro);
+        res.status(500).json({ erro: erro.message || "Erro ao identificar a imagem." });
+    }
+});
+
+// ======================================================
+// ROTA DE TESTE DO GEMINI
 // ======================================================
 
 app.get("/teste-gemini", async (req, res) => {
     try {
         console.log("🤖 Testando Gemini...");
 
-        const resposta = await ai.models.generateContent({
-            model: "gemini-3.7-flash",
+        const resposta = await chamarGeminiComRetry({
+            model: "gemini-3.5-flash",
             contents: "Responda apenas: Gemini funcionando!"
         });
 
@@ -369,6 +430,11 @@ app.get("/teste-gemini", async (req, res) => {
         });
     }
 });
+
+// ======================================================
+// INICIAR SERVIDOR (UMA ÚNICA VEZ!)
+// ======================================================
+
 app.listen(PORT, () => {
     console.log("\n======================================");
     console.log("🚀 JoviClass Backend");
@@ -378,16 +444,3 @@ app.listen(PORT, () => {
     console.log("🤖 Gemini:   conectado");
     console.log("======================================\n");
 });
-
-app.use(cors({
-  origin: process.env.FRONTEND_URL,
-  credentials: true
-}));
-
-app.use(session({
-  name: 'jovi_session',
-  keys: [process.env.SESSION_SECRET],
-  sameSite: 'lax',       // tente trocar para 'none' se 'lax' não resolver
-  secure: false,           // 'true' exigiria HTTPS — mantenha false em localhost
-  httpOnly: true
-}));
