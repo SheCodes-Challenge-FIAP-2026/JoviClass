@@ -111,6 +111,24 @@ body {
   display: none;
 }
 
+#flashCaptura {
+  position: absolute;
+  inset: 0;
+  background: #fff;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 60;
+}
+
+#flashCaptura.ativo {
+  animation: flashCapturaAnim 0.35s ease-out;
+}
+
+@keyframes flashCapturaAnim {
+  0%   { opacity: 0.85; }
+  100% { opacity: 0; }
+}
+
 .dropdown-menu {
   display: none;
   flex-direction: column;
@@ -230,16 +248,32 @@ body {
   bottom: 70px;
   left: 1rem;
   right: 1rem;
-  background: rgba(0,0,0,0.72);
+  max-height: 45vh;
+  overflow-y: auto;
+  background: rgba(20,20,20,0.85);
   backdrop-filter: blur(8px);
-  padding: 1rem;
-  border-radius: 14px;
-  font-size: 0.9rem;
-  line-height: 1.5;
+  padding: 1rem 1.1rem;
+  border-radius: 16px;
+  font-size: 0.92rem;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-word;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.35);
 }
 
 #saida.hidden {
   display: none;
+}
+
+#saida .saida-tag {
+  display: inline-block;
+  margin-top: 10px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  background: rgba(245,166,35,0.18);
+  color: var(--active-gold);
+  font-size: 0.8rem;
+  font-weight: 700;
 }
 
 .confirm-btn {

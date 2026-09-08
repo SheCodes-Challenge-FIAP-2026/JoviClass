@@ -3,7 +3,38 @@ const botaoScanear = document.getElementById("btn-texto");
 const resultado = document.getElementById("saida");
 const canvas = document.getElementById("canvas");
 
-/* ── Duplicidade de fotos (hash perceptual simples, persistido no localStorage) ── */
+/* ── Duplicidade de fotos: comparação por CONTEÚDO (texto reconhecido), persistida no localStorage ── */
+const CHAVE_TEXTOS = "jovi_textos_salvos";
+let textosSalvos = JSON.parse(localStorage.getItem(CHAVE_TEXTOS) || "[]");
+let ultimoTextoReconhecido = "";
+
+function salvarTextosNoStorage() {
+    localStorage.setItem(CHAVE_TEXTOS, JSON.stringify(textosSalvos));
+}
+
+// Remove acentos, pontuação e espaços extras para comparar só o conteúdo de fato
+function normalizarTexto(txt) {
+    return txt
+        .toLowerCase()
+        .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+        .replace(/[^a-z0-9\s]/g, "")
+        .replace(/\s+/g, " ")
+        .trim();
+}
+
+// Similaridade por sobreposição de palavras (Jaccard): 0 = nada em comum, 1 = idêntico
+function similaridadeTexto(a, b) {
+    const palavrasA = new Set(normalizarTexto(a).split(" ").filter(Boolean));
+    const palavrasB = new Set(normalizarTexto(b).split(" ").filter(Boolean));
+    if (palavrasA.size === 0 || palavrasB.size === 0) return 0;
+    const intersecao = [...palavrasA].filter(p => palavrasB.has(p)).length;
+    const uniao = new Set([...palavrasA, ...palavrasB]).size;
+    return intersecao / uniao;
+}
+
+/* ── Duplicidade — critério complementar por IMAGEM (hash perceptual) ──
+   Serve para pegar os casos em que o OCR leu "lixo" e o texto não bateu,
+   mas a foto é visualmente quase idêntica (mesma página, mesmo ângulo). */
 const CHAVE_HASHES = "jovi_hashes_fotos";
 let hashesSalvos = JSON.parse(localStorage.getItem(CHAVE_HASHES) || "[]");
 
@@ -129,10 +160,15 @@ async function salvarImagemNaMateria(materiaId, dataURL, nomeArquivo) {
     }
 }
 
+/* ── Câmera ── */
 async function configurarCamera() {
     try {
         const midia = await navigator.mediaDevices.getUserMedia({
-            video: { facingMode: "environment" },
+            video: {
+                facingMode: "environment",
+                width: { ideal: 1920 },
+                height: { ideal: 1080 }
+            },
             audio: false
         });
         videoElemento.srcObject = midia;
@@ -151,8 +187,13 @@ async function configurarCamera() {
             let minX = 160, maxX = 0, minY = 120, maxY = 0;
             const limiarContraste = 40;
 
-            for (let y = 1; y < 119; y++) {
-                for (let x = 1; x < 159; x++) {
+            // Analisa só a região central (ignora bordas, onde costuma ter parede/fundo
+            // que confundia o cálculo, fazendo o zoom parecer "ao contrário")
+            const margemX = 24;  // 15% de 160
+            const margemY = 18;  // 15% de 120
+
+            for (let y = margemY; y < 120 - margemY; y++) {
+                for (let x = margemX; x < 160 - margemX; x++) {
                     const i = (y * 160 + x) * 4;
                     const iDir = (y * 160 + (x + 1)) * 4;
                     const iBaixo = ((y + 1) * 160 + x) * 4;
@@ -169,7 +210,8 @@ async function configurarCamera() {
             }
 
             const areaConteudo = Math.max(0, (maxX - minX)) * Math.max(0, (maxY - minY));
-            return areaConteudo / (160 * 120);
+            const areaRegiaoAnalisada = (160 - margemX * 2) * (120 - margemY * 2);
+            return areaConteudo / areaRegiaoAnalisada;
         }
 
         async function ajustarZoomAutomatico() {
@@ -231,6 +273,14 @@ function corrigirIluminacao(context, width, height) {
 }
 
 botaoScanear.onclick = async () => {
+    // Efeito de flash, imitando o obturador da câmera nativa
+    const flash = document.getElementById("flashCaptura");
+    if (flash) {
+        flash.classList.remove("ativo");
+        void flash.offsetWidth; // força reflow, para o efeito reiniciar mesmo em cliques seguidos
+        flash.classList.add("ativo");
+    }
+
     botaoScanear.disabled = true;
     resultado.classList.remove("hidden");
     resultado.innerText = "Fazendo a leitura... aguarde";
@@ -241,13 +291,16 @@ botaoScanear.onclick = async () => {
     canvas.height = videoElemento.videoHeight || 480;
 
     context.setTransform(1, 0, 0, 1, 0, 0);
-    context.filter = "contrast(1.3) grayscale(1)";
+    context.filter = "none"; // a normalização de histograma abaixo já cuida do contraste
     context.drawImage(videoElemento, 0, 0, canvas.width, canvas.height);
     corrigirIluminacao(context, canvas.width, canvas.height);
 
     try {
-        const { data: { text } } = await Tesseract.recognize(canvas, "por");
+        const { data: { text } } = await Tesseract.recognize(canvas, "por", {
+            tessedit_pageseg_mode: "6" // trata a imagem como um bloco uniforme de texto (página/lousa)
+        });
         const textoFinal = text.trim();
+        ultimoTextoReconhecido = textoFinal;
         resultado.innerText = textoFinal.length > 0
             ? textoFinal
             : "Não foi possível identificar o texto";
@@ -263,7 +316,11 @@ botaoScanear.onclick = async () => {
 
             if (respIA.ok) {
                 const { tipo } = await respIA.json();
-                resultado.innerText += `\n\n📌 Identificado como: ${tipo}`;
+                const tag = document.createElement("span");
+                tag.className = "saida-tag";
+                tag.textContent = `📌 Identificado como: ${tipo}`;
+                resultado.appendChild(document.createElement("br"));
+                resultado.appendChild(tag);
             }
         } catch (erroConexao) {
             console.warn("Não foi possível identificar o tipo de imagem (sem conexão?):", erroConexao);
@@ -276,7 +333,7 @@ botaoScanear.onclick = async () => {
     }
 };
 
-/* ── Zoom manual  */
+/* ── Zoom manual (barra 0.6x / 1x / 2x) ── */
 async function aplicarZoom(valor) {
     const track = videoElemento.srcObject.getVideoTracks()[0];
     const capacidades = track.getCapabilities();
@@ -354,6 +411,7 @@ if (logoBtn && dropdownMenu) {
     });
 }
 
+/* Overlay */
 confirmBtn.addEventListener("click", () => {
     document.getElementById("overlay").classList.add("show");
 });
@@ -363,13 +421,27 @@ document.getElementById("cancelBtn").addEventListener("click", () => {
 });
 
 document.getElementById("salvarBtn").addEventListener("click", async function () {
+    const similaridades = textosSalvos.map(t => similaridadeTexto(t, ultimoTextoReconhecido));
+    const LIMIAR_SIMILARIDADE = 0.7; // 70% das palavras em comum já considera duplicado
+    const duplicadaPorTexto = ultimoTextoReconhecido.trim().length > 0 && similaridades.some(s => s >= LIMIAR_SIMILARIDADE);
+
     const hashAtual = gerarHashSimples(canvas.getContext("2d"), canvas.width, canvas.height);
-    const duplicada = hashesSalvos.some(h => distanciaHamming(h, hashAtual) < 5);
+    const distancias = hashesSalvos.map(h => distanciaHamming(h, hashAtual));
+    const LIMIAR_DISTANCIA_HASH = 10; // numa escala de 0 a 64
+    const duplicadaPorImagem = distancias.some(d => d < LIMIAR_DISTANCIA_HASH);
+
+    console.log("🔍 Debug duplicidade — texto:", ultimoTextoReconhecido);
+    console.log("🔍 Debug duplicidade — similaridades de texto:", similaridades, "| duplicada por texto:", duplicadaPorTexto);
+    console.log("🔍 Debug duplicidade — distâncias de hash:", distancias, "| duplicada por imagem:", duplicadaPorImagem);
+
+    const duplicada = duplicadaPorTexto || duplicadaPorImagem;
 
     if (duplicada) {
         const continuarMesmoAssim = await confirmarDuplicidade();
         if (!continuarMesmoAssim) return;
     }
+    textosSalvos.push(ultimoTextoReconhecido);
+    salvarTextosNoStorage();
     hashesSalvos.push(hashAtual);
     salvarHashesNoStorage();
 
