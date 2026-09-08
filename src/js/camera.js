@@ -214,6 +214,8 @@ async function configurarCamera() {
             return areaConteudo / areaRegiaoAnalisada;
         }
 
+        let avisoZoomJaExibido = false;
+
         async function ajustarZoomAutomatico() {
             if (ajustandoZoom) return;
             ajustandoZoom = true;
@@ -225,15 +227,28 @@ async function configurarCamera() {
             const track = videoElemento.srcObject.getVideoTracks()[0];
             const capacidades = track.getCapabilities();
 
-            if (capacidades.zoom) {
-                if (proporcao < alvoMin && zoomAtual < capacidades.zoom.max) {
-                    zoomAtual = Math.min(capacidades.zoom.max, zoomAtual + capacidades.zoom.step);
-                    await track.applyConstraints({ advanced: [{ zoom: zoomAtual }] });
-                } else if (proporcao > alvoMax && zoomAtual > capacidades.zoom.min) {
-                    zoomAtual = Math.max(capacidades.zoom.min, zoomAtual - capacidades.zoom.step);
-                    await track.applyConstraints({ advanced: [{ zoom: zoomAtual }] });
+            if (!capacidades.zoom) {
+                if (!avisoZoomJaExibido) {
+                    console.warn("⚠️ Este dispositivo/navegador não expõe controle de zoom (capacidades.zoom ausente). O zoom automático não pode fazer nada aqui.");
+                    avisoZoomJaExibido = true;
                 }
+                ajustandoZoom = false;
+                return;
             }
+
+            let acao = "nenhuma (dentro da faixa alvo)";
+
+            if (proporcao < alvoMin && zoomAtual < capacidades.zoom.max) {
+                zoomAtual = Math.min(capacidades.zoom.max, zoomAtual + capacidades.zoom.step);
+                await track.applyConstraints({ advanced: [{ zoom: zoomAtual }] });
+                acao = "AUMENTOU o zoom (conteúdo pequeno demais)";
+            } else if (proporcao > alvoMax && zoomAtual > capacidades.zoom.min) {
+                zoomAtual = Math.max(capacidades.zoom.min, zoomAtual - capacidades.zoom.step);
+                await track.applyConstraints({ advanced: [{ zoom: zoomAtual }] });
+                acao = "DIMINUIU o zoom (conteúdo grande demais)";
+            }
+
+            console.log(`🔎 Zoom auto — proporção: ${proporcao.toFixed(2)} | zoom atual: ${zoomAtual.toFixed(2)} | ${acao}`);
 
             ajustandoZoom = false;
         }
@@ -279,6 +294,8 @@ botaoScanear.onclick = async () => {
         flash.classList.remove("ativo");
         void flash.offsetWidth; // força reflow, para o efeito reiniciar mesmo em cliques seguidos
         flash.classList.add("ativo");
+    } else {
+        console.warn("⚠️ Elemento #flashCaptura não encontrado no HTML — o efeito de flash não vai aparecer. Confirme se <div id=\"flashCaptura\"></div> foi adicionado no camera.html, logo depois do <canvas id=\"canvas\">.");
     }
 
     botaoScanear.disabled = true;
