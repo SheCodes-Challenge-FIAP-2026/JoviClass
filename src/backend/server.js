@@ -29,17 +29,11 @@ if (!GOOGLE_CLIENT_ID) {
     process.exit(1);
 }
 
-// Cliente utilizado para verificar o login do Google
 const googleClient = new OAuth2Client(GOOGLE_CLIENT_ID);
 
 // ------------------------------------------------------
 // CORS
 // ------------------------------------------------------
-
-// Frontend normalmente está rodando pelo Live Server
-// em localhost:5500.
-//
-// Também deixei 127.0.0.1:5500 permitido.
 
 const origensPermitidas = [
     "http://localhost:5501",
@@ -47,17 +41,13 @@ const origensPermitidas = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
     "http://localhost:5500",
-    "http://127.0.0.1:5500",
-    "http://localhost:3000",
-    "http://127.0.0.1:3000"
+    "http://127.0.0.1:5500"
 ];
 
 app.use(
     cors({
         origin: function (origin, callback) {
 
-            // Permite requisições sem Origin
-            // (ex.: Postman)
             if (!origin) {
                 return callback(null, true);
             }
@@ -75,7 +65,6 @@ app.use(
     })
 );
 
-// Permite receber JSON
 app.use(
     express.json({
         limit: "10mb"
@@ -96,16 +85,8 @@ app.use(
         ],
 
         httpOnly: true,
-
-        // Permite compartilhar a sessão entre
-        // frontend localhost:5500 e backend localhost:3000
         sameSite: "lax",
-
-        // Em localhost usamos false.
-        // Em produção com HTTPS deverá ser true.
         secure: false,
-
-        // Expira depois de 7 dias
         maxAge: 7 * 24 * 60 * 60 * 1000
     })
 );
@@ -113,18 +94,12 @@ app.use(
 // ======================================================
 // BANCO DE USUÁRIOS SIMPLES
 // ======================================================
-//
-// Por enquanto vamos utilizar um arquivo JSON.
-// Depois podemos trocar por MySQL, MongoDB,
-// PostgreSQL etc.
-//
 
 const caminhoUsuarios = path.join(
     __dirname,
     "usuarios.json"
 );
 
-// Cria usuarios.json automaticamente caso não exista
 if (!fs.existsSync(caminhoUsuarios)) {
     fs.writeFileSync(
         caminhoUsuarios,
@@ -132,7 +107,6 @@ if (!fs.existsSync(caminhoUsuarios)) {
     );
 }
 
-// Lê usuários
 function lerUsuarios() {
 
     try {
@@ -155,7 +129,6 @@ function lerUsuarios() {
     }
 }
 
-// Salva usuários
 function salvarUsuarios(usuarios) {
 
     fs.writeFileSync(
@@ -164,11 +137,44 @@ function salvarUsuarios(usuarios) {
     );
 }
 
+// ------------------------------------------------------
+// MONTA O OBJETO DE SESSÃO A PARTIR DE UM USUÁRIO
+// ------------------------------------------------------
+//
+// Centralizado aqui pra garantir que toda rota que cria
+// ou atualiza a sessão devolva sempre o mesmo formato
+// (nome, curso, foto, possuiSenha etc.)
+//
+
+function montarSessao(usuario) {
+
+    return {
+
+        id: usuario.id,
+
+        nome: usuario.nome,
+
+        curso: usuario.curso || "",
+
+        email: usuario.email,
+
+        foto: usuario.foto || null,
+
+        provedor: usuario.provedor,
+
+        emailVerificado: usuario.emailVerificado || false,
+
+        // Nunca colocamos o hash da senha na sessão,
+        // só um booleano dizendo se existe uma senha
+        // própria cadastrada (usuários só-Google não têm).
+        possuiSenha: !!usuario.senha
+    };
+}
+
 // ======================================================
 // FUNÇÕES DE AUTENTICAÇÃO
 // ======================================================
 
-// Verifica se o usuário está logado
 function exigirLogin(req, res, next) {
 
     if (
@@ -203,7 +209,6 @@ app.post("/auth/cadastro", async (req, res) => {
             senha
         } = req.body;
 
-        // Validação básica
         if (
             !nome ||
             !email ||
@@ -219,7 +224,6 @@ app.post("/auth/cadastro", async (req, res) => {
         const emailNormalizado =
             email.trim().toLowerCase();
 
-        // Senha mínima
         if (senha.length < 6) {
 
             return res.status(400).json({
@@ -230,7 +234,6 @@ app.post("/auth/cadastro", async (req, res) => {
 
         const usuarios = lerUsuarios();
 
-        // Verifica se e-mail já existe
         const usuarioExistente =
             usuarios.find(
                 usuario =>
@@ -245,59 +248,33 @@ app.post("/auth/cadastro", async (req, res) => {
             });
         }
 
-        // Criptografa a senha
         const senhaHash =
             await bcrypt.hash(senha, 10);
 
         const novoUsuario = {
 
-            id:
-                Date.now().toString(),
+            id: Date.now().toString(),
 
-            nome:
-                nome.trim(),
+            nome: nome.trim(),
 
-            email:
-                emailNormalizado,
+            curso: "",
 
-            senha:
-                senhaHash,
+            email: emailNormalizado,
 
-            foto:
-                null,
+            senha: senhaHash,
 
-            provedor:
-                "email",
+            foto: null,
 
-            emailVerificado:
-                false
+            provedor: "email",
+
+            emailVerificado: false
         };
 
         usuarios.push(novoUsuario);
 
         salvarUsuarios(usuarios);
 
-        // Não colocamos a senha na sessão
-        req.session.usuario = {
-
-            id:
-                novoUsuario.id,
-
-            nome:
-                novoUsuario.nome,
-
-            email:
-                novoUsuario.email,
-
-            foto:
-                novoUsuario.foto,
-
-            provedor:
-                novoUsuario.provedor,
-
-            emailVerificado:
-                novoUsuario.emailVerificado
-        };
+        req.session.usuario = montarSessao(novoUsuario);
 
         console.log(
             "✅ Novo usuário cadastrado:",
@@ -308,11 +285,9 @@ app.post("/auth/cadastro", async (req, res) => {
 
             sucesso: true,
 
-            mensagem:
-                "Cadastro realizado com sucesso.",
+            mensagem: "Cadastro realizado com sucesso.",
 
-            usuario:
-                req.session.usuario
+            usuario: req.session.usuario
         });
 
     } catch (erro) {
@@ -326,8 +301,7 @@ app.post("/auth/cadastro", async (req, res) => {
 
             sucesso: false,
 
-            erro:
-                "Erro interno ao realizar cadastro."
+            erro: "Erro interno ao realizar cadastro."
         });
     }
 });
@@ -354,22 +328,19 @@ app.post("/auth/login", async (req, res) => {
 
                 sucesso: false,
 
-                erro:
-                    "Informe o e-mail e a senha."
+                erro: "Informe o e-mail e a senha."
             });
         }
 
         const emailNormalizado =
             email.trim().toLowerCase();
 
-        const usuarios =
-            lerUsuarios();
+        const usuarios = lerUsuarios();
 
         const usuario =
             usuarios.find(
                 usuario =>
-                    usuario.email ===
-                    emailNormalizado
+                    usuario.email === emailNormalizado
             );
 
         if (!usuario) {
@@ -378,21 +349,17 @@ app.post("/auth/login", async (req, res) => {
 
                 sucesso: false,
 
-                erro:
-                    "E-mail ou senha incorretos."
+                erro: "E-mail ou senha incorretos."
             });
         }
 
-        // Usuários criados pelo Google
-        // podem não possuir senha.
         if (!usuario.senha) {
 
             return res.status(401).json({
 
                 sucesso: false,
 
-                erro:
-                    "Esta conta utiliza o login com Google."
+                erro: "Esta conta utiliza o login com Google."
             });
         }
 
@@ -408,32 +375,11 @@ app.post("/auth/login", async (req, res) => {
 
                 sucesso: false,
 
-                erro:
-                    "E-mail ou senha incorretos."
+                erro: "E-mail ou senha incorretos."
             });
         }
 
-        // Cria sessão
-        req.session.usuario = {
-
-            id:
-                usuario.id,
-
-            nome:
-                usuario.nome,
-
-            email:
-                usuario.email,
-
-            foto:
-                usuario.foto || null,
-
-            provedor:
-                usuario.provedor,
-
-            emailVerificado:
-                usuario.emailVerificado || false
-        };
+        req.session.usuario = montarSessao(usuario);
 
         console.log(
             "✅ Login realizado:",
@@ -444,11 +390,9 @@ app.post("/auth/login", async (req, res) => {
 
             sucesso: true,
 
-            mensagem:
-                "Login realizado com sucesso.",
+            mensagem: "Login realizado com sucesso.",
 
-            usuario:
-                req.session.usuario
+            usuario: req.session.usuario
         });
 
     } catch (erro) {
@@ -462,8 +406,7 @@ app.post("/auth/login", async (req, res) => {
 
             sucesso: false,
 
-            erro:
-                "Erro interno ao realizar login."
+            erro: "Erro interno ao realizar login."
         });
     }
 });
@@ -484,31 +427,22 @@ app.post("/auth/google", async (req, res) => {
             "📥 Login com Google recebido."
         );
 
-        // O Google Identity Services
-        // envia o ID Token neste campo.
         if (!credential) {
 
             return res.status(400).json({
 
                 sucesso: false,
 
-                erro:
-                    "Token do Google não foi enviado."
+                erro: "Token do Google não foi enviado."
             });
         }
-
-        // ------------------------------------------------
-        // VERIFICA O TOKEN NO GOOGLE
-        // ------------------------------------------------
 
         const ticket =
             await googleClient.verifyIdToken({
 
-                idToken:
-                    credential,
+                idToken: credential,
 
-                audience:
-                    GOOGLE_CLIENT_ID
+                audience: GOOGLE_CLIENT_ID
             });
 
         const payload =
@@ -520,29 +454,15 @@ app.post("/auth/google", async (req, res) => {
 
                 sucesso: false,
 
-                erro:
-                    "Token do Google inválido."
+                erro: "Token do Google inválido."
             });
         }
 
-        // ------------------------------------------------
-        // DADOS RECEBIDOS DO GOOGLE
-        // ------------------------------------------------
-
-        const googleId =
-            payload.sub;
-
-        const nome =
-            payload.name || "Usuário";
-
-        const email =
-            payload.email?.toLowerCase();
-
-        const foto =
-            payload.picture || null;
-
-        const emailVerificado =
-            payload.email_verified === true;
+        const googleId = payload.sub;
+        const nome = payload.name || "Usuário";
+        const email = payload.email?.toLowerCase();
+        const foto = payload.picture || null;
+        const emailVerificado = payload.email_verified === true;
 
         if (!email) {
 
@@ -550,28 +470,17 @@ app.post("/auth/google", async (req, res) => {
 
                 sucesso: false,
 
-                erro:
-                    "O Google não forneceu um e-mail válido."
+                erro: "O Google não forneceu um e-mail válido."
             });
         }
 
-        // ------------------------------------------------
-        // PROCURA O USUÁRIO
-        // ------------------------------------------------
-
-        const usuarios =
-            lerUsuarios();
+        const usuarios = lerUsuarios();
 
         let usuario =
             usuarios.find(
                 usuario =>
                     usuario.googleId === googleId
             );
-
-        // ------------------------------------------------
-        // SE NÃO ENCONTROU PELO GOOGLE ID,
-        // PROCURA PELO E-MAIL
-        // ------------------------------------------------
 
         if (!usuario) {
 
@@ -590,29 +499,23 @@ app.post("/auth/google", async (req, res) => {
 
             usuario = {
 
-                id:
-                    Date.now().toString(),
+                id: Date.now().toString(),
 
-                googleId:
-                    googleId,
+                googleId: googleId,
 
-                nome:
-                    nome,
+                nome: nome,
 
-                email:
-                    email,
+                curso: "",
 
-                senha:
-                    null,
+                email: email,
 
-                foto:
-                    foto,
+                senha: null,
 
-                provedor:
-                    "google",
+                foto: foto,
 
-                emailVerificado:
-                    emailVerificado
+                provedor: "google",
+
+                emailVerificado: emailVerificado
             };
 
             usuarios.push(usuario);
@@ -632,21 +535,11 @@ app.post("/auth/google", async (req, res) => {
 
         else {
 
-            // Atualiza dados do Google
-            usuario.googleId =
-                googleId;
+            usuario.googleId = googleId;
+            usuario.nome = nome;
+            usuario.foto = foto;
+            usuario.emailVerificado = emailVerificado;
 
-            usuario.nome =
-                nome;
-
-            usuario.foto =
-                foto;
-
-            usuario.emailVerificado =
-                emailVerificado;
-
-            // Se ele já possuía conta por e-mail,
-            // agora também poderá entrar com Google.
             usuario.provedor =
                 usuario.provedor === "email"
                     ? "email_google"
@@ -660,30 +553,7 @@ app.post("/auth/google", async (req, res) => {
             );
         }
 
-        // ------------------------------------------------
-        // CRIA A SESSÃO
-        // ------------------------------------------------
-
-        req.session.usuario = {
-
-            id:
-                usuario.id,
-
-            nome:
-                usuario.nome,
-
-            email:
-                usuario.email,
-
-            foto:
-                usuario.foto || null,
-
-            provedor:
-                usuario.provedor,
-
-            emailVerificado:
-                usuario.emailVerificado
-        };
+        req.session.usuario = montarSessao(usuario);
 
         console.log(
             "✅ Sessão criada para:",
@@ -694,11 +564,9 @@ app.post("/auth/google", async (req, res) => {
 
             sucesso: true,
 
-            mensagem:
-                "Login com Google realizado com sucesso.",
+            mensagem: "Login com Google realizado com sucesso.",
 
-            usuario:
-                req.session.usuario
+            usuario: req.session.usuario
         });
 
     } catch (erro) {
@@ -707,16 +575,13 @@ app.post("/auth/google", async (req, res) => {
             "❌ ERRO NO LOGIN COM GOOGLE"
         );
 
-        console.error(
-            erro
-        );
+        console.error(erro);
 
         return res.status(401).json({
 
             sucesso: false,
 
-            erro:
-                "Não foi possível validar o login com Google."
+            erro: "Não foi possível validar o login com Google."
         });
     }
 });
@@ -742,8 +607,7 @@ app.get("/auth/me", (req, res) => {
 
         autenticado: true,
 
-        usuario:
-            req.session.usuario
+        usuario: req.session.usuario
     });
 });
 
@@ -763,9 +627,313 @@ app.post("/auth/logout", (req, res) => {
 
         sucesso: true,
 
-        mensagem:
-            "Logout realizado com sucesso."
+        mensagem: "Logout realizado com sucesso."
     });
+});
+
+// ======================================================
+// PERFIL — EDITAR NOME / CURSO / E-MAIL
+// ======================================================
+
+app.put("/perfil", exigirLogin, async (req, res) => {
+
+    try {
+
+        const {
+            nome,
+            curso,
+            email
+        } = req.body;
+
+        if (!nome || !email) {
+
+            return res.status(400).json({
+
+                sucesso: false,
+
+                erro: "Informe nome e e-mail."
+            });
+        }
+
+        const emailValido =
+            /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+        if (!emailValido) {
+
+            return res.status(400).json({
+
+                sucesso: false,
+
+                erro: "Informe um e-mail válido."
+            });
+        }
+
+        const emailNormalizado =
+            email.trim().toLowerCase();
+
+        const usuarios = lerUsuarios();
+
+        const indice =
+            usuarios.findIndex(
+                usuario =>
+                    usuario.id === req.session.usuario.id
+            );
+
+        if (indice === -1) {
+
+            return res.status(404).json({
+
+                sucesso: false,
+
+                erro: "Usuário não encontrado."
+            });
+        }
+
+        // Se o e-mail mudou, garante que não pertence
+        // a outra conta.
+        if (emailNormalizado !== usuarios[indice].email) {
+
+            const emailEmUso =
+                usuarios.some(
+                    (usuario, i) =>
+                        i !== indice &&
+                        usuario.email === emailNormalizado
+                );
+
+            if (emailEmUso) {
+
+                return res.status(409).json({
+
+                    sucesso: false,
+
+                    erro: "Este e-mail já está sendo usado por outra conta."
+                });
+            }
+        }
+
+        usuarios[indice].nome = nome.trim();
+        usuarios[indice].curso = (curso || "").trim();
+        usuarios[indice].email = emailNormalizado;
+
+        salvarUsuarios(usuarios);
+
+        req.session.usuario = montarSessao(usuarios[indice]);
+
+        console.log(
+            "✏️ Perfil atualizado:",
+            usuarios[indice].email
+        );
+
+        return res.json({
+
+            sucesso: true,
+
+            usuario: req.session.usuario
+        });
+
+    } catch (erro) {
+
+        console.error(
+            "❌ Erro ao atualizar perfil:",
+            erro
+        );
+
+        return res.status(500).json({
+
+            sucesso: false,
+
+            erro: "Erro interno ao atualizar perfil."
+        });
+    }
+});
+
+// ======================================================
+// PERFIL — TROCAR SENHA
+// ======================================================
+
+app.post("/perfil/senha", exigirLogin, async (req, res) => {
+
+    try {
+
+        const {
+            senhaAtual,
+            senhaNova
+        } = req.body;
+
+        if (
+            !senhaNova ||
+            senhaNova.length < 6
+        ) {
+
+            return res.status(400).json({
+
+                sucesso: false,
+
+                erro: "A nova senha deve possuir pelo menos 6 caracteres."
+            });
+        }
+
+        const usuarios = lerUsuarios();
+
+        const indice =
+            usuarios.findIndex(
+                usuario =>
+                    usuario.id === req.session.usuario.id
+            );
+
+        if (indice === -1) {
+
+            return res.status(404).json({
+
+                sucesso: false,
+
+                erro: "Usuário não encontrado."
+            });
+        }
+
+        const usuario = usuarios[indice];
+
+        // Se o usuário já tinha senha própria,
+        // exige a senha atual pra trocar.
+        if (usuario.senha) {
+
+            if (!senhaAtual) {
+
+                return res.status(400).json({
+
+                    sucesso: false,
+
+                    erro: "Informe sua senha atual."
+                });
+            }
+
+            const senhaCorreta =
+                await bcrypt.compare(
+                    senhaAtual,
+                    usuario.senha
+                );
+
+            if (!senhaCorreta) {
+
+                return res.status(401).json({
+
+                    sucesso: false,
+
+                    erro: "Senha atual incorreta."
+                });
+            }
+        }
+
+        usuario.senha =
+            await bcrypt.hash(senhaNova, 10);
+
+        // Se a conta era só do Google, agora também
+        // pode entrar com e-mail e senha.
+        if (usuario.provedor === "google") {
+            usuario.provedor = "email_google";
+        }
+
+        salvarUsuarios(usuarios);
+
+        req.session.usuario = montarSessao(usuario);
+
+        console.log(
+            "🔐 Senha atualizada para:",
+            usuario.email
+        );
+
+        return res.json({
+
+            sucesso: true,
+
+            mensagem: "Senha atualizada com sucesso.",
+
+            usuario: req.session.usuario
+        });
+
+    } catch (erro) {
+
+        console.error(
+            "❌ Erro ao trocar senha:",
+            erro
+        );
+
+        return res.status(500).json({
+
+            sucesso: false,
+
+            erro: "Erro interno ao trocar a senha."
+        });
+    }
+});
+
+// ======================================================
+// PERFIL — ATUALIZAR FOTO
+// ======================================================
+
+app.post("/perfil/foto", exigirLogin, (req, res) => {
+
+    try {
+
+        const {
+            foto
+        } = req.body;
+
+        if (!foto) {
+
+            return res.status(400).json({
+
+                sucesso: false,
+
+                erro: "Nenhuma imagem foi enviada."
+            });
+        }
+
+        const usuarios = lerUsuarios();
+
+        const indice =
+            usuarios.findIndex(
+                usuario =>
+                    usuario.id === req.session.usuario.id
+            );
+
+        if (indice === -1) {
+
+            return res.status(404).json({
+
+                sucesso: false,
+
+                erro: "Usuário não encontrado."
+            });
+        }
+
+        usuarios[indice].foto = foto;
+
+        salvarUsuarios(usuarios);
+
+        req.session.usuario = montarSessao(usuarios[indice]);
+
+        return res.json({
+
+            sucesso: true,
+
+            usuario: req.session.usuario
+        });
+
+    } catch (erro) {
+
+        console.error(
+            "❌ Erro ao atualizar foto:",
+            erro
+        );
+
+        return res.status(500).json({
+
+            sucesso: false,
+
+            erro: "Erro interno ao atualizar a foto."
+        });
+    }
 });
 
 // ======================================================
@@ -783,8 +951,7 @@ if (!process.env.GEMINI_API_KEY) {
 
 const ai = new GoogleGenAI({
 
-    apiKey:
-        process.env.GEMINI_API_KEY
+    apiKey: process.env.GEMINI_API_KEY
 });
 
 // ======================================================
@@ -861,11 +1028,9 @@ app.get("/", (req, res) => {
 
     res.json({
 
-        status:
-            "online",
+        status: "online",
 
-        mensagem:
-            "Backend JoviClass funcionando!"
+        mensagem: "Backend JoviClass funcionando!"
     });
 });
 
@@ -877,11 +1042,9 @@ app.get("/teste", (req, res) => {
 
     res.json({
 
-        status:
-            "ok",
+        status: "ok",
 
-        mensagem:
-            "Rota de teste funcionando!"
+        mensagem: "Rota de teste funcionando!"
     });
 });
 
@@ -1131,10 +1294,6 @@ ${texto}
 // ======================================================
 // ROTA DA INTELIGÊNCIA ARTIFICIAL
 // ======================================================
-//
-// IMPORTANTE:
-// Agora somente usuários logados podem utilizar a IA.
-//
 
 app.post(
     "/ia",
@@ -1184,8 +1343,7 @@ app.post(
 
                 return res.status(400).json({
 
-                    erro:
-                        "Nenhum conteúdo foi enviado."
+                    erro: "Nenhum conteúdo foi enviado."
                 });
             }
 
@@ -1199,8 +1357,7 @@ app.post(
 
                 return res.status(400).json({
 
-                    erro:
-                        "Ação de IA inválida."
+                    erro: "Ação de IA inválida."
                 });
             }
 
@@ -1215,11 +1372,9 @@ app.post(
             const resposta =
                 await chamarGeminiComRetry({
 
-                    model:
-                        "gemini-3.5-flash",
+                    model: "gemini-3.5-flash",
 
-                    contents:
-                        prompt
+                    contents: prompt
                 });
 
             console.log(
@@ -1233,8 +1388,7 @@ app.post(
 
                 return res.status(500).json({
 
-                    erro:
-                        "O Gemini não retornou nenhum texto."
+                    erro: "O Gemini não retornou nenhum texto."
                 });
             }
 
@@ -1248,8 +1402,7 @@ app.post(
 
             res.json({
 
-                resultado:
-                    resultado
+                resultado: resultado
             });
 
         } catch (erro) {
@@ -1266,9 +1419,7 @@ app.post(
                 "======================================"
             );
 
-            console.error(
-                erro
-            );
+            console.error(erro);
 
             console.error(
                 "======================================\n"
@@ -1287,9 +1438,6 @@ app.post(
 // ======================================================
 // ROTA DE VISÃO
 // ======================================================
-//
-// Também exige login.
-//
 
 app.post(
     "/identificar-imagem",
@@ -1318,8 +1466,7 @@ app.post(
 
                 return res.status(400).json({
 
-                    erro:
-                        "Nenhuma imagem foi enviada."
+                    erro: "Nenhuma imagem foi enviada."
                 });
             }
 
@@ -1330,15 +1477,13 @@ app.post(
             const resposta =
                 await chamarGeminiComRetry({
 
-                    model:
-                        "gemini-3.5-flash",
+                    model: "gemini-3.5-flash",
 
                     contents: [
 
                         {
 
-                            role:
-                                "user",
+                            role: "user",
 
                             parts: [
 
@@ -1352,11 +1497,9 @@ app.post(
 
                                     inlineData: {
 
-                                        mimeType:
-                                            "image/jpeg",
+                                        mimeType: "image/jpeg",
 
-                                        data:
-                                            imagemBase64
+                                        data: imagemBase64
                                     }
                                 }
                             ]
@@ -1381,8 +1524,7 @@ app.post(
 
             res.json({
 
-                tipo:
-                    tipo
+                tipo: tipo
             });
 
         } catch (erro) {
@@ -1391,9 +1533,7 @@ app.post(
                 "❌ ERRO NA IDENTIFICAÇÃO DE IMAGEM"
             );
 
-            console.error(
-                erro
-            );
+            console.error(erro);
 
             res.status(500).json({
 
@@ -1408,9 +1548,6 @@ app.post(
 // ======================================================
 // TESTE DO GEMINI
 // ======================================================
-//
-// Também exige login.
-//
 
 app.get(
     "/teste-gemini",
@@ -1426,11 +1563,9 @@ app.get(
             const resposta =
                 await chamarGeminiComRetry({
 
-                    model:
-                        "gemini-3.5-flash",
+                    model: "gemini-3.5-flash",
 
-                    contents:
-                        "Responda apenas: Gemini funcionando!"
+                    contents: "Responda apenas: Gemini funcionando!"
                 });
 
             console.log(
@@ -1440,11 +1575,9 @@ app.get(
 
             res.json({
 
-                sucesso:
-                    true,
+                sucesso: true,
 
-                resposta:
-                    resposta.text
+                resposta: resposta.text
             });
 
         } catch (erro) {
@@ -1453,17 +1586,13 @@ app.get(
                 "❌ ERRO NO GEMINI:"
             );
 
-            console.error(
-                erro
-            );
+            console.error(erro);
 
             res.status(500).json({
 
-                sucesso:
-                    false,
+                sucesso: false,
 
-                erro:
-                    erro.message
+                erro: erro.message
             });
         }
     }

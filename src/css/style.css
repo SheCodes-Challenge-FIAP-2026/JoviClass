@@ -814,3 +814,482 @@ a {
     grid-template-columns: repeat(4, 1fr);
   }
 }
+/* =========================================================
+   AUTENTICAÇÃO — LOGIN / CADASTRO
+   (substitui todo o bloco antigo de #authOverlay pra baixo
+   no seu style.css)
+========================================================= */
+
+/* Fundo que bloqueia toda a aplicação */
+.auth-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 20px;
+
+  background:
+    radial-gradient(
+      circle at 20% 20%,
+      rgba(77, 163, 255, 0.35),
+      transparent 35%
+    ),
+    radial-gradient(
+      circle at 80% 80%,
+      rgba(52, 211, 153, 0.18),
+      transparent 30%
+    ),
+    linear-gradient(
+      135deg,
+      #0015d6 0%,
+      #000fb0 55%,
+      #07147d 100%
+    );
+
+  overflow-y: auto;
+}
+
+body:not(.auth-aberto) .auth-overlay {
+  display: none;
+}
+
+/* =========================================
+   CARD PRINCIPAL
+========================================= */
+
+.auth-modal {
+  position: relative;
+
+  width: 100%;
+  max-width: 430px;
+
+  background: #ffffff;
+
+  border-radius: 24px;
+
+  padding: 38px 34px 32px;
+
+  box-shadow:
+    0 25px 60px rgba(0, 0, 0, 0.25),
+    0 8px 25px rgba(0, 15, 176, 0.18);
+
+  text-align: center;
+
+  animation: authEntrada 0.45s ease;
+}
+
+@keyframes authEntrada {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* =========================================
+   LOGO
+========================================= */
+
+.auth-modal .auth-logo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+
+  margin-bottom: 18px;
+}
+
+.auth-modal .auth-logo img {
+  width: 64px;
+  height: 64px;
+  object-fit: cover;
+  border-radius: 16px;
+  box-shadow: 0 8px 20px rgba(0, 15, 176, 0.2);
+}
+
+.auth-modal .auth-logo span {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #12142b;
+  letter-spacing: -0.3px;
+}
+
+/* =========================================
+   TÍTULO E DESCRIÇÃO
+========================================= */
+
+.auth-topo {
+  margin-bottom: 22px;
+}
+
+.auth-topo h1 {
+  color: #12142b;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  font-size: 1.5rem;
+  margin: 0;
+}
+
+.auth-topo p {
+  color: #888;
+  font-size: 13.5px;
+  line-height: 1.6;
+  margin: 8px auto 0;
+  max-width: 330px;
+}
+
+/* =========================================
+   ABAS (LOGIN / CRIAR CONTA)
+========================================= */
+
+.auth-tabs {
+  display: flex;
+  gap: 6px;
+
+  background: #f2f3fa;
+  border-radius: 12px;
+  padding: 4px;
+
+  margin-bottom: 22px;
+}
+
+.auth-tab {
+  flex: 1;
+
+  border: none;
+  background: transparent;
+
+  padding: 10px 12px;
+  border-radius: 9px;
+
+  font-family: "Manrope", Arial, sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: #666;
+
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.auth-tab:hover {
+  color: #12142b;
+}
+
+.auth-tab.ativo {
+  background: #ffffff;
+  color: #000fb0;
+  box-shadow: 0 3px 10px rgba(0, 15, 176, 0.12);
+}
+
+/* =========================================
+   FORMULÁRIOS
+========================================= */
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: 100%;
+  text-align: left;
+}
+
+.campo-auth {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.campo-auth label {
+  color: #333;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.campo-auth input {
+  width: 100%;
+  height: 48px;
+
+  padding: 0 15px;
+
+  border: 1px solid #e0e4ff;
+  border-radius: 12px;
+  outline: none;
+
+  background: #fafaff;
+  color: #12142b;
+
+  font-family: "Manrope", Arial, sans-serif;
+  font-size: 13.5px;
+
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease;
+}
+
+.campo-auth input::placeholder {
+  color: #aaa;
+}
+
+.campo-auth input:focus {
+  border-color: #1466ff;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(20, 102, 255, 0.1);
+}
+
+/* Checkbox de termos (cadastro) */
+
+.auth-termos-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+
+  font-size: 11.5px;
+  color: #666;
+  line-height: 1.5;
+
+  cursor: pointer;
+}
+
+.auth-termos-check input {
+  margin-top: 2px;
+  accent-color: #000fb0;
+  flex-shrink: 0;
+}
+
+/* =========================================
+   BOTÃO PRINCIPAL
+========================================= */
+
+.auth-btn {
+  width: 100%;
+  min-height: 48px;
+  margin-top: 5px;
+
+  border: none;
+  border-radius: 12px;
+
+  background: linear-gradient(135deg, #0015d6, #1466ff);
+
+  color: #ffffff;
+
+  font-family: "Manrope", Arial, sans-serif;
+  font-size: 14px;
+  font-weight: 800;
+
+  cursor: pointer;
+
+  box-shadow: 0 7px 18px rgba(0, 15, 176, 0.25);
+
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.auth-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(0, 15, 176, 0.32);
+}
+
+.auth-btn:active {
+  transform: translateY(0);
+}
+
+/* =========================================
+   DIVISOR "OU"
+========================================= */
+
+.auth-ou {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  margin: 24px 0;
+
+  color: #999;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.auth-ou span {
+  flex: 1;
+  height: 1px;
+  background: #e8eaf2;
+}
+
+/* =========================================
+   LOGIN COM GOOGLE
+========================================= */
+
+.google-login {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+#googleBtn {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+#googleBtn > div {
+  width: 100% !important;
+}
+
+/* =========================================
+   MENSAGEM DE ERRO
+========================================= */
+
+.auth-erro {
+  display: none;
+
+  width: 100%;
+  margin-top: 14px;
+
+  padding: 11px 13px;
+  border-radius: 10px;
+
+  background: #ffe8eb;
+  border: 1px solid #ffc5cc;
+
+  color: #d92d4f;
+
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+.auth-erro:not(:empty) {
+  display: block;
+}
+
+/* =========================================
+   TEXTO INFERIOR DE PRIVACIDADE
+========================================= */
+
+.auth-privacidade {
+  margin-top: 22px;
+
+  color: #999;
+  font-size: 10.5px;
+  line-height: 1.5;
+}
+
+.auth-privacidade::before {
+  content: "🔒 ";
+  font-size: 11px;
+}
+
+/* =========================================
+   BODY BLOQUEADO
+========================================= */
+
+/*
+   O JavaScript adiciona .auth-aberto
+   enquanto o usuário não estiver autenticado.
+*/
+
+body.auth-aberto {
+  overflow: hidden;
+}
+
+/* Impede interação com o conteúdo atrás do login */
+
+body.auth-aberto > *:not(.auth-overlay) {
+  pointer-events: none;
+  user-select: none;
+}
+
+/* =========================================
+   RESPONSIVIDADE
+========================================= */
+
+@media (max-width: 560px) {
+  .auth-overlay {
+    padding: 16px;
+  }
+
+  .auth-modal {
+    max-width: 100%;
+    padding: 30px 22px 25px;
+    border-radius: 20px;
+  }
+
+  .auth-modal .auth-logo img {
+    width: 54px;
+    height: 54px;
+    border-radius: 14px;
+  }
+
+  .auth-topo h1 {
+    font-size: 1.3rem;
+  }
+
+  .auth-topo p {
+    font-size: 12.5px;
+  }
+}
+
+@media (max-height: 650px) {
+  .auth-overlay {
+    align-items: flex-start;
+    padding-top: 25px;
+    padding-bottom: 25px;
+  }
+
+  .auth-modal {
+    padding-top: 25px;
+    padding-bottom: 22px;
+  }
+
+  .auth-modal .auth-logo img {
+    width: 48px;
+    height: 48px;
+  }
+
+  .auth-topo {
+    margin-bottom: 16px;
+  }
+
+  .auth-ou {
+    margin: 16px 0;
+  }
+}
+
+/* =========================================
+   ACESSIBILIDADE
+========================================= */
+
+.auth-modal button:focus-visible,
+.auth-modal input:focus-visible {
+  outline: 3px solid rgba(52, 211, 153, 0.55);
+  outline-offset: 3px;
+}
+
+/* =========================================
+   GOOGLE LOGIN - AJUSTE RESPONSIVO
+========================================= */
+
+@media (max-width: 400px) {
+  #googleBtn {
+    overflow: hidden;
+  }
+
+  #googleBtn iframe {
+    max-width: 100%;
+  }
+
+  .auth-modal {
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+}

@@ -1,3 +1,15 @@
+/* =========================================================
+   URL BASE DA API
+========================================================= */
+
+const API_BASE =
+  `http://${window.location.hostname}:3000`;
+
+
+/* =========================================================
+   MENU HAMBURGUER
+========================================================= */
+
 const hamburger = document.getElementById("hamburger");
 const menuLinks = document.getElementById("menuLinks");
 
@@ -7,9 +19,16 @@ if (hamburger && menuLinks) {
   });
 }
 
+
+/* =========================================================
+   OVERLAY DE CONFIRMAÇÃO (genérico)
+========================================================= */
+
 const overlay = document.getElementById("overlay");
 const cancelBtn = document.getElementById("cancelBtn");
 const okBtn = document.getElementById("okBtn");
+
+let acaoConfirmacaoPendente = null;
 
 const toggleOverlay = (show) => {
   if (overlay) overlay.classList.toggle("show", show);
@@ -18,12 +37,38 @@ const toggleOverlay = (show) => {
 document.querySelectorAll("[data-confirm]").forEach((el) => {
   el.addEventListener("click", (e) => {
     e.preventDefault();
+
+    // Se o botão que abriu a confirmação for o de sair da
+    // conta, guardamos a ação de logout pra rodar ao confirmar.
+    acaoConfirmacaoPendente =
+      el.id === "btnSair" ? sairDaConta : null;
+
     toggleOverlay(true);
   });
 });
 
-if (cancelBtn) cancelBtn.addEventListener("click", () => toggleOverlay(false));
-if (okBtn) okBtn.addEventListener("click", () => toggleOverlay(false));
+if (cancelBtn) {
+  cancelBtn.addEventListener("click", () => {
+    acaoConfirmacaoPendente = null;
+    toggleOverlay(false);
+  });
+}
+
+if (okBtn) {
+  okBtn.addEventListener("click", () => {
+    toggleOverlay(false);
+
+    if (acaoConfirmacaoPendente) {
+      acaoConfirmacaoPendente();
+      acaoConfirmacaoPendente = null;
+    }
+  });
+}
+
+
+/* =========================================================
+   EVENTOS (usados só pelas notificações e resumo semanal)
+========================================================= */
 
 const EVENTOS = [
   { id: "prova-calculo",  titulo: "Prova de Cálculo I",      tipo: "prova",    materia: "Cálculo I", data: "2026-08-14T08:00" },
@@ -37,6 +82,8 @@ const ICONE_TIPO = {
   trabalho: "📁",
   reuniao: "🗓️",
 };
+
+const TIPO_LABEL = { prova: "Prova", trabalho: "Trabalho", reuniao: "Reunião" };
 
 const LIMIARES_ALERTA = {
   aviso7dias: 7 * 24 * 60 * 60 * 1000,
@@ -67,7 +114,7 @@ function calcularStatus(evento) {
   const dataEvento = new Date(evento.data);
   const diffMs = dataEvento - agora;
 
-  if (diffMs <= 0) return null; 
+  if (diffMs <= 0) return null;
   const diffHoras = diffMs / (1000 * 60 * 60);
   const diffDias = diffHoras / 24;
 
@@ -93,8 +140,6 @@ function gerarNotificacoes() {
     .filter(Boolean)
     .sort((a, b) => a.diffMs - b.diffMs);
 }
-
-const TIPO_LABEL = { prova: "Prova", trabalho: "Trabalho", reuniao: "Reunião" };
 
 function renderizarPainel() {
   const lista = document.getElementById("notifLista");
@@ -142,7 +187,7 @@ function dispararNotificacaoDoNavegador(evento, status) {
   if (!("Notification" in window) || Notification.permission !== "granted") return;
 
   const chaveDisparo = `${evento.id}-${status.urgencia}`;
-  if (disparadas.has(chaveDisparo)) return; 
+  if (disparadas.has(chaveDisparo)) return;
 
   new Notification(`${TIPO_LABEL[evento.tipo]}: ${evento.titulo}`, {
     body: `Vence ${status.prazoTexto}.`,
@@ -207,6 +252,11 @@ function iniciarSistemaDeNotificacoes() {
 
 iniciarSistemaDeNotificacoes();
 
+
+/* =========================================================
+   PREFERÊNCIAS (continuam locais, não fazem parte do login)
+========================================================= */
+
 const CHAVE_PREFERENCIAS = "joviclass_preferencias";
 
 function carregarPreferencias() {
@@ -249,27 +299,26 @@ function iniciarPreferenciasDoPerfil() {
   });
 }
 
-iniciarPreferenciasDoPerfil();
 
-const CHAVE_PERFIL = "joviclass_perfil";
+/* =========================================================
+   PERFIL — ESTADO ATUAL (vem do backend)
+========================================================= */
 
-const PERFIL_PADRAO = {
-  nome: "Helena Martins",
-  curso: "Engenharia de Produção · 4º período",
-  email: "helena.martins@email.com",
-  foto: "../assets/img/avatar.png",
-};
+// Preenchido depois de buscarmos /auth/me. Guardamos aqui
+// pra outras funções (edição, senha, resumo semanal) lerem
+// sem precisar buscar de novo toda hora.
+let perfilAtual = null;
 
-function carregarPerfil() {
-  try {
-    return { ...PERFIL_PADRAO, ...(JSON.parse(localStorage.getItem(CHAVE_PERFIL)) || {}) };
-  } catch {
-    return { ...PERFIL_PADRAO };
-  }
-}
 
-function salvarPerfil(perfil) {
-  localStorage.setItem(CHAVE_PERFIL, JSON.stringify(perfil));
+function mapUsuarioParaPerfil(usuario) {
+  return {
+    id: usuario.id,
+    nome: usuario.nome || "",
+    curso: usuario.curso || "",
+    email: usuario.email || "",
+    foto: usuario.foto || "../assets/img/avatar.png",
+    possuiSenha: !!usuario.possuiSenha,
+  };
 }
 
 function aplicarPerfilNaTela(perfil) {
@@ -279,14 +328,60 @@ function aplicarPerfilNaTela(perfil) {
   const fotoEl = document.getElementById("perfilFotoImg");
 
   if (nomeEl) nomeEl.textContent = perfil.nome;
-  if (cursoEl) cursoEl.textContent = perfil.curso;
+  if (cursoEl) cursoEl.textContent = perfil.curso || "Curso não informado";
   if (emailEl) emailEl.textContent = perfil.email;
   if (fotoEl) fotoEl.src = perfil.foto;
 }
 
+
+/* =========================================================
+   BUSCAR USUÁRIO LOGADO
+========================================================= */
+
+async function carregarUsuarioAtual() {
+  try {
+    const resposta = await fetch(`${API_BASE}/auth/me`, {
+      method: "GET",
+      credentials: "include",
+    });
+
+    if (!resposta.ok) return null;
+
+    const dados = await resposta.json();
+    return dados.autenticado ? dados.usuario : null;
+
+  } catch (erro) {
+    console.error("Erro ao verificar autenticação:", erro);
+    return null;
+  }
+}
+
+
+/* =========================================================
+   SAIR DA CONTA
+========================================================= */
+
+async function sairDaConta() {
+  try {
+    await fetch(`${API_BASE}/auth/logout`, {
+      method: "POST",
+      credentials: "include",
+    });
+  } catch (erro) {
+    console.error("Erro ao sair da conta:", erro);
+  } finally {
+    window.location.href = "../../index.html";
+  }
+}
+
+
+/* =========================================================
+   EDITAR PERFIL (nome, curso, e-mail, foto)
+========================================================= */
+
 function iniciarEdicaoDePerfil() {
   const modal = document.getElementById("editPerfilOverlay");
-  if (!modal) return; 
+  if (!modal) return;
 
   const btnEditar = document.getElementById("btnEditarPerfil");
   const form = document.getElementById("formEditarPerfil");
@@ -298,9 +393,6 @@ function iniciarEdicaoDePerfil() {
 
   const trocarFotoBtn = document.getElementById("trocarFotoBtn");
   const inputFoto = document.getElementById("inputFoto");
-
-  let perfilAtual = carregarPerfil();
-  aplicarPerfilNaTela(perfilAtual);
 
   function abrirModal() {
     campoNome.value = perfilAtual.nome;
@@ -321,8 +413,9 @@ function iniciarEdicaoDePerfil() {
   if (btnCancelarPerfil) btnCancelarPerfil.addEventListener("click", fecharModal);
 
   if (form) {
-    form.addEventListener("submit", (e) => {
+    form.addEventListener("submit", async (e) => {
       e.preventDefault();
+      erro.hidden = true;
 
       const nome = campoNome.value.trim();
       const curso = campoCurso.value.trim();
@@ -337,10 +430,29 @@ function iniciarEdicaoDePerfil() {
         return;
       }
 
-      perfilAtual = { ...perfilAtual, nome, curso, email };
-      salvarPerfil(perfilAtual);
-      aplicarPerfilNaTela(perfilAtual);
-      fecharModal();
+      try {
+        const resposta = await fetch(`${API_BASE}/perfil`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ nome, curso, email }),
+        });
+
+        const dados = await resposta.json();
+
+        if (!resposta.ok || !dados.sucesso) {
+          throw new Error(dados.erro || "Não foi possível salvar as alterações.");
+        }
+
+        // Guarda a foto atual (não veio nesse form) e atualiza o resto.
+        perfilAtual = mapUsuarioParaPerfil(dados.usuario);
+        aplicarPerfilNaTela(perfilAtual);
+        fecharModal();
+
+      } catch (erroReq) {
+        erro.textContent = erroReq.message;
+        erro.hidden = false;
+      }
     });
   }
 
@@ -357,28 +469,39 @@ function iniciarEdicaoDePerfil() {
       }
 
       const leitor = new FileReader();
-      leitor.onload = () => {
-        perfilAtual = { ...perfilAtual, foto: leitor.result };
-        salvarPerfil(perfilAtual);
-        aplicarPerfilNaTela(perfilAtual);
+
+      leitor.onload = async () => {
+        try {
+          const resposta = await fetch(`${API_BASE}/perfil/foto`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify({ foto: leitor.result }),
+          });
+
+          const dados = await resposta.json();
+
+          if (!resposta.ok || !dados.sucesso) {
+            throw new Error(dados.erro || "Não foi possível atualizar a foto.");
+          }
+
+          perfilAtual = mapUsuarioParaPerfil(dados.usuario);
+          aplicarPerfilNaTela(perfilAtual);
+
+        } catch (erroFoto) {
+          alert(erroFoto.message);
+        }
       };
+
       leitor.readAsDataURL(arquivo);
     });
   }
 }
 
-iniciarEdicaoDePerfil();
 
-const CHAVE_SENHA = "joviclass_senha_hash";
-
-function hashSimples(texto) {
-  let hash = 0;
-  for (let i = 0; i < texto.length; i++) {
-    hash = (hash << 5) - hash + texto.charCodeAt(i);
-    hash |= 0;
-  }
-  return String(hash);
-}
+/* =========================================================
+   SENHA E SEGURANÇA
+========================================================= */
 
 function iniciarSenhaSeguranca() {
   const modal = document.getElementById("modalSenha");
@@ -395,16 +518,14 @@ function iniciarSenhaSeguranca() {
   const campoConfirma = document.getElementById("campoSenhaConfirma");
   const blocoSenhaAtual = document.getElementById("blocoSenhaAtual");
 
-  function temSenhaCadastrada() {
-    return !!localStorage.getItem(CHAVE_SENHA);
-  }
-
   function abrirModal() {
     form.reset();
     erro.hidden = true;
     sucesso.hidden = true;
 
-    const jaTemSenha = temSenhaCadastrada();
+    // Contas só-Google não têm senha própria ainda,
+    // então não pedimos a "senha atual" nesse caso.
+    const jaTemSenha = !!perfilAtual.possuiSenha;
     blocoSenhaAtual.hidden = !jaTemSenha;
     campoAtual.required = jaTemSenha;
 
@@ -423,7 +544,7 @@ function iniciarSenhaSeguranca() {
 
   if (btnCancelar) btnCancelar.addEventListener("click", fecharModal);
 
-  form.addEventListener("submit", (e) => {
+  form.addEventListener("submit", async (e) => {
     e.preventDefault();
     erro.hidden = true;
     sucesso.hidden = true;
@@ -431,15 +552,6 @@ function iniciarSenhaSeguranca() {
     const senhaAtual = campoAtual.value;
     const senhaNova = campoNova.value;
     const senhaConfirma = campoConfirma.value;
-
-    if (temSenhaCadastrada()) {
-      const hashSalvo = localStorage.getItem(CHAVE_SENHA);
-      if (hashSimples(senhaAtual) !== hashSalvo) {
-        erro.textContent = "Senha atual incorreta.";
-        erro.hidden = false;
-        return;
-      }
-    }
 
     if (senhaNova.length < 6) {
       erro.textContent = "A nova senha deve ter pelo menos 6 caracteres.";
@@ -453,17 +565,39 @@ function iniciarSenhaSeguranca() {
       return;
     }
 
-    localStorage.setItem(CHAVE_SENHA, hashSimples(senhaNova));
+    try {
+      const resposta = await fetch(`${API_BASE}/perfil/senha`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ senhaAtual, senhaNova }),
+      });
 
-    sucesso.textContent = "Senha atualizada com sucesso!";
-    sucesso.hidden = false;
-    form.reset();
+      const dados = await resposta.json();
 
-    setTimeout(fecharModal, 1200);
+      if (!resposta.ok || !dados.sucesso) {
+        throw new Error(dados.erro || "Não foi possível atualizar a senha.");
+      }
+
+      perfilAtual.possuiSenha = true;
+
+      sucesso.textContent = "Senha atualizada com sucesso!";
+      sucesso.hidden = false;
+      form.reset();
+
+      setTimeout(fecharModal, 1200);
+
+    } catch (erroSenha) {
+      erro.textContent = erroSenha.message;
+      erro.hidden = false;
+    }
   });
 }
 
-iniciarSenhaSeguranca();
+
+/* =========================================================
+   INSTITUIÇÃO DE ENSINO (continua local por enquanto)
+========================================================= */
 
 const CHAVE_INSTITUICAO = "joviclass_instituicao";
 
@@ -551,7 +685,10 @@ function iniciarInstituicao() {
   });
 }
 
-iniciarInstituicao();
+
+/* =========================================================
+   ACESSOS E RESUMO SEMANAL
+========================================================= */
 
 const CHAVE_ACESSOS = "joviclass_acessos_materias";
 const CHAVE_ULTIMO_ENVIO_RESUMO = "joviclass_ultimo_envio_resumo";
@@ -594,7 +731,7 @@ function seedAcessosDemoSeNecessario() {
 
 function limitesDaSemanaAtual() {
   const agora = new Date();
-  const diaSemana = agora.getDay(); // 0 = domingo
+  const diaSemana = agora.getDay();
   const offsetSegunda = diaSemana === 0 ? -6 : 1 - diaSemana;
 
   const inicio = new Date(agora);
@@ -633,7 +770,7 @@ function gerarResumoSemanal() {
   const acessos = carregarAcessos();
   const materiasUnicas = [...new Set([...EVENTOS.map((e) => e.materia), ...Object.keys(acessos)])].sort();
   const eventosSemana = eventosDaSemanaAtual();
-  const perfil = carregarPerfil();
+  const perfil = perfilAtual;
   const { inicio, fim } = limitesDaSemanaAtual();
 
   const linhasAcesso = materiasUnicas.map((materia) => {
@@ -708,12 +845,48 @@ function iniciarResumoSemanal() {
   }
 }
 
-iniciarResumoSemanal();
 
-document.getElementById('btnConectarGoogle').addEventListener('click', () => {
-  window.location.href = 'http://localhost:3000/auth/google';
+/* =========================================================
+   CONEXÕES EXTERNAS (Google Drive / Notion)
+========================================================= */
+
+const btnConectarGoogle = document.getElementById("btnConectarGoogle");
+const btnConectarNotion = document.getElementById("btnConectarNotion");
+
+if (btnConectarGoogle) {
+  btnConectarGoogle.addEventListener("click", () => {
+    window.location.href = `${API_BASE}/auth/google`;
+  });
+}
+
+if (btnConectarNotion) {
+  btnConectarNotion.addEventListener("click", () => {
+    window.location.href = `${API_BASE}/auth/notion`;
+  });
+}
+
+
+/* =========================================================
+   INICIALIZAÇÃO
+========================================================= */
+
+document.addEventListener("DOMContentLoaded", async () => {
+
+  const usuario = await carregarUsuarioAtual();
+
+  // Sem sessão válida: manda pra tela de login da página inicial.
+  if (!usuario) {
+    window.location.href = "../../index.html";
+    return;
+  }
+
+  perfilAtual = mapUsuarioParaPerfil(usuario);
+  aplicarPerfilNaTela(perfilAtual);
+
+  iniciarEdicaoDePerfil();
+  iniciarSenhaSeguranca();
+
+  iniciarPreferenciasDoPerfil();
+  iniciarInstituicao();
+  iniciarResumoSemanal();
 });
-
-document.getElementById('btnConectarNotion').addEventListener('click', () => {
-  window.location.href = 'http://localhost:3000/auth/notion';
-}); 
