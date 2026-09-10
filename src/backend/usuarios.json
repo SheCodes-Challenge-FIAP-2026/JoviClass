@@ -4,13 +4,13 @@
     "nome": "scalzone gi",
     "curso": "",
     "email": "giscalzone@gmail.com",
-    "senha": "$2b$10$X45S6NEV9pyj/rAUHwFQFeztspGsg5BCqCEgQaiyq8K0MWneFwqyS",
+    "senha": "$2b$10$rIkJgm4vghYNnKz1kszJVeb..ugfuXyYk31cN7SaajwDgjXP.rFgK",
     "foto": null,
     "provedor": "email",
     "emailVerificado": true,
     "codigoVerificacao": null,
     "codigoVerificacaoExpira": null,
-    "codigoRecuperacaoSenha": "$2b$10$pLFPZ8p404i/RBcNIy9F0eAfPvhKHsCvN2wKw5BMpps0llj.txqEu",
-    "codigoRecuperacaoSenhaExpira": 1789073930759
+    "codigoRecuperacaoSenha": "$2b$10$ssAPtcvgZJKuWxs2SP7YGOuK6bvfCCUgKQD.yNCQPJfEFRLvXEbu6",
+    "codigoRecuperacaoSenhaExpira": 1789075230882
   }
 ]

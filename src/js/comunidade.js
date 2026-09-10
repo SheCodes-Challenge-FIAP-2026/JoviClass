@@ -12,6 +12,7 @@ document.getElementById("inputFoto").addEventListener("change", function () {
     if (!file) return;
 
     const reader = new FileReader();
+
     reader.onload = function (e) {
         fotoDataURL = e.target.result;
 
@@ -22,15 +23,38 @@ document.getElementById("inputFoto").addEventListener("change", function () {
         preview.style.display = "block";
         placeholder.style.display = "none";
     };
+
     reader.readAsDataURL(file);
 });
 
+
 const salasPadrao = [
-    { icone: "💬", nome: "Geral", desc: "Conversa livre entre os membros", tipo: "chat" },
-    { icone: "📚", nome: "Estudos", desc: "Dúvidas e discussões sobre conteúdo", tipo: "chat" },
-    { icone: "📁", nome: "Arquivos", desc: "Compartilhe materiais e documentos", tipo: "arquivos" },
-    { icone: "📢", nome: "Avisos", desc: "Comunicados importantes da comunidade", tipo: "chat" },
+    {
+        icone: "💬",
+        nome: "Geral",
+        desc: "Conversa livre entre os membros",
+        tipo: "chat"
+    },
+    {
+        icone: "📚",
+        nome: "Estudos",
+        desc: "Dúvidas e discussões sobre conteúdo",
+        tipo: "chat"
+    },
+    {
+        icone: "📁",
+        nome: "Arquivos",
+        desc: "Compartilhe materiais e documentos",
+        tipo: "arquivos"
+    },
+    {
+        icone: "📢",
+        nome: "Avisos",
+        desc: "Comunicados importantes da comunidade",
+        tipo: "chat"
+    },
 ];
+
 
 const dadosSalas = {};
 
@@ -38,10 +62,19 @@ const dadosComunidades = {};
 
 let comunidadeAtiva = null;
 
+
+/* =========================================================
+   STORAGE
+========================================================= */
+
 function salvarNoStorage() {
+
     try {
+
         const comunidadesSemFoto = {};
+
         Object.values(dadosComunidades).forEach(com => {
+
             comunidadesSemFoto[com.id] = {
                 id: com.id,
                 nome: com.nome,
@@ -50,889 +83,3431 @@ function salvarNoStorage() {
                 privacidade: com.privacidade,
                 convidados: com.convidados
             };
-        });
-        localStorage.setItem("joviclass_comunidades", JSON.stringify(comunidadesSemFoto));
 
-        localStorage.setItem("joviclass_salas", JSON.stringify(dadosSalas));
+        });
+
+        localStorage.setItem(
+            "joviclass_comunidades",
+            JSON.stringify(comunidadesSemFoto)
+        );
+
+
+        localStorage.setItem(
+            "joviclass_salas",
+            JSON.stringify(dadosSalas)
+        );
+
 
         const fotos = {};
+
         Object.values(dadosComunidades).forEach(com => {
             fotos[com.id] = com.foto || null;
         });
-        localStorage.setItem("joviclass_fotos", JSON.stringify(fotos));
+
+        localStorage.setItem(
+            "joviclass_fotos",
+            JSON.stringify(fotos)
+        );
+
     } catch (e) {
-        console.warn("Erro ao salvar no localStorage:", e);
+
+        console.warn(
+            "Erro ao salvar no localStorage:",
+            e
+        );
+
     }
+
 }
+
 
 function carregarDoStorage() {
+
     try {
-        const comunidades = localStorage.getItem("joviclass_comunidades");
-        const salas = localStorage.getItem("joviclass_salas");
-        const fotos = localStorage.getItem("joviclass_fotos");
+
+        const comunidades =
+            localStorage.getItem("joviclass_comunidades");
+
+        const salas =
+            localStorage.getItem("joviclass_salas");
+
+        const fotos =
+            localStorage.getItem("joviclass_fotos");
+
 
         if (comunidades) {
-            Object.assign(dadosComunidades, JSON.parse(comunidades));
+
+            Object.assign(
+                dadosComunidades,
+                JSON.parse(comunidades)
+            );
+
         }
+
+
         if (salas) {
-            Object.assign(dadosSalas, JSON.parse(salas));
+
+            Object.assign(
+                dadosSalas,
+                JSON.parse(salas)
+            );
+
         }
+
+
         if (fotos) {
+
             const fotosObj = JSON.parse(fotos);
+
             Object.keys(fotosObj).forEach(id => {
+
                 if (dadosComunidades[id]) {
-                    dadosComunidades[id].foto = fotosObj[id];
+
+                    dadosComunidades[id].foto =
+                        fotosObj[id];
+
                 }
+
             });
+
         }
+
     } catch (e) {
-        console.warn("Erro ao carregar do localStorage:", e);
+
+        console.warn(
+            "Erro ao carregar do localStorage:",
+            e
+        );
+
     }
+
 }
 
-function renderizarCard(com) {
-    const { id, nome, descricao, categoria, privacidade, foto } = com;
 
-    const card = document.createElement("div");
-    card.classList.add("cardComunidade");
+/* =========================================================
+   CARDS DE COMUNIDADES
+========================================================= */
+
+function renderizarCard(com) {
+
+    const {
+        id,
+        nome,
+        descricao,
+        categoria,
+        privacidade,
+        foto
+    } = com;
+
+
+    const card =
+        document.createElement("div");
+
+
+    card.classList.add(
+        "cardComunidade"
+    );
+
+
     card.dataset.id = id;
+
 
     const topoHTML = foto
         ? `<img src="${foto}" alt="foto">`
         : `<span class="semFoto">🏫</span>`;
 
+
     card.innerHTML = `
-        <div class="topoCard">${topoHTML}</div>
+        <div class="topoCard">
+            ${topoHTML}
+        </div>
+
         <div class="conteudoCard">
+
             <div class="cabecalhoCard">
+
                 <h3>${nome}</h3>
-                <button class="btnTresPontosCard" onclick="abrirMenuOpcoesCard(event, '${id}')" title="Opções">
-                    <span></span><span></span><span></span>
+
+                <button
+                    class="btnTresPontosCard"
+                    onclick="abrirMenuOpcoesCard(event, '${id}')"
+                    title="Opções"
+                >
+                    <span></span>
+                    <span></span>
+                    <span></span>
                 </button>
+
             </div>
+
             <p>${descricao}</p>
+
             <div class="infoComunidade">
-                <span>📁 ${categoria}</span>
-                <span>🌐 ${privacidade}</span>
+
+                <span>
+                    📁 ${categoria}
+                </span>
+
+                <span>
+                    🌐 ${privacidade}
+                </span>
+
             </div>
+
         </div>
     `;
 
-    card.addEventListener("click", function (e) {
-        if (e.target.closest(".btnTresPontosCard")) return;
-        abrirComunidade(id, nome, descricao, foto);
-    });
 
-    document.getElementById("listadeComunidades").appendChild(card);
+    card.addEventListener(
+        "click",
+        function (e) {
+
+            if (
+                e.target.closest(
+                    ".btnTresPontosCard"
+                )
+            ) {
+                return;
+            }
+
+            abrirTermosComunidade(
+                id,
+                nome,
+                descricao,
+                foto
+            );
+
+        }
+    );
+
+
+    document
+        .getElementById("listadeComunidades")
+        .appendChild(card);
+
 }
+
+
+/* =========================================================
+   FORMULÁRIO
+========================================================= */
 
 function abrirFormulario() {
+
     resetarFormulario();
-    document.getElementById("formulario").style.display = "block";
-    document.getElementById("overlay").style.display = "block";
+
+    document.getElementById(
+        "formulario"
+    ).style.display = "block";
+
+
+    document.getElementById(
+        "overlay"
+    ).style.display = "block";
+
 }
+
 
 function fecharAba() {
-    document.getElementById("formulario").style.display = "none";
-    document.getElementById("overlay").style.display = "none";
+
+    document.getElementById(
+        "formulario"
+    ).style.display = "none";
+
+
+    document.getElementById(
+        "overlay"
+    ).style.display = "none";
+
+
     resetarFormulario();
+
 }
+
 
 function resetarFormulario() {
-    document.getElementById("nomeComunidade").value = "";
-    document.getElementById("descricao").value = "";
-    document.getElementById("categoria").value = "Estudo";
-    document.getElementById("privacidade").value = "Pública";
-    document.getElementById("fotoPreview").style.display = "none";
-    document.getElementById("fotoPlaceholder").style.display = "flex";
-    document.getElementById("inputFoto").value = "";
+
+    document.getElementById(
+        "nomeComunidade"
+    ).value = "";
+
+
+    document.getElementById(
+        "descricao"
+    ).value = "";
+
+
+    document.getElementById(
+        "categoria"
+    ).value = "Estudo";
+
+
+    document.getElementById(
+        "privacidade"
+    ).value = "Pública";
+
+
+    document.getElementById(
+        "fotoPreview"
+    ).style.display = "none";
+
+
+    document.getElementById(
+        "fotoPlaceholder"
+    ).style.display = "flex";
+
+
+    document.getElementById(
+        "inputFoto"
+    ).value = "";
+
+
     fotoDataURL = null;
-    document.getElementById("tituloFormulario").innerText = "Nova Comunidade";
-    const btn = document.getElementById("btnConfirmarForm");
-    btn.innerText = "Criar comunidade";
-    btn.onclick = criarComunidade;
+
+
+    document.getElementById(
+        "tituloFormulario"
+    ).innerText = "Nova Comunidade";
+
+
+    const btn =
+        document.getElementById(
+            "btnConfirmarForm"
+        );
+
+
+    btn.innerText =
+        "Criar comunidade";
+
+
+    btn.onclick =
+        criarComunidade;
+
 }
+
+
+/* =========================================================
+   CRIAR COMUNIDADE
+========================================================= */
 
 function criarComunidade() {
-    const nome = document.getElementById("nomeComunidade").value.trim();
-    const descricao = document.getElementById("descricao").value.trim();
-    const categoria = document.getElementById("categoria").value;
-    const privacidade = document.getElementById("privacidade").value;
-    const foto = fotoDataURL;
+
+    const nome =
+        document
+            .getElementById("nomeComunidade")
+            .value
+            .trim();
+
+
+    const descricao =
+        document
+            .getElementById("descricao")
+            .value
+            .trim();
+
+
+    const categoria =
+        document
+            .getElementById("categoria")
+            .value;
+
+
+    const privacidade =
+        document
+            .getElementById("privacidade")
+            .value;
+
+
+    const foto =
+        fotoDataURL;
+
 
     if (!nome || !descricao) {
-        alert("Preencha todos os campos!");
+
+        alert(
+            "Preencha todos os campos!"
+        );
+
         return;
+
     }
 
-    const id = "com_" + Date.now();
+
+    const id =
+        "com_" + Date.now();
+
 
     dadosSalas[id] = {};
+
+
     salasPadrao.forEach(s => {
-        dadosSalas[id][s.nome] = { mensagens: [], arquivos: [], compartilhada: false };
+
+        dadosSalas[id][s.nome] = {
+            mensagens: [],
+            arquivos: [],
+            compartilhada: false
+        };
+
     });
 
-    dadosComunidades[id] = { id, nome, descricao, categoria, privacidade, foto, convidados: [] };
 
-    renderizarCard(dadosComunidades[id]);
+    dadosComunidades[id] = {
+        id,
+        nome,
+        descricao,
+        categoria,
+        privacidade,
+        foto,
+        convidados: []
+    };
+
+
+    renderizarCard(
+        dadosComunidades[id]
+    );
+
 
     salvarNoStorage();
 
+
     fecharAba();
+
 }
+
+
+/* =========================================================
+   EDITAR COMUNIDADE
+========================================================= */
 
 function abrirFormularioEdicao(id) {
-    const com = dadosComunidades[id];
+
+    const com =
+        dadosComunidades[id];
+
+
     if (!com) return;
 
-    document.getElementById("nomeComunidade").value = com.nome;
-    document.getElementById("descricao").value = com.descricao;
-    document.getElementById("categoria").value = com.categoria;
-    document.getElementById("privacidade").value = com.privacidade;
 
-    fotoDataURL = com.foto || null;
-    const preview = document.getElementById("fotoPreview");
-    const placeholder = document.getElementById("fotoPlaceholder");
+    document.getElementById(
+        "nomeComunidade"
+    ).value = com.nome;
+
+
+    document.getElementById(
+        "descricao"
+    ).value = com.descricao;
+
+
+    document.getElementById(
+        "categoria"
+    ).value = com.categoria;
+
+
+    document.getElementById(
+        "privacidade"
+    ).value = com.privacidade;
+
+
+    fotoDataURL =
+        com.foto || null;
+
+
+    const preview =
+        document.getElementById(
+            "fotoPreview"
+        );
+
+
+    const placeholder =
+        document.getElementById(
+            "fotoPlaceholder"
+        );
+
+
     if (com.foto) {
-        preview.src = com.foto;
-        preview.style.display = "block";
-        placeholder.style.display = "none";
+
+        preview.src =
+            com.foto;
+
+        preview.style.display =
+            "block";
+
+        placeholder.style.display =
+            "none";
+
     } else {
-        preview.style.display = "none";
-        placeholder.style.display = "flex";
+
+        preview.style.display =
+            "none";
+
+        placeholder.style.display =
+            "flex";
+
     }
 
-    document.getElementById("tituloFormulario").innerText = "Editar Comunidade";
-    const btn = document.getElementById("btnConfirmarForm");
-    btn.innerText = "Salvar alterações";
-    btn.onclick = function () { salvarEdicao(id); };
 
-    document.getElementById("formulario").style.display = "block";
-    document.getElementById("overlay").style.display = "block";
+    document.getElementById(
+        "tituloFormulario"
+    ).innerText =
+        "Editar Comunidade";
+
+
+    const btn =
+        document.getElementById(
+            "btnConfirmarForm"
+        );
+
+
+    btn.innerText =
+        "Salvar alterações";
+
+
+    btn.onclick =
+        function () {
+            salvarEdicao(id);
+        };
+
+
+    document.getElementById(
+        "formulario"
+    ).style.display =
+        "block";
+
+
+    document.getElementById(
+        "overlay"
+    ).style.display =
+        "block";
+
 }
+
 
 function salvarEdicao(id) {
-    const nome = document.getElementById("nomeComunidade").value.trim();
-    const descricao = document.getElementById("descricao").value.trim();
-    const categoria = document.getElementById("categoria").value;
-    const privacidade = document.getElementById("privacidade").value;
+
+    const nome =
+        document
+            .getElementById("nomeComunidade")
+            .value
+            .trim();
+
+
+    const descricao =
+        document
+            .getElementById("descricao")
+            .value
+            .trim();
+
+
+    const categoria =
+        document
+            .getElementById("categoria")
+            .value;
+
+
+    const privacidade =
+        document
+            .getElementById("privacidade")
+            .value;
+
 
     if (!nome || !descricao) {
-        alert("Preencha todos os campos!");
+
+        alert(
+            "Preencha todos os campos!"
+        );
+
         return;
+
     }
 
-    const com = dadosComunidades[id];
-    com.nome = nome;
-    com.descricao = descricao;
-    com.categoria = categoria;
-    com.privacidade = privacidade;
-    if (fotoDataURL) com.foto = fotoDataURL;
 
-    const card = document.querySelector(`.cardComunidade[data-id="${id}"]`);
+    const com =
+        dadosComunidades[id];
+
+
+    com.nome =
+        nome;
+
+
+    com.descricao =
+        descricao;
+
+
+    com.categoria =
+        categoria;
+
+
+    com.privacidade =
+        privacidade;
+
+
+    if (fotoDataURL) {
+        com.foto =
+            fotoDataURL;
+    }
+
+
+    const card =
+        document.querySelector(
+            `.cardComunidade[data-id="${id}"]`
+        );
+
+
     if (card) {
-        const topoHTML = com.foto
-            ? `<img src="${com.foto}" alt="foto">`
-            : `<span class="semFoto">🏫</span>`;
-        card.querySelector(".topoCard").innerHTML = topoHTML;
-        card.querySelector(".cabecalhoCard h3").innerText = nome;
-        card.querySelector(".conteudoCard p").innerText = descricao;
-        const spans = card.querySelectorAll(".infoComunidade span");
-        spans[0].innerText = `📁 ${categoria}`;
-        spans[1].innerText = `🌐 ${privacidade}`;
+
+        const topoHTML =
+            com.foto
+                ? `<img src="${com.foto}" alt="foto">`
+                : `<span class="semFoto">🏫</span>`;
+
+
+        card.querySelector(
+            ".topoCard"
+        ).innerHTML =
+            topoHTML;
+
+
+        card.querySelector(
+            ".cabecalhoCard h3"
+        ).innerText =
+            nome;
+
+
+        card.querySelector(
+            ".conteudoCard p"
+        ).innerText =
+            descricao;
+
+
+        const spans =
+            card.querySelectorAll(
+                ".infoComunidade span"
+            );
+
+
+        spans[0].innerText =
+            `📁 ${categoria}`;
+
+
+        spans[1].innerText =
+            `🌐 ${privacidade}`;
+
     }
 
-    if (document.getElementById("paginaComunidade").style.display !== "none") {
-        document.getElementById("tituloComunidade").innerText = nome;
-        document.getElementById("NomeDiferenciado").innerText = nome;
-        document.getElementById("descricaoComunidade").innerText = descricao;
-        const banner = document.getElementById("bannerComunidade");
+
+    if (
+        document.getElementById(
+            "paginaComunidade"
+        ).style.display !== "none"
+    ) {
+
+        document.getElementById(
+            "tituloComunidade"
+        ).innerText =
+            nome;
+
+
+        document.getElementById(
+            "NomeDiferenciado"
+        ).innerText =
+            nome;
+
+
+        document.getElementById(
+            "descricaoComunidade"
+        ).innerText =
+            descricao;
+
+
+        const banner =
+            document.getElementById(
+                "bannerComunidade"
+            );
+
+
         if (com.foto) {
-            banner.innerHTML = `<img src="${com.foto}" alt="banner">`;
+
+            banner.innerHTML =
+                `<img src="${com.foto}" alt="banner">`;
+
         } else {
-            banner.innerHTML = `<span class="semFotoBanner">🏫</span>`;
+
+            banner.innerHTML =
+                `<span class="semFotoBanner">🏫</span>`;
+
         }
+
     }
+
 
     salvarNoStorage();
 
+
     fecharAba();
+
 }
 
+
+/* =========================================================
+   MENU DE OPÇÕES
+========================================================= */
 
 function abrirMenuOpcoesCard(event, id) {
+
     event.stopPropagation();
-    comunidadeAtiva = id;
 
-    const menu = document.getElementById("menuOpcoes");
-    const overlay = document.getElementById("overlayMenu");
 
-    const btn = event.currentTarget;
-    const rect = btn.getBoundingClientRect();
+    comunidadeAtiva =
+        id;
 
-    menu.style.top = (rect.bottom + window.scrollY + 6) + "px";
-    menu.style.left = (rect.left + window.scrollX - 120) + "px";
-    menu.style.display = "block";
-    overlay.style.display = "block";
+
+    const menu =
+        document.getElementById(
+            "menuOpcoes"
+        );
+
+
+    const overlay =
+        document.getElementById(
+            "overlayMenu"
+        );
+
+
+    const btn =
+        event.currentTarget;
+
+
+    const rect =
+        btn.getBoundingClientRect();
+
+
+    menu.style.top =
+        (
+            rect.bottom +
+            window.scrollY +
+            6
+        ) + "px";
+
+
+    menu.style.left =
+        (
+            rect.left +
+            window.scrollX -
+            120
+        ) + "px";
+
+
+    menu.style.display =
+        "block";
+
+
+    overlay.style.display =
+        "block";
+
 }
+
 
 function abrirMenuOpcoesPagina(event) {
+
     event.stopPropagation();
 
-    const menu = document.getElementById("menuOpcoes");
-    const overlay = document.getElementById("overlayMenu");
 
-    const btn = event.currentTarget;
-    const rect = btn.getBoundingClientRect();
+    const menu =
+        document.getElementById(
+            "menuOpcoes"
+        );
 
-    menu.style.top = (rect.bottom + window.scrollY + 6) + "px";
-    menu.style.left = (rect.left + window.scrollX - 140) + "px";
-    menu.style.display = "block";
-    overlay.style.display = "block";
+
+    const overlay =
+        document.getElementById(
+            "overlayMenu"
+        );
+
+
+    const btn =
+        event.currentTarget;
+
+
+    const rect =
+        btn.getBoundingClientRect();
+
+
+    menu.style.top =
+        (
+            rect.bottom +
+            window.scrollY +
+            6
+        ) + "px";
+
+
+    menu.style.left =
+        (
+            rect.left +
+            window.scrollX -
+            140
+        ) + "px";
+
+
+    menu.style.display =
+        "block";
+
+
+    overlay.style.display =
+        "block";
+
 }
+
 
 function fecharMenuOpcoes() {
-    document.getElementById("menuOpcoes").style.display = "none";
-    document.getElementById("overlayMenu").style.display = "none";
+
+    document.getElementById(
+        "menuOpcoes"
+    ).style.display =
+        "none";
+
+
+    document.getElementById(
+        "overlayMenu"
+    ).style.display =
+        "none";
+
 }
+
 
 function acaoMenuOpcoes(acao) {
+
     fecharMenuOpcoes();
 
+
     if (!comunidadeAtiva) return;
-    const com = dadosComunidades[comunidadeAtiva];
+
+
+    const com =
+        dadosComunidades[
+            comunidadeAtiva
+        ];
+
+
     if (!com) return;
+
 
     if (acao === "convidar") {
-        abrirModalConvidar(comunidadeAtiva);
+
+        abrirModalConvidar(
+            comunidadeAtiva
+        );
+
     } else if (acao === "editar") {
-        abrirFormularioEdicao(comunidadeAtiva);
+
+        abrirFormularioEdicao(
+            comunidadeAtiva
+        );
+
     } else if (acao === "excluir") {
-        if (confirm(`Tem certeza que deseja excluir a comunidade "${com.nome}"?`)) {
-            excluirComunidade(comunidadeAtiva);
+
+        if (
+            confirm(
+                `Tem certeza que deseja excluir a comunidade "${com.nome}"?`
+            )
+        ) {
+
+            excluirComunidade(
+                comunidadeAtiva
+            );
+
         }
+
     }
+
 }
+
 
 function excluirComunidade(id) {
-    const card = document.querySelector(`.cardComunidade[data-id="${id}"]`);
-    if (card) card.remove();
+
+    const card =
+        document.querySelector(
+            `.cardComunidade[data-id="${id}"]`
+        );
+
+
+    if (card) {
+        card.remove();
+    }
+
 
     delete dadosComunidades[id];
+
     delete dadosSalas[id];
 
+
     salvarNoStorage();
 
-    if (document.getElementById("paginaComunidade").style.display !== "none") {
+
+    if (
+        document.getElementById(
+            "paginaComunidade"
+        ).style.display !== "none"
+    ) {
+
         voltarComunidades();
+
     }
 
-    comunidadeAtiva = null;
+
+    comunidadeAtiva =
+        null;
+
 }
+
+
+/* =========================================================
+   MODAL DE CONVITE
+========================================================= */
 
 function abrirModalConvidar(id) {
-    comunidadeAtiva = id;
 
-    const link = `https://joviclass.app/convite/${id}`;
-    document.getElementById("inputLinkConvite").value = link;
-    document.getElementById("statusCopiar").textContent = "";
-    document.getElementById("emailConvite").value = "";
+    comunidadeAtiva =
+        id;
 
-    renderizarConvidados(id);
 
-    document.getElementById("modalConvidar").style.display = "flex";
-    document.getElementById("overlay").style.display = "block";
+    const link =
+        `https://joviclass.app/convite/${id}`;
+
+
+    document.getElementById(
+        "inputLinkConvite"
+    ).value =
+        link;
+
+
+    document.getElementById(
+        "statusCopiar"
+    ).textContent =
+        "";
+
+
+    document.getElementById(
+        "emailConvite"
+    ).value =
+        "";
+
+
+    renderizarConvidados(
+        id
+    );
+
+
+    document.getElementById(
+        "modalConvidar"
+    ).style.display =
+        "flex";
+
+
+    document.getElementById(
+        "overlay"
+    ).style.display =
+        "block";
+
 }
+
 
 function fecharModalConvidar() {
-    document.getElementById("modalConvidar").style.display = "none";
-    document.getElementById("overlay").style.display = "none";
+
+    document.getElementById(
+        "modalConvidar"
+    ).style.display =
+        "none";
+
+
+    document.getElementById(
+        "overlay"
+    ).style.display =
+        "none";
+
 }
 
-document.getElementById("overlay").addEventListener("click", function () {
-    fecharAba();
-    fecharModalConvidar();
-});
+
+document.getElementById(
+    "overlay"
+).addEventListener(
+    "click",
+    function () {
+
+        fecharAba();
+
+        fecharModalConvidar();
+
+    }
+);
+
+
+/* =========================================================
+   COPIAR LINK
+========================================================= */
 
 function copiarLink() {
-    const input = document.getElementById("inputLinkConvite");
+
+    const input =
+        document.getElementById(
+            "inputLinkConvite"
+        );
+
+
     input.select();
-    input.setSelectionRange(0, 99999);
+
+    input.setSelectionRange(
+        0,
+        99999
+    );
+
 
     try {
-        navigator.clipboard.writeText(input.value).then(() => {
-            mostrarStatusCopiar("✅ Link copiado!");
-        }).catch(() => {
-            document.execCommand("copy");
-            mostrarStatusCopiar("✅ Link copiado!");
-        });
+
+        navigator.clipboard
+            .writeText(input.value)
+            .then(() => {
+
+                mostrarStatusCopiar(
+                    "✅ Link copiado!"
+                );
+
+            })
+            .catch(() => {
+
+                document.execCommand(
+                    "copy"
+                );
+
+                mostrarStatusCopiar(
+                    "✅ Link copiado!"
+                );
+
+            });
+
     } catch (e) {
-        document.execCommand("copy");
-        mostrarStatusCopiar("✅ Link copiado!");
+
+        document.execCommand(
+            "copy"
+        );
+
+        mostrarStatusCopiar(
+            "✅ Link copiado!"
+        );
+
     }
+
 }
+
 
 function mostrarStatusCopiar(msg) {
-    const status = document.getElementById("statusCopiar");
-    status.textContent = msg;
-    setTimeout(() => { status.textContent = ""; }, 3000);
+
+    const status =
+        document.getElementById(
+            "statusCopiar"
+        );
+
+
+    status.textContent =
+        msg;
+
+
+    setTimeout(
+        () => {
+            status.textContent =
+                "";
+        },
+        3000
+    );
+
 }
+
+
+/* =========================================================
+   CONVITE POR E-MAIL
+========================================================= */
 
 function enviarConviteEmail() {
-    const emailInput = document.getElementById("emailConvite");
-    const email = emailInput.value.trim();
 
-    if (!email || !email.includes("@")) {
-        alert("Digite um e-mail válido.");
+    const emailInput =
+        document.getElementById(
+            "emailConvite"
+        );
+
+
+    const email =
+        emailInput.value.trim();
+
+
+    if (
+        !email ||
+        !email.includes("@")
+    ) {
+
+        alert(
+            "Digite um e-mail válido."
+        );
+
         return;
+
     }
+
 
     if (!comunidadeAtiva) return;
-    const com = dadosComunidades[comunidadeAtiva];
+
+
+    const com =
+        dadosComunidades[
+            comunidadeAtiva
+        ];
+
+
     if (!com) return;
 
-    if (com.convidados.find(c => c.email === email)) {
-        alert("Este e-mail já recebeu um convite.");
+
+    if (
+        com.convidados.find(
+            c => c.email === email
+        )
+    ) {
+
+        alert(
+            "Este e-mail já recebeu um convite."
+        );
+
         return;
+
     }
 
-    com.convidados.push({ email, status: "pendente" });
-    emailInput.value = "";
+
+    com.convidados.push({
+        email,
+        status: "pendente"
+    });
+
+
+    emailInput.value =
+        "";
+
 
     salvarNoStorage();
-    renderizarConvidados(comunidadeAtiva);
-    renderizarConvidadosPasta(comunidadeAtiva); 
+
+
+    renderizarConvidados(
+        comunidadeAtiva
+    );
+
+
+    renderizarConvidadosPasta(
+        comunidadeAtiva
+    );
+
 }
+
 
 function renderizarConvidados(id) {
-    const com = dadosComunidades[id];
-    const container = document.getElementById("convidadosItens");
-    container.innerHTML = "";
 
-    if (!com || com.convidados.length === 0) {
-        document.getElementById("listaConvidados").style.display = "none";
+    const com =
+        dadosComunidades[id];
+
+
+    const container =
+        document.getElementById(
+            "convidadosItens"
+        );
+
+
+    container.innerHTML =
+        "";
+
+
+    if (
+        !com ||
+        com.convidados.length === 0
+    ) {
+
+        document.getElementById(
+            "listaConvidados"
+        ).style.display =
+            "none";
+
         return;
+
     }
 
-    document.getElementById("listaConvidados").style.display = "block";
 
-    com.convidados.forEach((c, idx) => {
-        const item = document.createElement("div");
-        item.classList.add("convidadoItem");
-        item.innerHTML = `
-            <div class="convidadoEmail">
-                <span class="iconEmail">✉️</span>
-                <span>${c.email}</span>
-            </div>
-            <div class="convidadoAcoes">
-                <span class="badgePendente">Pendente</span>
-                <button class="btnRemoverConvite" onclick="removerConvite('${id}', ${idx})" title="Remover convite">✕</button>
-            </div>
-        `;
-        container.appendChild(item);
-    });
+    document.getElementById(
+        "listaConvidados"
+    ).style.display =
+        "block";
+
+
+    com.convidados.forEach(
+        (c, idx) => {
+
+            const item =
+                document.createElement(
+                    "div"
+                );
+
+
+            item.classList.add(
+                "convidadoItem"
+            );
+
+
+            item.innerHTML = `
+                <div class="convidadoEmail">
+                    <span class="iconEmail">✉️</span>
+                    <span>${c.email}</span>
+                </div>
+
+                <div class="convidadoAcoes">
+
+                    <span class="badgePendente">
+                        Pendente
+                    </span>
+
+                    <button
+                        class="btnRemoverConvite"
+                        onclick="removerConvite('${id}', ${idx})"
+                        title="Remover convite"
+                    >
+                        ✕
+                    </button>
+
+                </div>
+            `;
+
+
+            container.appendChild(
+                item
+            );
+
+        }
+    );
+
 }
+
 
 function removerConvite(id, idx) {
-    dadosComunidades[id].convidados.splice(idx, 1);
+
+    dadosComunidades[
+        id
+    ].convidados.splice(
+        idx,
+        1
+    );
+
+
     salvarNoStorage();
-    renderizarConvidados(id);
-    renderizarConvidadosPasta(id);
+
+
+    renderizarConvidados(
+        id
+    );
+
+
+    renderizarConvidadosPasta(
+        id
+    );
+
 }
 
 
+/* =========================================================
+   COMPARTILHAMENTO DE PASTA
+========================================================= */
 
-function alternarCompartilharPasta(comId, checked) {
-    const dados = dadosSalas[comId] && dadosSalas[comId]["Arquivos"];
+function alternarCompartilharPasta(
+    comId,
+    checked
+) {
+
+    const dados =
+        dadosSalas[comId] &&
+        dadosSalas[comId]["Arquivos"];
+
+
     if (!dados) return;
 
-    dados.compartilhada = checked;
+
+    dados.compartilhada =
+        checked;
+
+
     salvarNoStorage();
 
-    const opcoes = document.getElementById("opcoesCompartilharPasta");
-    if (opcoes) opcoes.style.display = checked ? "block" : "none";
+
+    const opcoes =
+        document.getElementById(
+            "opcoesCompartilharPasta"
+        );
+
+
+    if (opcoes) {
+
+        opcoes.style.display =
+            checked
+                ? "block"
+                : "none";
+
+    }
+
 
     if (checked) {
-        prepararCompartilhamentoPasta(comId);
+
+        prepararCompartilhamentoPasta(
+            comId
+        );
+
     }
+
 }
 
-function prepararCompartilhamentoPasta(comId) {
-    const link = `https://joviclass.app/convite/${comId}`;
-    const inputLink = document.getElementById("inputLinkPasta");
-    if (inputLink) inputLink.value = link;
 
-    const status = document.getElementById("statusCopiarPasta");
-    if (status) status.textContent = "";
+function prepararCompartilhamentoPasta(
+    comId
+) {
 
-    const emailInput = document.getElementById("emailConvitePasta");
-    if (emailInput) emailInput.value = "";
+    const link =
+        `https://joviclass.app/convite/${comId}`;
 
-    renderizarConvidadosPasta(comId);
+
+    const inputLink =
+        document.getElementById(
+            "inputLinkPasta"
+        );
+
+
+    if (inputLink) {
+
+        inputLink.value =
+            link;
+
+    }
+
+
+    const status =
+        document.getElementById(
+            "statusCopiarPasta"
+        );
+
+
+    if (status) {
+
+        status.textContent =
+            "";
+
+    }
+
+
+    const emailInput =
+        document.getElementById(
+            "emailConvitePasta"
+        );
+
+
+    if (emailInput) {
+
+        emailInput.value =
+            "";
+
+    }
+
+
+    renderizarConvidadosPasta(
+        comId
+    );
+
 }
+
 
 function copiarLinkPasta() {
-    const input = document.getElementById("inputLinkPasta");
+
+    const input =
+        document.getElementById(
+            "inputLinkPasta"
+        );
+
+
     if (!input) return;
 
+
     input.select();
-    input.setSelectionRange(0, 99999);
+
+    input.setSelectionRange(
+        0,
+        99999
+    );
+
 
     try {
-        navigator.clipboard.writeText(input.value).then(() => {
-            mostrarStatusCopiarPasta("✅ Link copiado!");
-        }).catch(() => {
-            document.execCommand("copy");
-            mostrarStatusCopiarPasta("✅ Link copiado!");
-        });
+
+        navigator.clipboard
+            .writeText(input.value)
+            .then(() => {
+
+                mostrarStatusCopiarPasta(
+                    "✅ Link copiado!"
+                );
+
+            })
+            .catch(() => {
+
+                document.execCommand(
+                    "copy"
+                );
+
+                mostrarStatusCopiarPasta(
+                    "✅ Link copiado!"
+                );
+
+            });
+
     } catch (e) {
-        document.execCommand("copy");
-        mostrarStatusCopiarPasta("✅ Link copiado!");
+
+        document.execCommand(
+            "copy"
+        );
+
+        mostrarStatusCopiarPasta(
+            "✅ Link copiado!"
+        );
+
     }
+
 }
 
-function mostrarStatusCopiarPasta(msg) {
-    const status = document.getElementById("statusCopiarPasta");
+
+function mostrarStatusCopiarPasta(
+    msg
+) {
+
+    const status =
+        document.getElementById(
+            "statusCopiarPasta"
+        );
+
+
     if (!status) return;
-    status.textContent = msg;
-    setTimeout(() => { status.textContent = ""; }, 3000);
+
+
+    status.textContent =
+        msg;
+
+
+    setTimeout(
+        () => {
+            status.textContent =
+                "";
+        },
+        3000
+    );
+
 }
 
-function enviarConvitePastaEmail(comId) {
-    const emailInput = document.getElementById("emailConvitePasta");
-    const email = emailInput.value.trim();
 
-    if (!email || !email.includes("@")) {
-        alert("Digite um e-mail válido.");
+function enviarConvitePastaEmail(
+    comId
+) {
+
+    const emailInput =
+        document.getElementById(
+            "emailConvitePasta"
+        );
+
+
+    const email =
+        emailInput.value.trim();
+
+
+    if (
+        !email ||
+        !email.includes("@")
+    ) {
+
+        alert(
+            "Digite um e-mail válido."
+        );
+
         return;
+
     }
 
-    const com = dadosComunidades[comId];
+
+    const com =
+        dadosComunidades[comId];
+
+
     if (!com) return;
 
-    if (com.convidados.find(c => c.email === email)) {
-        alert("Este e-mail já recebeu um convite.");
+
+    if (
+        com.convidados.find(
+            c => c.email === email
+        )
+    ) {
+
+        alert(
+            "Este e-mail já recebeu um convite."
+        );
+
         return;
+
     }
 
-    com.convidados.push({ email, status: "pendente" });
-    emailInput.value = "";
+
+    com.convidados.push({
+        email,
+        status: "pendente"
+    });
+
+
+    emailInput.value =
+        "";
+
 
     salvarNoStorage();
-    renderizarConvidadosPasta(comId);
-    renderizarConvidados(comId); 
+
+
+    renderizarConvidadosPasta(
+        comId
+    );
+
+
+    renderizarConvidados(
+        comId
+    );
+
 }
 
-function renderizarConvidadosPasta(comId) {
-    const com = dadosComunidades[comId];
-    const container = document.getElementById("convidadosItensPasta");
-    if (!container) return; 
 
-    container.innerHTML = "";
+function renderizarConvidadosPasta(
+    comId
+) {
 
-    if (!com || com.convidados.length === 0) {
-        document.getElementById("listaConvidadosPasta").style.display = "none";
+    const com =
+        dadosComunidades[comId];
+
+
+    const container =
+        document.getElementById(
+            "convidadosItensPasta"
+        );
+
+
+    if (!container) return;
+
+
+    container.innerHTML =
+        "";
+
+
+    if (
+        !com ||
+        com.convidados.length === 0
+    ) {
+
+        document.getElementById(
+            "listaConvidadosPasta"
+        ).style.display =
+            "none";
+
         return;
+
     }
 
-    document.getElementById("listaConvidadosPasta").style.display = "block";
 
-    com.convidados.forEach((c, idx) => {
-        const item = document.createElement("div");
-        item.classList.add("convidadoItem");
-        item.innerHTML = `
-            <div class="convidadoEmail">
-                <span class="iconEmail">✉️</span>
-                <span>${c.email}</span>
-            </div>
-            <div class="convidadoAcoes">
-                <span class="badgePendente">Pendente</span>
-                <button class="btnRemoverConvite" onclick="removerConvite('${comId}', ${idx})" title="Remover convite">✕</button>
-            </div>
-        `;
-        container.appendChild(item);
-    });
-}
+    document.getElementById(
+        "listaConvidadosPasta"
+    ).style.display =
+        "block";
 
-function abrirComunidade(id, nome, descricao, foto) {
-    comunidadeAtiva = id;
 
-    document.getElementById("listadeComunidades").style.display = "none";
-    document.getElementById("paginaComunidade").style.display = "block";
-    document.getElementById("salaInterna").style.display = "none";
-    document.getElementById("salasArea").style.display = "block";
-    document.getElementById("tituloComunidade").innerText = nome;
-    document.getElementById("descricaoComunidade").innerText = descricao;
-    document.getElementById("NomeDiferenciado").innerText = nome;
-    document.getElementById("subtituloComunidade").style.display = "none";
-    document.getElementById("btnNovaComunidade").style.display = "none";
+    com.convidados.forEach(
+        (c, idx) => {
 
-    const banner = document.getElementById("bannerComunidade");
-    if (foto) {
-        banner.innerHTML = `<img src="${foto}" alt="banner">`;
-    } else {
-        banner.innerHTML = `<span class="semFotoBanner">🏫</span>`;
-    }
+            const item =
+                document.createElement(
+                    "div"
+                );
 
-    const listaSalas = document.getElementById("listaSalas");
-    listaSalas.innerHTML = "";
 
-    salasPadrao.forEach(sala => {
-        const item = document.createElement("div");
-        item.classList.add("salaItem");
-        item.innerHTML = `
-            <div class="salaInfo">
-                <div class="salaIcone">${sala.icone}</div>
-                <div>
-                    <div class="salaNome">${sala.nome}</div>
-                    <div class="salaDesc">${sala.desc}</div>
+            item.classList.add(
+                "convidadoItem"
+            );
+
+
+            item.innerHTML = `
+                <div class="convidadoEmail">
+                    <span class="iconEmail">✉️</span>
+                    <span>${c.email}</span>
                 </div>
-            </div>
-            <div class="salaEntrar">Entrar →</div>
-        `;
-        item.onclick = function () {
-            abrirSala(id, sala);
-        };
-        listaSalas.appendChild(item);
-    });
+
+                <div class="convidadoAcoes">
+
+                    <span class="badgePendente">
+                        Pendente
+                    </span>
+
+                    <button
+                        class="btnRemoverConvite"
+                        onclick="removerConvite('${comId}', ${idx})"
+                        title="Remover convite"
+                    >
+                        ✕
+                    </button>
+
+                </div>
+            `;
+
+
+            container.appendChild(
+                item
+            );
+
+        }
+    );
+
 }
 
-function abrirSala(comId, sala) {
-    document.getElementById("salasArea").style.display = "none";
-    document.getElementById("salaInterna").style.display = "block";
-    document.getElementById("nomeSalaAtual").innerText = sala.icone + " " + sala.nome;
 
-    document.getElementById("arquivoArea").innerHTML = "";
-    document.getElementById("mensagensChat").innerHTML = "";
+/* =========================================================
+   TERMOS DA COMUNIDADE
+========================================================= */
 
-    if (!dadosSalas[comId]) dadosSalas[comId] = {};
-    if (!dadosSalas[comId][sala.nome]) {
-        dadosSalas[comId][sala.nome] = { mensagens: [], arquivos: [], compartilhada: false };
+function obterTermosAceitos() {
+
+    try {
+
+        return JSON.parse(
+            localStorage.getItem(
+                "joviclass_termos_comunidades"
+            )
+        ) || {};
+
+    } catch (e) {
+
+        return {};
+
     }
 
-    const dados = dadosSalas[comId][sala.nome];
+}
 
-    if (sala.tipo === "arquivos") {
-        document.getElementById("chatArea").style.display = "none";
 
-        const compartilhada = !!dados.compartilhada;
+function salvarTermosAceitos(
+    termos
+) {
 
-        const arquivoArea = document.getElementById("arquivoArea");
+    localStorage.setItem(
+        "joviclass_termos_comunidades",
+        JSON.stringify(termos)
+    );
+
+}
+
+
+/*
+    Essa função é chamada quando a pessoa
+    clica em uma comunidade.
+*/
+
+function abrirTermosComunidade(
+    id,
+    nome,
+    descricao,
+    foto
+) {
+
+    const termosAceitos =
+        obterTermosAceitos();
+
+
+    /*
+        Se a pessoa já aceitou as regras
+        desta comunidade, ela entra diretamente.
+    */
+
+    if (termosAceitos[id]) {
+
+        abrirComunidade(
+            id,
+            nome,
+            descricao,
+            foto
+        );
+
+        return;
+
+    }
+
+
+    /*
+        Evita criar o mesmo modal
+        mais de uma vez.
+    */
+
+    const modalExistente =
+        document.getElementById(
+            "modalTermosComunidade"
+        );
+
+
+    if (modalExistente) {
+
+        modalExistente.remove();
+
+    }
+
+
+    const overlayTermos =
+        document.createElement(
+            "div"
+        );
+
+
+    overlayTermos.id =
+        "overlayTermosComunidade";
+
+
+    const modal =
+        document.createElement(
+            "div"
+        );
+
+
+    modal.id =
+        "modalTermosComunidade";
+
+
+    modal.setAttribute(
+        "role",
+        "dialog"
+    );
+
+
+    modal.setAttribute(
+        "aria-modal",
+        "true"
+    );
+
+
+    modal.setAttribute(
+        "aria-labelledby",
+        "tituloTermosComunidade"
+    );
+
+
+    modal.innerHTML = `
+
+        <div class="termosIcone">
+            🛡️
+        </div>
+
+
+        <div class="termosCabecalho">
+
+            <h2 id="tituloTermosComunidade">
+                Antes de entrar na comunidade
+            </h2>
+
+            <p>
+                Para manter o ambiente seguro e agradável
+                para todos, leia e aceite as regras da comunidade.
+            </p>
+
+        </div>
+
+
+        <div class="nomeComunidadeTermos"></div>
+
+
+        <div class="listaTermos">
+
+
+            <div class="termoItem">
+
+                <span class="numeroTermo">
+                    1
+                </span>
+
+                <div>
+
+                    <strong>
+                        Respeito entre os membros
+                    </strong>
+
+                    <p>
+                        Trate todos com respeito.
+                        Não serão permitidos ataques pessoais,
+                        bullying, preconceito ou assédio.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="termoItem">
+
+                <span class="numeroTermo">
+                    2
+                </span>
+
+                <div>
+
+                    <strong>
+                        Use a comunidade para estudar e colaborar
+                    </strong>
+
+                    <p>
+                        Mantenha as conversas relacionadas ao
+                        objetivo do grupo e contribua de forma construtiva.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="termoItem">
+
+                <span class="numeroTermo">
+                    3
+                </span>
+
+                <div>
+
+                    <strong>
+                        Não compartilhe conteúdo inadequado
+                    </strong>
+
+                    <p>
+                        É proibido publicar conteúdo ofensivo,
+                        ilegal, discriminatório ou que possa
+                        prejudicar outros estudantes.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="termoItem">
+
+                <span class="numeroTermo">
+                    4
+                </span>
+
+                <div>
+
+                    <strong>
+                        Respeite a privacidade
+                    </strong>
+
+                    <p>
+                        Não divulgue dados pessoais, fotos,
+                        mensagens ou materiais de outros membros
+                        sem autorização.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="termoItem">
+
+                <span class="numeroTermo">
+                    5
+                </span>
+
+                <div>
+
+                    <strong>
+                        Compartilhe materiais de forma responsável
+                    </strong>
+
+                    <p>
+                        Publique apenas arquivos e conteúdos
+                        que você tenha permissão para compartilhar.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="termoItem">
+
+                <span class="numeroTermo">
+                    6
+                </span>
+
+                <div>
+
+                    <strong>
+                        Ajude a manter a comunidade organizada
+                    </strong>
+
+                    <p>
+                        Evite spam, mensagens repetitivas e
+                        conteúdos que atrapalhem o estudo dos
+                        demais participantes.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+        </div>
+
+
+        <label class="checkTermos">
+
+            <input
+                type="checkbox"
+                id="aceitarTermosComunidade"
+            >
+
+            <span>
+                Li e concordo com as regras desta comunidade.
+            </span>
+
+        </label>
+
+
+        <div class="acoesTermos">
+
+            <button
+                type="button"
+                id="btnNaoConcordo"
+                class="btnNaoConcordo"
+            >
+                Não concordo
+            </button>
+
+
+            <button
+                type="button"
+                id="btnConcordoTermos"
+                class="btnConcordoTermos"
+                disabled
+            >
+                Concordo e entrar
+            </button>
+
+        </div>
+
+    `;
+
+
+    modal.querySelector(
+        ".nomeComunidadeTermos"
+    ).textContent =
+        `Comunidade: ${nome}`;
+
+
+    document.body.appendChild(
+        overlayTermos
+    );
+
+
+    document.body.appendChild(
+        modal
+    );
+
+
+    const checkbox =
+        document.getElementById(
+            "aceitarTermosComunidade"
+        );
+
+
+    const btnConcordo =
+        document.getElementById(
+            "btnConcordoTermos"
+        );
+
+
+    checkbox.addEventListener(
+        "change",
+        function () {
+
+            btnConcordo.disabled =
+                !this.checked;
+
+        }
+    );
+
+
+    document.getElementById(
+        "btnNaoConcordo"
+    ).addEventListener(
+        "click",
+        function () {
+
+            fecharTermosComunidade();
+
+        }
+    );
+
+
+    overlayTermos.addEventListener(
+        "click",
+        function () {
+
+            fecharTermosComunidade();
+
+        }
+    );
+
+
+    btnConcordo.addEventListener(
+        "click",
+        function () {
+
+            if (!checkbox.checked) {
+                return;
+            }
+
+
+            const termos =
+                obterTermosAceitos();
+
+
+            termos[id] =
+                true;
+
+
+            salvarTermosAceitos(
+                termos
+            );
+
+
+            fecharTermosComunidade();
+
+
+            abrirComunidade(
+                id,
+                nome,
+                descricao,
+                foto
+            );
+
+        }
+    );
+
+}
+
+
+function fecharTermosComunidade() {
+
+    const overlay =
+        document.getElementById(
+            "overlayTermosComunidade"
+        );
+
+
+    const modal =
+        document.getElementById(
+            "modalTermosComunidade"
+        );
+
+
+    if (overlay) {
+        overlay.remove();
+    }
+
+
+    if (modal) {
+        modal.remove();
+    }
+
+}
+
+
+/* =========================================================
+   ENTRAR NA COMUNIDADE
+========================================================= */
+
+function abrirComunidade(
+    id,
+    nome,
+    descricao,
+    foto
+) {
+
+    comunidadeAtiva =
+        id;
+
+
+    document.getElementById(
+        "listadeComunidades"
+    ).style.display =
+        "none";
+
+
+    document.getElementById(
+        "paginaComunidade"
+    ).style.display =
+        "block";
+
+
+    document.getElementById(
+        "salaInterna"
+    ).style.display =
+        "none";
+
+
+    document.getElementById(
+        "salasArea"
+    ).style.display =
+        "block";
+
+
+    document.getElementById(
+        "tituloComunidade"
+    ).innerText =
+        nome;
+
+
+    document.getElementById(
+        "descricaoComunidade"
+    ).innerText =
+        descricao;
+
+
+    document.getElementById(
+        "NomeDiferenciado"
+    ).innerText =
+        nome;
+
+
+    document.getElementById(
+        "subtituloComunidade"
+    ).style.display =
+        "none";
+
+
+    document.getElementById(
+        "btnNovaComunidade"
+    ).style.display =
+        "none";
+
+
+    const banner =
+        document.getElementById(
+            "bannerComunidade"
+        );
+
+
+    if (foto) {
+
+        banner.innerHTML =
+            `<img src="${foto}" alt="banner">`;
+
+    } else {
+
+        banner.innerHTML =
+            `<span class="semFotoBanner">🏫</span>`;
+
+    }
+
+
+    const listaSalas =
+        document.getElementById(
+            "listaSalas"
+        );
+
+
+    listaSalas.innerHTML =
+        "";
+
+
+    salasPadrao.forEach(
+        sala => {
+
+            const item =
+                document.createElement(
+                    "div"
+                );
+
+
+            item.classList.add(
+                "salaItem"
+            );
+
+
+            item.innerHTML = `
+
+                <div class="salaInfo">
+
+                    <div class="salaIcone">
+                        ${sala.icone}
+                    </div>
+
+                    <div>
+
+                        <div class="salaNome">
+                            ${sala.nome}
+                        </div>
+
+                        <div class="salaDesc">
+                            ${sala.desc}
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="salaEntrar">
+                    Entrar →
+                </div>
+
+            `;
+
+
+            item.onclick =
+                function () {
+
+                    abrirSala(
+                        id,
+                        sala
+                    );
+
+                };
+
+
+            listaSalas.appendChild(
+                item
+            );
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   SALAS
+========================================================= */
+
+function abrirSala(
+    comId,
+    sala
+) {
+
+    document.getElementById(
+        "salasArea"
+    ).style.display =
+        "none";
+
+
+    document.getElementById(
+        "salaInterna"
+    ).style.display =
+        "block";
+
+
+    document.getElementById(
+        "nomeSalaAtual"
+    ).innerText =
+        sala.icone +
+        " " +
+        sala.nome;
+
+
+    document.getElementById(
+        "arquivoArea"
+    ).innerHTML =
+        "";
+
+
+    document.getElementById(
+        "mensagensChat"
+    ).innerHTML =
+        "";
+
+
+    if (!dadosSalas[comId]) {
+
+        dadosSalas[comId] =
+            {};
+
+    }
+
+
+    if (
+        !dadosSalas[comId][sala.nome]
+    ) {
+
+        dadosSalas[comId][sala.nome] = {
+            mensagens: [],
+            arquivos: [],
+            compartilhada: false
+        };
+
+    }
+
+
+    const dados =
+        dadosSalas[comId][sala.nome];
+
+
+    if (
+        sala.tipo === "arquivos"
+    ) {
+
+        document.getElementById(
+            "chatArea"
+        ).style.display =
+            "none";
+
+
+        const compartilhada =
+            !!dados.compartilhada;
+
+
+        const arquivoArea =
+            document.getElementById(
+                "arquivoArea"
+            );
+
+
         arquivoArea.innerHTML = `
-            <h2 class="tituloArquivos">📁 Arquivos</h2>
+
+            <h2 class="tituloArquivos">
+                📁 Arquivos
+            </h2>
+
 
             <div class="compartilharPastaBox">
+
                 <div class="compartilharPastaTopo">
+
                     <div>
-                        <span class="compartilharPastaTitulo">Pasta compartilhada</span>
-                        <p class="compartilharPastaDesc">Permita que outras pessoas acessem esta pasta via link ou convite por e-mail.</p>
+
+                        <span class="compartilharPastaTitulo">
+                            Pasta compartilhada
+                        </span>
+
+                        <p class="compartilharPastaDesc">
+                            Permita que outras pessoas acessem
+                            esta pasta via link ou convite por e-mail.
+                        </p>
+
                     </div>
+
+
                     <label class="toggleSwitch">
-                        <input type="checkbox" id="toggleCompartilharPasta" ${compartilhada ? "checked" : ""}>
+
+                        <input
+                            type="checkbox"
+                            id="toggleCompartilharPasta"
+                            ${compartilhada ? "checked" : ""}
+                        >
+
                         <span class="toggleSlider"></span>
+
                     </label>
+
                 </div>
 
-                <div id="opcoesCompartilharPasta" style="display:${compartilhada ? "block" : "none"}">
+
+                <div
+                    id="opcoesCompartilharPasta"
+                    style="display:${compartilhada ? "block" : "none"}"
+                >
+
                     <div class="linkConvite">
-                        <input type="text" id="inputLinkPasta" readonly>
-                        <button type="button" onclick="copiarLinkPasta()">Copiar</button>
+
+                        <input
+                            type="text"
+                            id="inputLinkPasta"
+                            readonly
+                        >
+
+                        <button
+                            type="button"
+                            onclick="copiarLinkPasta()"
+                        >
+                            Copiar
+                        </button>
+
                     </div>
+
+
                     <div id="statusCopiarPasta"></div>
 
+
                     <div class="divisorConvidar">
-                        <span>ou convide por e-mail</span>
+
+                        <span>
+                            ou convide por e-mail
+                        </span>
+
                     </div>
+
 
                     <div class="emailRow">
-                        <input type="email" id="emailConvitePasta" placeholder="exemplo@email.com">
-                        <button type="button" onclick="enviarConvitePastaEmail('${comId}')">Enviar convite</button>
+
+                        <input
+                            type="email"
+                            id="emailConvitePasta"
+                            placeholder="exemplo@email.com"
+                        >
+
+                        <button
+                            type="button"
+                            onclick="enviarConvitePastaEmail('${comId}')"
+                        >
+                            Enviar convite
+                        </button>
+
                     </div>
+
 
                     <div id="listaConvidadosPasta">
-                        <p class="labelConvidados">Convites enviados:</p>
+
+                        <p class="labelConvidados">
+                            Convites enviados:
+                        </p>
+
                         <div id="convidadosItensPasta"></div>
+
                     </div>
+
                 </div>
+
             </div>
+
 
             <div class="uploadBox">
-                <label style="font-size:14px;font-weight:600;color:#333;">Enviar arquivo:</label>
-                <input type="file" id="uploadArquivo" style="margin-top:8px;">
+
+                <label
+                    style="font-size:14px;font-weight:600;color:#333;"
+                >
+                    Enviar arquivo:
+                </label>
+
+                <input
+                    type="file"
+                    id="uploadArquivo"
+                    style="margin-top:8px;"
+                >
+
             </div>
+
+
             <div id="listaArquivos"></div>
+
         `;
 
+
         if (compartilhada) {
-            prepararCompartilhamentoPasta(comId);
+
+            prepararCompartilhamentoPasta(
+                comId
+            );
+
         }
 
-        document.getElementById("toggleCompartilharPasta").addEventListener("change", function () {
-            alternarCompartilharPasta(comId, this.checked);
-        });
 
-        const listaArquivos = document.getElementById("listaArquivos");
-        dados.arquivos.forEach(nome => {
-            const item = document.createElement("div");
-            item.classList.add("arquivoItem");
-            item.innerText = "📄 " + nome;
-            listaArquivos.appendChild(item);
-        });
+        document
+            .getElementById(
+                "toggleCompartilharPasta"
+            )
+            .addEventListener(
+                "change",
+                function () {
 
-        document.getElementById("uploadArquivo").addEventListener("change", function () {
-            const arquivo = this.files[0];
-            if (!arquivo) return;
+                    alternarCompartilharPasta(
+                        comId,
+                        this.checked
+                    );
 
-            dados.arquivos.push(arquivo.name);
-            salvarNoStorage();
+                }
+            );
 
-            const item = document.createElement("div");
-            item.classList.add("arquivoItem");
-            item.innerText = "📄 " + arquivo.name;
-            document.getElementById("listaArquivos").appendChild(item);
 
-            alert("Arquivo enviado com sucesso!");
-            this.value = "";
-        });
+        const listaArquivos =
+            document.getElementById(
+                "listaArquivos"
+            );
+
+
+        dados.arquivos.forEach(
+            nome => {
+
+                const item =
+                    document.createElement(
+                        "div"
+                    );
+
+
+                item.classList.add(
+                    "arquivoItem"
+                );
+
+
+                item.innerText =
+                    "📄 " + nome;
+
+
+                listaArquivos.appendChild(
+                    item
+                );
+
+            }
+        );
+
+
+        document
+            .getElementById(
+                "uploadArquivo"
+            )
+            .addEventListener(
+                "change",
+                function () {
+
+                    const arquivo =
+                        this.files[0];
+
+
+                    if (!arquivo) {
+                        return;
+                    }
+
+
+                    dados.arquivos.push(
+                        arquivo.name
+                    );
+
+
+                    salvarNoStorage();
+
+
+                    const item =
+                        document.createElement(
+                            "div"
+                        );
+
+
+                    item.classList.add(
+                        "arquivoItem"
+                    );
+
+
+                    item.innerText =
+                        "📄 " +
+                        arquivo.name;
+
+
+                    document
+                        .getElementById(
+                            "listaArquivos"
+                        )
+                        .appendChild(
+                            item
+                        );
+
+
+                    alert(
+                        "Arquivo enviado com sucesso!"
+                    );
+
+
+                    this.value =
+                        "";
+
+                }
+            );
+
     } else {
-        document.getElementById("chatArea").style.display = "block";
 
-        dados.mensagens.forEach(texto => {
-            adicionarMensagem(texto, false);
-        });
+        document.getElementById(
+            "chatArea"
+        ).style.display =
+            "block";
+
+
+        dados.mensagens.forEach(
+            texto => {
+
+                adicionarMensagem(
+                    texto,
+                    false
+                );
+
+            }
+        );
+
     }
 
-    window._salaAtiva = { comId, salaNome: sala.nome };
+
+    window._salaAtiva = {
+        comId,
+        salaNome: sala.nome
+    };
+
 }
 
+
+/* =========================================================
+   CHAT
+========================================================= */
 
 function enviarMensagem() {
-    const input = document.getElementById("inputMensagem");
-    const texto = input.value.trim();
+
+    const input =
+        document.getElementById(
+            "inputMensagem"
+        );
+
+
+    const texto =
+        input.value.trim();
+
+
     if (!texto) return;
 
-    const { comId, salaNome } = window._salaAtiva;
-    dadosSalas[comId][salaNome].mensagens.push(texto);
+
+    const {
+        comId,
+        salaNome
+    } =
+        window._salaAtiva;
+
+
+    dadosSalas[
+        comId
+    ][
+        salaNome
+    ].mensagens.push(
+        texto
+    );
+
 
     salvarNoStorage();
-    adicionarMensagem(texto, true);
-    input.value = "";
+
+
+    adicionarMensagem(
+        texto,
+        true
+    );
+
+
+    input.value =
+        "";
+
 }
 
-function adicionarMensagem(texto, rolar) {
-    const chat = document.getElementById("mensagensChat");
-    const msg = document.createElement("div");
-    msg.classList.add("mensagem");
-    msg.innerText = texto;
-    chat.appendChild(msg);
-    if (rolar) chat.scrollTop = chat.scrollHeight;
+
+function adicionarMensagem(
+    texto,
+    rolar
+) {
+
+    const chat =
+        document.getElementById(
+            "mensagensChat"
+        );
+
+
+    const msg =
+        document.createElement(
+            "div"
+        );
+
+
+    msg.classList.add(
+        "mensagem"
+    );
+
+
+    msg.innerText =
+        texto;
+
+
+    chat.appendChild(
+        msg
+    );
+
+
+    if (rolar) {
+
+        chat.scrollTop =
+            chat.scrollHeight;
+
+    }
+
 }
 
-document.getElementById("inputMensagem").addEventListener("keydown", function (e) {
-    if (e.key === "Enter") enviarMensagem();
-});
 
+document.getElementById(
+    "inputMensagem"
+).addEventListener(
+    "keydown",
+    function (e) {
+
+        if (e.key === "Enter") {
+
+            enviarMensagem();
+
+        }
+
+    }
+);
+
+
+/* =========================================================
+   VOLTAR
+========================================================= */
 
 function voltarSalas() {
-    document.getElementById("salaInterna").style.display = "none";
-    document.getElementById("salasArea").style.display = "block";
-    document.getElementById("chatArea").style.display = "block";
+
+    document.getElementById(
+        "salaInterna"
+    ).style.display =
+        "none";
+
+
+    document.getElementById(
+        "salasArea"
+    ).style.display =
+        "block";
+
+
+    document.getElementById(
+        "chatArea"
+    ).style.display =
+        "block";
+
 }
+
 
 function voltarComunidades() {
-    comunidadeAtiva = null;
-    document.getElementById("paginaComunidade").style.display = "none";
-    document.getElementById("listadeComunidades").style.display = "flex";
-    document.getElementById("subtituloComunidade").style.display = "block";
-    document.getElementById("btnNovaComunidade").style.display = "block";
+
+    comunidadeAtiva =
+        null;
+
+
+    document.getElementById(
+        "paginaComunidade"
+    ).style.display =
+        "none";
+
+
+    document.getElementById(
+        "listadeComunidades"
+    ).style.display =
+        "flex";
+
+
+    document.getElementById(
+        "subtituloComunidade"
+    ).style.display =
+        "block";
+
+
+    document.getElementById(
+        "btnNovaComunidade"
+    ).style.display =
+        "block";
+
 }
 
 
+/* =========================================================
+   CARREGAR COMUNIDADES
+========================================================= */
 
 carregarDoStorage();
-Object.values(dadosComunidades).forEach(com => renderizarCard(com));
 
 
+Object.values(
+    dadosComunidades
+).forEach(
+    com =>
+        renderizarCard(com)
+);
+
+
+/* =========================================================
+   NOTIFICAÇÕES
+========================================================= */
 
 const EVENTOS = [
-  { id: "prova-calculo",  titulo: "Prova de Cálculo I",      tipo: "prova",    materia: "Cálculo I", data: "2024-05-25T08:00" },
-  { id: "prova-fisica",   titulo: "Prova de Física II",      tipo: "prova",    materia: "Física II",  data: "2024-06-02T08:00" },
-  { id: "trabalho-eco",   titulo: "Entrega do trabalho de Economia", tipo: "trabalho", materia: "Economia", data: "2024-06-05T23:59" },
-  { id: "reuniao-grupo",  titulo: "Reunião do grupo de estudos", tipo: "reuniao", materia: "Cálculo I", data: "2024-05-20T19:00" },
+
+    {
+        id: "prova-calculo",
+        titulo: "Prova de Cálculo I",
+        tipo: "prova",
+        materia: "Cálculo I",
+        data: "2024-05-25T08:00"
+    },
+
+    {
+        id: "prova-fisica",
+        titulo: "Prova de Física II",
+        tipo: "prova",
+        materia: "Física II",
+        data: "2024-06-02T08:00"
+    },
+
+    {
+        id: "trabalho-eco",
+        titulo: "Entrega do trabalho de Economia",
+        tipo: "trabalho",
+        materia: "Economia",
+        data: "2024-06-05T23:59"
+    },
+
+    {
+        id: "reuniao-grupo",
+        titulo: "Reunião do grupo de estudos",
+        tipo: "reuniao",
+        materia: "Cálculo I",
+        data: "2024-05-20T19:00"
+    }
+
 ];
 
+
 const ICONE_TIPO = {
-  prova: "📝",
-  trabalho: "📁",
-  reuniao: "🗓️",
+
+    prova: "📝",
+
+    trabalho: "📁",
+
+    reuniao: "🗓️"
+
 };
+
 
 const LIMIARES_ALERTA = {
-  aviso7dias: 7 * 24 * 60 * 60 * 1000,
-  aviso1dia: 24 * 60 * 60 * 1000,
-  aviso1hora: 60 * 60 * 1000,
+
+    aviso7dias:
+        7 *
+        24 *
+        60 *
+        60 *
+        1000,
+
+    aviso1dia:
+        24 *
+        60 *
+        60 *
+        1000,
+
+    aviso1hora:
+        60 *
+        60 *
+        1000
+
 };
 
-const CHAVE_LIDAS = "joviclass_notif_lidas";
-const CHAVE_DISPARADAS = "joviclass_notif_disparadas";
 
-function carregarSet(chave) {
-  try {
-    return new Set(JSON.parse(localStorage.getItem(chave)) || []);
-  } catch {
-    return new Set();
-  }
+const CHAVE_LIDAS =
+    "joviclass_notif_lidas";
+
+
+const CHAVE_DISPARADAS =
+    "joviclass_notif_disparadas";
+
+
+function carregarSet(
+    chave
+) {
+
+    try {
+
+        return new Set(
+            JSON.parse(
+                localStorage.getItem(
+                    chave
+                )
+            ) || []
+        );
+
+    } catch {
+
+        return new Set();
+
+    }
+
 }
 
-function salvarSet(chave, set) {
-  localStorage.setItem(chave, JSON.stringify([...set]));
+
+function salvarSet(
+    chave,
+    set
+) {
+
+    localStorage.setItem(
+        chave,
+        JSON.stringify(
+            [...set]
+        )
+    );
+
 }
 
-let lidas = carregarSet(CHAVE_LIDAS);
-let disparadas = carregarSet(CHAVE_DISPARADAS);
 
-function calcularStatus(evento) {
-  const agora = new Date();
-  const dataEvento = new Date(evento.data);
-  const diffMs = dataEvento - agora;
+let lidas =
+    carregarSet(
+        CHAVE_LIDAS
+    );
 
-  if (diffMs <= 0) return null;
 
-  const diffHoras = diffMs / (1000 * 60 * 60);
-  const diffDias = diffHoras / 24;
+let disparadas =
+    carregarSet(
+        CHAVE_DISPARADAS
+    );
 
-  let urgencia = "normal";
-  if (diffHoras <= 24) urgencia = "urgente";
-  else if (diffDias <= 3) urgencia = "breve";
 
-  let prazoTexto;
-  if (diffHoras < 1) prazoTexto = "em menos de 1h";
-  else if (diffHoras < 24) prazoTexto = `em ${Math.round(diffHoras)}h`;
-  else prazoTexto = `em ${Math.ceil(diffDias)} dia${Math.ceil(diffDias) > 1 ? "s" : ""}`;
+function calcularStatus(
+    evento
+) {
 
-  return { diffMs, diffHoras, diffDias, urgencia, prazoTexto };
+    const agora =
+        new Date();
+
+
+    const dataEvento =
+        new Date(
+            evento.data
+        );
+
+
+    const diffMs =
+        dataEvento -
+        agora;
+
+
+    if (diffMs <= 0) {
+
+        return null;
+
+    }
+
+
+    const diffHoras =
+        diffMs /
+        (
+            1000 *
+            60 *
+            60
+        );
+
+
+    const diffDias =
+        diffHoras /
+        24;
+
+
+    let urgencia =
+        "normal";
+
+
+    if (
+        diffHoras <= 24
+    ) {
+
+        urgencia =
+            "urgente";
+
+    } else if (
+        diffDias <= 3
+    ) {
+
+        urgencia =
+            "breve";
+
+    }
+
+
+    let prazoTexto;
+
+
+    if (
+        diffHoras < 1
+    ) {
+
+        prazoTexto =
+            "em menos de 1h";
+
+    } else if (
+        diffHoras < 24
+    ) {
+
+        prazoTexto =
+            `em ${Math.round(diffHoras)}h`;
+
+    } else {
+
+        prazoTexto =
+            `em ${Math.ceil(diffDias)} dia${Math.ceil(diffDias) > 1 ? "s" : ""}`;
+
+    }
+
+
+    return {
+        diffMs,
+        diffHoras,
+        diffDias,
+        urgencia,
+        prazoTexto
+    };
+
 }
+
 
 function gerarNotificacoes() {
-  return EVENTOS
-    .map((evento) => {
-      const status = calcularStatus(evento);
-      if (!status || status.diffMs > LIMIARES_ALERTA.aviso7dias) return null;
-      return { ...evento, ...status };
-    })
-    .filter(Boolean)
-    .sort((a, b) => a.diffMs - b.diffMs);
+
+    return EVENTOS
+
+        .map(
+            evento => {
+
+                const status =
+                    calcularStatus(
+                        evento
+                    );
+
+
+                if (
+                    !status ||
+                    status.diffMs >
+                    LIMIARES_ALERTA.aviso7dias
+                ) {
+
+                    return null;
+
+                }
+
+
+                return {
+                    ...evento,
+                    ...status
+                };
+
+            }
+        )
+
+        .filter(
+            Boolean
+        )
+
+        .sort(
+            (a, b) =>
+                a.diffMs -
+                b.diffMs
+        );
+
 }
 
-const TIPO_LABEL = { prova: "Prova", trabalho: "Trabalho", reuniao: "Reunião" };
+
+const TIPO_LABEL = {
+
+    prova: "Prova",
+
+    trabalho: "Trabalho",
+
+    reuniao: "Reunião"
+
+};
+
 
 function renderizarPainel() {
-  const lista = document.getElementById("notifLista");
-  const dot = document.getElementById("notifDot");
-  if (!lista || !dot) return;
 
-  const notificacoes = gerarNotificacoes();
-  const naoLidas = notificacoes.filter((n) => !lidas.has(n.id));
+    const lista =
+        document.getElementById(
+            "notifLista"
+        );
 
-  if (naoLidas.length > 0) {
-    dot.hidden = false;
-    dot.textContent = naoLidas.length > 9 ? "9+" : naoLidas.length;
-  } else {
-    dot.hidden = true;
-  }
 
-  if (notificacoes.length === 0) {
-    lista.innerHTML = `<div class="notif-vazio">Nenhuma prova, trabalho ou reunião chegando perto!</div>`;
-    return;
-  }
+    const dot =
+        document.getElementById(
+            "notifDot"
+        );
 
-  lista.innerHTML = notificacoes
-    .map((n) => `
-      <div class="notif-item ${lidas.has(n.id) ? "" : "nao-lida"}" data-id="${n.id}">
-        <span class="notif-icone ${n.urgencia}">${ICONE_TIPO[n.tipo] || "🔔"}</span>
-        <div class="notif-corpo">
-          <div class="notif-titulo">${n.titulo}</div>
-          <div class="notif-sub">${TIPO_LABEL[n.tipo] || "Evento"}${n.materia ? " · " + n.materia : ""}</div>
-          <span class="notif-prazo ${n.urgencia}">Vence ${n.prazoTexto}</span>
-        </div>
-      </div>
-    `)
-    .join("");
 
-  lista.querySelectorAll(".notif-item").forEach((el) => {
-    el.addEventListener("click", () => {
-      lidas.add(el.dataset.id);
-      salvarSet(CHAVE_LIDAS, lidas);
-      renderizarPainel();
-    });
-  });
+    if (!lista || !dot) {
+        return;
+    }
+
+
+    const notificacoes =
+        gerarNotificacoes();
+
+
+    const naoLidas =
+        notificacoes.filter(
+            n =>
+                !lidas.has(
+                    n.id
+                )
+        );
+
+
+    if (
+        naoLidas.length > 0
+    ) {
+
+        dot.hidden =
+            false;
+
+
+        dot.textContent =
+            naoLidas.length > 9
+                ? "9+"
+                : naoLidas.length;
+
+    } else {
+
+        dot.hidden =
+            true;
+
+    }
+
+
+    if (
+        notificacoes.length === 0
+    ) {
+
+        lista.innerHTML = `
+            <div class="notif-vazio">
+                Nenhuma prova, trabalho ou reunião
+                chegando perto!
+            </div>
+        `;
+
+        return;
+
+    }
+
+
+    lista.innerHTML =
+        notificacoes
+
+            .map(
+                n => `
+
+                    <div
+                        class="notif-item ${lidas.has(n.id) ? "" : "nao-lida"}"
+                        data-id="${n.id}"
+                    >
+
+                        <span
+                            class="notif-icone ${n.urgencia}"
+                        >
+                            ${ICONE_TIPO[n.tipo] || "🔔"}
+                        </span>
+
+
+                        <div class="notif-corpo">
+
+                            <div class="notif-titulo">
+                                ${n.titulo}
+                            </div>
+
+
+                            <div class="notif-sub">
+                                ${TIPO_LABEL[n.tipo] || "Evento"}
+                                ${n.materia ? " · " + n.materia : ""}
+                            </div>
+
+
+                            <span
+                                class="notif-prazo ${n.urgencia}"
+                            >
+                                Vence ${n.prazoTexto}
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                `
+            )
+
+            .join("");
+
+
+    lista
+        .querySelectorAll(
+            ".notif-item"
+        )
+        .forEach(
+            el => {
+
+                el.addEventListener(
+                    "click",
+                    () => {
+
+                        lidas.add(
+                            el.dataset.id
+                        );
+
+
+                        salvarSet(
+                            CHAVE_LIDAS,
+                            lidas
+                        );
+
+
+                        renderizarPainel();
+
+                    }
+                );
+
+            }
+        );
+
 }
 
-function dispararNotificacaoDoNavegador(evento, status) {
-  if (!("Notification" in window) || Notification.permission !== "granted") return;
 
-  const chaveDisparo = `${evento.id}-${status.urgencia}`;
-  if (disparadas.has(chaveDisparo)) return;
+/* =========================================================
+   NOTIFICAÇÃO DO NAVEGADOR
+========================================================= */
 
-  new Notification(`${TIPO_LABEL[evento.tipo]}: ${evento.titulo}`, {
-    body: `Vence ${status.prazoTexto}.`,
-    icon: "./src/assets/img/logo.png",
-  });
+function dispararNotificacaoDoNavegador(
+    evento,
+    status
+) {
 
-  disparadas.add(chaveDisparo);
-  salvarSet(CHAVE_DISPARADAS, disparadas);
+    if (
+        !("Notification" in window) ||
+        Notification.permission !== "granted"
+    ) {
+
+        return;
+
+    }
+
+
+    const chaveDisparo =
+        `${evento.id}-${status.urgencia}`;
+
+
+    if (
+        disparadas.has(
+            chaveDisparo
+        )
+    ) {
+
+        return;
+
+    }
+
+
+    new Notification(
+        `${TIPO_LABEL[evento.tipo]}: ${evento.titulo}`,
+        {
+            body:
+                `Vence ${status.prazoTexto}.`,
+
+            icon:
+                "./src/assets/img/logo.png"
+        }
+    );
+
+
+    disparadas.add(
+        chaveDisparo
+    );
+
+
+    salvarSet(
+        CHAVE_DISPARADAS,
+        disparadas
+    );
+
 }
+
 
 function verificarAlertasDoSistema() {
-  EVENTOS.forEach((evento) => {
-    const status = calcularStatus(evento);
-    if (!status) return;
-    if (status.diffMs <= LIMIARES_ALERTA.aviso1hora || status.diffMs <= LIMIARES_ALERTA.aviso1dia) {
-      dispararNotificacaoDoNavegador(evento, status);
-    }
-  });
+
+    EVENTOS.forEach(
+        evento => {
+
+            const status =
+                calcularStatus(
+                    evento
+                );
+
+
+            if (!status) {
+                return;
+            }
+
+
+            if (
+                status.diffMs <=
+                    LIMIARES_ALERTA.aviso1hora ||
+
+                status.diffMs <=
+                    LIMIARES_ALERTA.aviso1dia
+            ) {
+
+                dispararNotificacaoDoNavegador(
+                    evento,
+                    status
+                );
+
+            }
+
+        }
+    );
+
 }
+
+
+/* =========================================================
+   INICIAR NOTIFICAÇÕES
+========================================================= */
 
 function iniciarSistemaDeNotificacoes() {
-  const notifBtn = document.getElementById("notifBtn");
-  const notifPanel = document.getElementById("notifPanel");
-  const notifMarcarLidas = document.getElementById("notifMarcarLidas");
 
-  renderizarPainel();
-  verificarAlertasDoSistema();
+    const notifBtn =
+        document.getElementById(
+            "notifBtn"
+        );
 
-  if ("Notification" in window && Notification.permission === "default") {
-    Notification.requestPermission();
-  }
 
-  if (notifBtn && notifPanel) {
-    notifBtn.addEventListener("click", (e) => {
-      e.stopPropagation();
-      const aberto = !notifPanel.hidden;
-      notifPanel.hidden = aberto;
-      notifBtn.setAttribute("aria-expanded", String(!aberto));
-    });
+    const notifPanel =
+        document.getElementById(
+            "notifPanel"
+        );
 
-    document.addEventListener("click", (e) => {
-      if (!notifPanel.hidden && !notifPanel.contains(e.target) && e.target !== notifBtn) {
-        notifPanel.hidden = true;
-        notifBtn.setAttribute("aria-expanded", "false");
-      }
-    });
-  }
 
-  if (notifMarcarLidas) {
-    notifMarcarLidas.addEventListener("click", () => {
-      gerarNotificacoes().forEach((n) => lidas.add(n.id));
-      salvarSet(CHAVE_LIDAS, lidas);
-      renderizarPainel();
-    });
-  }
+    const notifMarcarLidas =
+        document.getElementById(
+            "notifMarcarLidas"
+        );
 
-  setInterval(() => {
+
     renderizarPainel();
+
+
     verificarAlertasDoSistema();
-  }, 5 * 60 * 1000);
+
+
+    if (
+        "Notification" in window &&
+        Notification.permission === "default"
+    ) {
+
+        Notification.requestPermission();
+
+    }
+
+
+    if (
+        notifBtn &&
+        notifPanel
+    ) {
+
+        notifBtn.addEventListener(
+            "click",
+            e => {
+
+                e.stopPropagation();
+
+
+                const aberto =
+                    !notifPanel.hidden;
+
+
+                notifPanel.hidden =
+                    aberto;
+
+
+                notifBtn.setAttribute(
+                    "aria-expanded",
+                    String(!aberto)
+                );
+
+            }
+        );
+
+
+        document.addEventListener(
+            "click",
+            e => {
+
+                if (
+                    !notifPanel.hidden &&
+                    !notifPanel.contains(
+                        e.target
+                    ) &&
+                    e.target !== notifBtn
+                ) {
+
+                    notifPanel.hidden =
+                        true;
+
+
+                    notifBtn.setAttribute(
+                        "aria-expanded",
+                        "false"
+                    );
+
+                }
+
+            }
+        );
+
+    }
+
+
+    if (
+        notifMarcarLidas
+    ) {
+
+        notifMarcarLidas.addEventListener(
+            "click",
+            () => {
+
+                gerarNotificacoes()
+                    .forEach(
+                        n =>
+                            lidas.add(
+                                n.id
+                            )
+                    );
+
+
+                salvarSet(
+                    CHAVE_LIDAS,
+                    lidas
+                );
+
+
+                renderizarPainel();
+
+            }
+        );
+
+    }
+
+
+    setInterval(
+        () => {
+
+            renderizarPainel();
+
+            verificarAlertasDoSistema();
+
+        },
+        5 * 60 * 1000
+    );
+
 }
+
 
 iniciarSistemaDeNotificacoes();
