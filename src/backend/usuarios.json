@@ -7,10 +7,34 @@
     "senha": "$2b$10$rIkJgm4vghYNnKz1kszJVeb..ugfuXyYk31cN7SaajwDgjXP.rFgK",
     "foto": null,
     "provedor": "email",
+<<<<<<< Updated upstream
     "emailVerificado": true,
     "codigoVerificacao": null,
     "codigoVerificacaoExpira": null,
     "codigoRecuperacaoSenha": "$2b$10$ssAPtcvgZJKuWxs2SP7YGOuK6bvfCCUgKQD.yNCQPJfEFRLvXEbu6",
     "codigoRecuperacaoSenhaExpira": 1789075230882
+=======
+    "emailVerificado": false
+  },
+  {
+    "id": "1788990276027",
+    "nome": "Giovanna Lopes Scalzone",
+    "email": "gi647401@gmail.com",
+    "senha": "$2b$10$bbzxQG0hTWNcYjBMyVcI6up1QI3i4LD1igy3jLEmmemqAmROOBFye",
+    "foto": null,
+    "provedor": "email",
+    "emailVerificado": false,
+    "curso": "Engenharia de Produção · 4º período"
+  },
+  {
+    "id": "1789065933662",
+    "nome": "Nayra Sousa Duarte",
+    "curso": "Engenharia de Software - 2° Período",
+    "email": "nayrasdteste@gmail.com",
+    "senha": "$2b$10$PndrE4kqu8vMvuiuZCcq9Om6q5m6swxMICvgDQ09z8Vr5mXC51iZC",
+    "foto": null,
+    "provedor": "email",
+    "emailVerificado": false
+>>>>>>> Stashed changes
   }
 ]

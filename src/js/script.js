@@ -2069,6 +2069,9 @@ function liberarAplicacao() {
     const authOverlay =
         document.getElementById("authOverlay");
 
+    const botaoSuporte =
+        document.getElementById("botaoSuporte");
+
 
     if (!authOverlay) {
         return;
@@ -2081,6 +2084,8 @@ function liberarAplicacao() {
     document.body.classList.remove(
         "auth-aberto"
     );
+
+    botaoSuporte.hidden = false
 }
 
 
