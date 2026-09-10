@@ -172,6 +172,157 @@ function montarSessao(usuario) {
 }
 
 // ======================================================
+// VERIFICAÇÃO DE E-MAIL POR CÓDIGO
+// ======================================================
+
+const nodemailer = require("nodemailer");
+
+const transportadorEmail = nodemailer.createTransport({
+    service: "gmail",
+
+    auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
+    }
+});
+
+function gerarCodigoVerificacao() {
+
+    return String(
+        Math.floor(100000 + Math.random() * 900000)
+    );
+}
+
+async function enviarCodigoVerificacao(destinatario, codigo) {
+
+    // Se as credenciais de e-mail não estiverem configuradas
+    // no .env, caímos num "modo dev": o código só aparece
+    // no console, sem precisar de um provedor de e-mail real.
+    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+
+        console.log(
+            `✉️  [MODO DEV] Código de verificação para ${destinatario}: ${codigo}`
+        );
+
+        return;
+    }
+
+    await transportadorEmail.sendMail({
+
+        from: `"JoviClass" <${process.env.EMAIL_USER}>`,
+
+        to: destinatario,
+
+        subject: "Confirme seu e-mail — JoviClass",
+
+        html: `
+            <div style="font-family: Arial, sans-serif; max-width: 420px; margin: 0 auto;">
+                <h2 style="color:#000fb0; margin-bottom: 8px;">Confirme seu e-mail</h2>
+                <p style="color:#333; font-size: 14px;">
+                    Use o código abaixo para confirmar sua conta no JoviClass:
+                </p>
+                <p style="font-size: 30px; font-weight: 800; letter-spacing: 8px; color:#000fb0; margin: 18px 0;">
+                    ${codigo}
+                </p>
+                <p style="color:#888; font-size: 12.5px;">
+                    Esse código expira em 10 minutos. Se você não pediu isso, pode ignorar este e-mail.
+                </p>
+            </div>
+        `
+    });
+}
+
+// ------------------------------------------------------
+// E-MAIL DE CONFIRMAÇÃO DE CADASTRO (PASSO 2 DO CADASTRO)
+// ------------------------------------------------------
+//
+// Mesmo formato do código de verificação de e-mail, mas usado
+// especificamente no fluxo de "criar conta com código", antes
+// de a conta existir de fato.
+//
+
+async function enviarCodigoConfirmacaoCadastro(destinatario, codigo) {
+
+    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+
+        console.log(
+            `✉️  [MODO DEV] Código de confirmação de cadastro para ${destinatario}: ${codigo}`
+        );
+
+        return;
+    }
+
+    await transportadorEmail.sendMail({
+
+        from: `"JoviClass" <${process.env.EMAIL_USER}>`,
+
+        to: destinatario,
+
+        subject: "Confirme seu cadastro — JoviClass",
+
+        html: `
+            <div style="font-family: Arial, sans-serif; max-width: 420px; margin: 0 auto;">
+                <h2 style="color:#000fb0; margin-bottom: 8px;">Confirme sua conta</h2>
+                <p style="color:#333; font-size: 14px;">
+                    Use o código abaixo para concluir a criação da sua conta no JoviClass:
+                </p>
+                <p style="font-size: 30px; font-weight: 800; letter-spacing: 8px; color:#000fb0; margin: 18px 0;">
+                    ${codigo}
+                </p>
+                <p style="color:#888; font-size: 12.5px;">
+                    Esse código expira em 10 minutos. Se você não pediu isso, pode ignorar este e-mail.
+                </p>
+            </div>
+        `
+    });
+}
+
+// ------------------------------------------------------
+// E-MAIL DE RECUPERAÇÃO DE SENHA
+// ------------------------------------------------------
+//
+// Mesmo formato do código de confirmação de e-mail, mas com
+// assunto e texto diferentes pra deixar claro que é sobre
+// redefinir a senha, não sobre confirmar a conta.
+//
+
+async function enviarCodigoRecuperacaoSenha(destinatario, codigo) {
+
+    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+
+        console.log(
+            `✉️  [MODO DEV] Código de recuperação de senha para ${destinatario}: ${codigo}`
+        );
+
+        return;
+    }
+
+    await transportadorEmail.sendMail({
+
+        from: `"JoviClass" <${process.env.EMAIL_USER}>`,
+
+        to: destinatario,
+
+        subject: "Recupere sua senha — JoviClass",
+
+        html: `
+            <div style="font-family: Arial, sans-serif; max-width: 420px; margin: 0 auto;">
+                <h2 style="color:#000fb0; margin-bottom: 8px;">Redefinir senha</h2>
+                <p style="color:#333; font-size: 14px;">
+                    Use o código abaixo para criar uma nova senha no JoviClass:
+                </p>
+                <p style="font-size: 30px; font-weight: 800; letter-spacing: 8px; color:#000fb0; margin: 18px 0;">
+                    ${codigo}
+                </p>
+                <p style="color:#888; font-size: 12.5px;">
+                    Esse código expira em 10 minutos. Se você não pediu isso, pode ignorar este e-mail — sua senha atual continua a mesma.
+                </p>
+            </div>
+        `
+    });
+}
+
+// ======================================================
 // FUNÇÕES DE AUTENTICAÇÃO
 // ======================================================
 
@@ -198,6 +349,14 @@ function exigirLogin(req, res, next) {
 // ------------------------------------------------------
 // CADASTRO COM E-MAIL E SENHA
 // ------------------------------------------------------
+//
+// OBS: esta rota antiga cria a conta direto, sem confirmar
+// o e-mail antes. O fluxo atual do frontend usa as duas
+// rotas novas logo abaixo (/auth/cadastro/enviar-codigo e
+// /auth/cadastro/confirmar). Deixamos esta aqui por
+// compatibilidade, mas ela não é mais chamada pela tela
+// de cadastro.
+//
 
 app.post("/auth/cadastro", async (req, res) => {
 
@@ -251,6 +410,9 @@ app.post("/auth/cadastro", async (req, res) => {
         const senhaHash =
             await bcrypt.hash(senha, 10);
 
+        const codigo = gerarCodigoVerificacao();
+        const codigoHash = await bcrypt.hash(codigo, 10);
+
         const novoUsuario = {
 
             id: Date.now().toString(),
@@ -267,7 +429,15 @@ app.post("/auth/cadastro", async (req, res) => {
 
             provedor: "email",
 
-            emailVerificado: false
+            emailVerificado: false,
+
+            codigoVerificacao: codigoHash,
+
+            codigoVerificacaoExpira: Date.now() + 10 * 60 * 1000,
+
+            codigoRecuperacaoSenha: null,
+
+            codigoRecuperacaoSenhaExpira: null
         };
 
         usuarios.push(novoUsuario);
@@ -275,6 +445,8 @@ app.post("/auth/cadastro", async (req, res) => {
         salvarUsuarios(usuarios);
 
         req.session.usuario = montarSessao(novoUsuario);
+
+        await enviarCodigoVerificacao(novoUsuario.email, codigo);
 
         console.log(
             "✅ Novo usuário cadastrado:",
@@ -302,6 +474,316 @@ app.post("/auth/cadastro", async (req, res) => {
             sucesso: false,
 
             erro: "Erro interno ao realizar cadastro."
+        });
+    }
+});
+
+// ======================================================
+// CADASTRO EM 2 PASSOS COM CÓDIGO POR E-MAIL
+// ======================================================
+//
+// Fluxo (o mesmo espírito da recuperação de senha, mas
+// pra criar conta):
+//
+// 1) POST /auth/cadastro/enviar-codigo  -> valida os dados,
+//    NÃO cria a conta ainda, guarda tudo temporariamente
+//    em memória e manda o código de 6 dígitos por e-mail.
+//
+// 2) POST /auth/cadastro/confirmar      -> confere o código;
+//    se estiver certo, cria a conta de verdade (já com
+//    e-mail marcado como verificado) e abre a sessão.
+//
+// Os dados pendentes ficam num Map em memória, com
+// expiração de 10 minutos — se o servidor reiniciar antes
+// da confirmação, o usuário só precisa pedir o código de
+// novo (o formulário já tem "Reenviar código").
+//
+
+const cadastrosPendentes = new Map();
+
+function limparCadastrosPendentesExpirados() {
+
+    const agora = Date.now();
+
+    for (const [email, pendente] of cadastrosPendentes) {
+
+        if (agora > pendente.expira) {
+            cadastrosPendentes.delete(email);
+        }
+    }
+}
+
+// ------------------------------------------------------
+// PASSO 1 — VALIDAR DADOS E ENVIAR CÓDIGO
+// ------------------------------------------------------
+
+app.post("/auth/cadastro/enviar-codigo", async (req, res) => {
+
+    try {
+
+        limparCadastrosPendentesExpirados();
+
+        const {
+            nome,
+            email,
+            senha
+        } = req.body;
+
+        if (
+            !nome ||
+            !email ||
+            !senha
+        ) {
+
+            return res.status(400).json({
+
+                sucesso: false,
+
+                erro: "Preencha nome, e-mail e senha."
+            });
+        }
+
+        if (senha.length < 6) {
+
+            return res.status(400).json({
+
+                sucesso: false,
+
+                erro: "A senha deve possuir pelo menos 6 caracteres."
+            });
+        }
+
+        const emailNormalizado =
+            email.trim().toLowerCase();
+
+        const usuarios = lerUsuarios();
+
+        const usuarioExistente =
+            usuarios.find(
+                usuario =>
+                    usuario.email === emailNormalizado
+            );
+
+        if (usuarioExistente) {
+
+            return res.status(409).json({
+
+                sucesso: false,
+
+                erro: "Este e-mail já está cadastrado."
+            });
+        }
+
+        const senhaHash =
+            await bcrypt.hash(senha, 10);
+
+        const codigo = gerarCodigoVerificacao();
+        const codigoHash = await bcrypt.hash(codigo, 10);
+
+        cadastrosPendentes.set(emailNormalizado, {
+
+            nome: nome.trim(),
+
+            email: emailNormalizado,
+
+            senhaHash,
+
+            codigoHash,
+
+            expira: Date.now() + 10 * 60 * 1000
+        });
+
+        await enviarCodigoConfirmacaoCadastro(
+            emailNormalizado,
+            codigo
+        );
+
+        console.log(
+            "📨 Código de confirmação de cadastro enviado para:",
+            emailNormalizado
+        );
+
+        return res.json({
+
+            sucesso: true,
+
+            mensagem: "Código enviado para o seu e-mail."
+        });
+
+    } catch (erro) {
+
+        console.error(
+            "❌ Erro ao enviar código de cadastro:",
+            erro
+        );
+
+        return res.status(500).json({
+
+            sucesso: false,
+
+            erro: "Erro interno ao enviar o código de confirmação."
+        });
+    }
+});
+
+// ------------------------------------------------------
+// PASSO 2 — CONFERIR O CÓDIGO E CRIAR A CONTA DE VERDADE
+// ------------------------------------------------------
+
+app.post("/auth/cadastro/confirmar", async (req, res) => {
+
+    try {
+
+        limparCadastrosPendentesExpirados();
+
+        const {
+            email,
+            codigo
+        } = req.body;
+
+        if (
+            !email ||
+            !codigo
+        ) {
+
+            return res.status(400).json({
+
+                sucesso: false,
+
+                erro: "Informe o e-mail e o código."
+            });
+        }
+
+        const emailNormalizado =
+            email.trim().toLowerCase();
+
+        const pendente =
+            cadastrosPendentes.get(emailNormalizado);
+
+        if (!pendente) {
+
+            return res.status(400).json({
+
+                sucesso: false,
+
+                erro: "Nenhum cadastro pendente para este e-mail. Preencha o formulário novamente."
+            });
+        }
+
+        if (Date.now() > pendente.expira) {
+
+            cadastrosPendentes.delete(emailNormalizado);
+
+            return res.status(400).json({
+
+                sucesso: false,
+
+                erro: "Código expirado. Solicite um novo."
+            });
+        }
+
+        const codigoCorreto =
+            await bcrypt.compare(
+                String(codigo).trim(),
+                pendente.codigoHash
+            );
+
+        if (!codigoCorreto) {
+
+            return res.status(401).json({
+
+                sucesso: false,
+
+                erro: "Código incorreto."
+            });
+        }
+
+        // Confere de novo se o e-mail não foi cadastrado
+        // por outro caminho enquanto o código estava pendente
+        // (ex: login com Google no meio do processo).
+        const usuarios = lerUsuarios();
+
+        const usuarioExistente =
+            usuarios.find(
+                usuario =>
+                    usuario.email === emailNormalizado
+            );
+
+        if (usuarioExistente) {
+
+            cadastrosPendentes.delete(emailNormalizado);
+
+            return res.status(409).json({
+
+                sucesso: false,
+
+                erro: "Este e-mail já está cadastrado."
+            });
+        }
+
+        const novoUsuario = {
+
+            id: Date.now().toString(),
+
+            nome: pendente.nome,
+
+            curso: "",
+
+            email: emailNormalizado,
+
+            senha: pendente.senhaHash,
+
+            foto: null,
+
+            provedor: "email",
+
+            // Já veio confirmado pelo código, então
+            // marcamos como verificado direto.
+            emailVerificado: true,
+
+            codigoVerificacao: null,
+
+            codigoVerificacaoExpira: null,
+
+            codigoRecuperacaoSenha: null,
+
+            codigoRecuperacaoSenhaExpira: null
+        };
+
+        usuarios.push(novoUsuario);
+
+        salvarUsuarios(usuarios);
+
+        cadastrosPendentes.delete(emailNormalizado);
+
+        req.session.usuario = montarSessao(novoUsuario);
+
+        console.log(
+            "✅ Cadastro confirmado e conta criada:",
+            novoUsuario.email
+        );
+
+        return res.json({
+
+            sucesso: true,
+
+            mensagem: "Conta criada com sucesso.",
+
+            usuario: req.session.usuario
+        });
+
+    } catch (erro) {
+
+        console.error(
+            "❌ Erro ao confirmar cadastro:",
+            erro
+        );
+
+        return res.status(500).json({
+
+            sucesso: false,
+
+            erro: "Erro interno ao confirmar o cadastro."
         });
     }
 });
@@ -629,6 +1111,552 @@ app.post("/auth/logout", (req, res) => {
 
         mensagem: "Logout realizado com sucesso."
     });
+});
+
+// ======================================================
+// VERIFICAR CÓDIGO DE E-MAIL
+// ======================================================
+
+app.post("/auth/verificar-email", exigirLogin, async (req, res) => {
+
+    try {
+
+        const { codigo } = req.body;
+
+        if (!codigo) {
+
+            return res.status(400).json({
+
+                sucesso: false,
+
+                erro: "Informe o código recebido por e-mail."
+            });
+        }
+
+        const usuarios = lerUsuarios();
+
+        const indice =
+            usuarios.findIndex(
+                usuario =>
+                    usuario.id === req.session.usuario.id
+            );
+
+        if (indice === -1) {
+
+            return res.status(404).json({
+
+                sucesso: false,
+
+                erro: "Usuário não encontrado."
+            });
+        }
+
+        const usuario = usuarios[indice];
+
+        if (usuario.emailVerificado) {
+
+            return res.json({
+
+                sucesso: true,
+
+                usuario: montarSessao(usuario)
+            });
+        }
+
+        if (
+            !usuario.codigoVerificacao ||
+            !usuario.codigoVerificacaoExpira
+        ) {
+
+            return res.status(400).json({
+
+                sucesso: false,
+
+                erro: "Nenhum código pendente. Solicite um novo."
+            });
+        }
+
+        if (Date.now() > usuario.codigoVerificacaoExpira) {
+
+            return res.status(400).json({
+
+                sucesso: false,
+
+                erro: "Código expirado. Solicite um novo."
+            });
+        }
+
+        const codigoCorreto =
+            await bcrypt.compare(
+                String(codigo).trim(),
+                usuario.codigoVerificacao
+            );
+
+        if (!codigoCorreto) {
+
+            return res.status(401).json({
+
+                sucesso: false,
+
+                erro: "Código incorreto."
+            });
+        }
+
+        usuario.emailVerificado = true;
+        usuario.codigoVerificacao = null;
+        usuario.codigoVerificacaoExpira = null;
+
+        salvarUsuarios(usuarios);
+
+        req.session.usuario = montarSessao(usuario);
+
+        console.log(
+            "✅ E-mail verificado:",
+            usuario.email
+        );
+
+        return res.json({
+
+            sucesso: true,
+
+            usuario: req.session.usuario
+        });
+
+    } catch (erro) {
+
+        console.error(
+            "❌ Erro ao verificar e-mail:",
+            erro
+        );
+
+        return res.status(500).json({
+
+            sucesso: false,
+
+            erro: "Erro interno ao verificar e-mail."
+        });
+    }
+});
+
+// ======================================================
+// REENVIAR CÓDIGO DE VERIFICAÇÃO
+// ======================================================
+
+app.post("/auth/reenviar-codigo", exigirLogin, async (req, res) => {
+
+    try {
+
+        const usuarios = lerUsuarios();
+
+        const indice =
+            usuarios.findIndex(
+                usuario =>
+                    usuario.id === req.session.usuario.id
+            );
+
+        if (indice === -1) {
+
+            return res.status(404).json({
+
+                sucesso: false,
+
+                erro: "Usuário não encontrado."
+            });
+        }
+
+        const usuario = usuarios[indice];
+
+        if (usuario.emailVerificado) {
+
+            return res.json({
+
+                sucesso: true,
+
+                mensagem: "Este e-mail já está verificado."
+            });
+        }
+
+        const codigo = gerarCodigoVerificacao();
+
+        usuario.codigoVerificacao =
+            await bcrypt.hash(codigo, 10);
+
+        usuario.codigoVerificacaoExpira =
+            Date.now() + 10 * 60 * 1000;
+
+        salvarUsuarios(usuarios);
+
+        await enviarCodigoVerificacao(usuario.email, codigo);
+
+        console.log(
+            "🔁 Código reenviado para:",
+            usuario.email
+        );
+
+        return res.json({
+
+            sucesso: true,
+
+            mensagem: "Novo código enviado."
+        });
+
+    } catch (erro) {
+
+        console.error(
+            "❌ Erro ao reenviar código:",
+            erro
+        );
+
+        return res.status(500).json({
+
+            sucesso: false,
+
+            erro: "Erro interno ao reenviar o código."
+        });
+    }
+});
+
+// ======================================================
+// RECUPERAÇÃO DE SENHA (ESQUECI MINHA SENHA)
+// ======================================================
+//
+// Fluxo em 3 passos, todos SEM exigir login (a pessoa está
+// de fora porque esqueceu a senha):
+//
+// 1) POST /auth/recuperar-senha        -> gera e envia o código
+// 2) POST /auth/verificar-codigo-recuperacao -> confere o código
+// 3) POST /auth/redefinir-senha        -> troca a senha de fato
+//
+// O código usa o mesmo padrão do código de verificação de
+// e-mail: 6 dígitos, guardado com hash (bcrypt) e expira em
+// 10 minutos.
+//
+
+// ------------------------------------------------------
+// PASSO 1 — ENVIAR CÓDIGO PARA O E-MAIL
+// ------------------------------------------------------
+
+app.post("/auth/recuperar-senha", async (req, res) => {
+
+    try {
+
+        const { email } = req.body;
+
+        if (!email) {
+
+            return res.status(400).json({
+
+                sucesso: false,
+
+                erro: "Informe seu e-mail."
+            });
+        }
+
+        const emailNormalizado =
+            email.trim().toLowerCase();
+
+        const usuarios = lerUsuarios();
+
+        const indice =
+            usuarios.findIndex(
+                usuario =>
+                    usuario.email === emailNormalizado
+            );
+
+        if (indice === -1) {
+
+            return res.status(404).json({
+
+                sucesso: false,
+
+                erro: "Não encontramos uma conta com este e-mail."
+            });
+        }
+
+        const codigo = gerarCodigoVerificacao();
+        const codigoHash = await bcrypt.hash(codigo, 10);
+
+        usuarios[indice].codigoRecuperacaoSenha = codigoHash;
+
+        usuarios[indice].codigoRecuperacaoSenhaExpira =
+            Date.now() + 10 * 60 * 1000;
+
+        salvarUsuarios(usuarios);
+
+        await enviarCodigoRecuperacaoSenha(
+            emailNormalizado,
+            codigo
+        );
+
+        console.log(
+            "🔐 Código de recuperação enviado para:",
+            emailNormalizado
+        );
+
+        return res.json({
+
+            sucesso: true,
+
+            mensagem: "Código enviado para o seu e-mail."
+        });
+
+    } catch (erro) {
+
+        console.error(
+            "❌ Erro ao solicitar recuperação de senha:",
+            erro
+        );
+
+        return res.status(500).json({
+
+            sucesso: false,
+
+            erro: "Erro interno ao solicitar recuperação de senha."
+        });
+    }
+});
+
+// ------------------------------------------------------
+// PASSO 2 — CONFERIR O CÓDIGO RECEBIDO
+// ------------------------------------------------------
+
+app.post("/auth/verificar-codigo-recuperacao", async (req, res) => {
+
+    try {
+
+        const { email, codigo } = req.body;
+
+        if (!email || !codigo) {
+
+            return res.status(400).json({
+
+                sucesso: false,
+
+                erro: "Informe o e-mail e o código."
+            });
+        }
+
+        const emailNormalizado =
+            email.trim().toLowerCase();
+
+        const usuarios = lerUsuarios();
+
+        const indice =
+            usuarios.findIndex(
+                usuario =>
+                    usuario.email === emailNormalizado
+            );
+
+        if (indice === -1) {
+
+            return res.status(404).json({
+
+                sucesso: false,
+
+                erro: "Não encontramos uma conta com este e-mail."
+            });
+        }
+
+        const usuario = usuarios[indice];
+
+        if (
+            !usuario.codigoRecuperacaoSenha ||
+            !usuario.codigoRecuperacaoSenhaExpira
+        ) {
+
+            return res.status(400).json({
+
+                sucesso: false,
+
+                erro: "Nenhum código pendente. Solicite a recuperação novamente."
+            });
+        }
+
+        if (Date.now() > usuario.codigoRecuperacaoSenhaExpira) {
+
+            return res.status(400).json({
+
+                sucesso: false,
+
+                erro: "Código expirado. Solicite um novo."
+            });
+        }
+
+        const codigoCorreto =
+            await bcrypt.compare(
+                String(codigo).trim(),
+                usuario.codigoRecuperacaoSenha
+            );
+
+        if (!codigoCorreto) {
+
+            return res.status(401).json({
+
+                sucesso: false,
+
+                erro: "Código incorreto."
+            });
+        }
+
+        return res.json({
+
+            sucesso: true
+        });
+
+    } catch (erro) {
+
+        console.error(
+            "❌ Erro ao verificar código de recuperação:",
+            erro
+        );
+
+        return res.status(500).json({
+
+            sucesso: false,
+
+            erro: "Erro interno ao verificar o código."
+        });
+    }
+});
+
+// ------------------------------------------------------
+// PASSO 3 — DEFINIR A NOVA SENHA
+// ------------------------------------------------------
+//
+// Confere o código de novo (garante que ninguém pule direto
+// pra essa rota sem ter passado pelo passo 2) e só então
+// troca a senha.
+//
+
+app.post("/auth/redefinir-senha", async (req, res) => {
+
+    try {
+
+        const { email, codigo, senhaNova } = req.body;
+
+        if (!email || !codigo || !senhaNova) {
+
+            return res.status(400).json({
+
+                sucesso: false,
+
+                erro: "Preencha todos os campos."
+            });
+        }
+
+        if (senhaNova.length < 6) {
+
+            return res.status(400).json({
+
+                sucesso: false,
+
+                erro: "A nova senha deve possuir pelo menos 6 caracteres."
+            });
+        }
+
+        const emailNormalizado =
+            email.trim().toLowerCase();
+
+        const usuarios = lerUsuarios();
+
+        const indice =
+            usuarios.findIndex(
+                usuario =>
+                    usuario.email === emailNormalizado
+            );
+
+        if (indice === -1) {
+
+            return res.status(404).json({
+
+                sucesso: false,
+
+                erro: "Não encontramos uma conta com este e-mail."
+            });
+        }
+
+        const usuario = usuarios[indice];
+
+        if (
+            !usuario.codigoRecuperacaoSenha ||
+            !usuario.codigoRecuperacaoSenhaExpira
+        ) {
+
+            return res.status(400).json({
+
+                sucesso: false,
+
+                erro: "Solicite a recuperação de senha novamente."
+            });
+        }
+
+        if (Date.now() > usuario.codigoRecuperacaoSenhaExpira) {
+
+            return res.status(400).json({
+
+                sucesso: false,
+
+                erro: "Código expirado. Solicite um novo."
+            });
+        }
+
+        const codigoCorreto =
+            await bcrypt.compare(
+                String(codigo).trim(),
+                usuario.codigoRecuperacaoSenha
+            );
+
+        if (!codigoCorreto) {
+
+            return res.status(401).json({
+
+                sucesso: false,
+
+                erro: "Código incorreto."
+            });
+        }
+
+        usuario.senha =
+            await bcrypt.hash(senhaNova, 10);
+
+        // Se a conta era só do Google, agora também pode
+        // entrar com e-mail e senha (mesma regra usada na
+        // troca de senha pelo perfil).
+        if (usuario.provedor === "google") {
+            usuario.provedor = "email_google";
+        }
+
+        usuario.codigoRecuperacaoSenha = null;
+        usuario.codigoRecuperacaoSenhaExpira = null;
+
+        salvarUsuarios(usuarios);
+
+        console.log(
+            "🔐 Senha redefinida via recuperação para:",
+            usuario.email
+        );
+
+        return res.json({
+
+            sucesso: true,
+
+            mensagem: "Senha redefinida com sucesso."
+        });
+
+    } catch (erro) {
+
+        console.error(
+            "❌ Erro ao redefinir senha:",
+            erro
+        );
+
+        return res.status(500).json({
+
+            sucesso: false,
+
+            erro: "Erro interno ao redefinir a senha."
+        });
+    }
 });
 
 // ======================================================

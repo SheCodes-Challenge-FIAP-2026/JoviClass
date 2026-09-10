@@ -1,31 +1,16 @@
 [
   {
-    "id": "1788901757591",
-    "googleId": "115157201591849322744",
+    "id": "1789072936725",
     "nome": "scalzone gi",
+    "curso": "",
     "email": "giscalzone@gmail.com",
-    "senha": null,
-    "foto": "https://lh3.googleusercontent.com/a/ACg8ocKOS4eUv3WyMDJYDvWdHHiP9xW0XapabueU_q0RR11k4aZVDw=s96-c",
-    "provedor": "google",
-    "emailVerificado": true
-  },
-  {
-    "id": "1788989538843",
-    "nome": "Giovanna Lopes Scalzone",
-    "email": "seilavei574@gmail.com",
-    "senha": "$2b$10$EYNsIov5Qd/pjltRgUcGbu2v84c0bapQ7bgE2kwsDCkHtOAWZEa82",
+    "senha": "$2b$10$X45S6NEV9pyj/rAUHwFQFeztspGsg5BCqCEgQaiyq8K0MWneFwqyS",
     "foto": null,
     "provedor": "email",
-    "emailVerificado": false
-  },
-  {
-    "id": "1788990276027",
-    "nome": "Giovanna Lopes Scalzone",
-    "email": "gi647401@gmail.com",
-    "senha": "$2b$10$bbzxQG0hTWNcYjBMyVcI6up1QI3i4LD1igy3jLEmmemqAmROOBFye",
-    "foto": null,
-    "provedor": "email",
-    "emailVerificado": false,
-    "curso": "Engenharia de Produção · 4º período"
+    "emailVerificado": true,
+    "codigoVerificacao": null,
+    "codigoVerificacaoExpira": null,
+    "codigoRecuperacaoSenha": "$2b$10$pLFPZ8p404i/RBcNIy9F0eAfPvhKHsCvN2wKw5BMpps0llj.txqEu",
+    "codigoRecuperacaoSenhaExpira": 1789073930759
   }
 ]

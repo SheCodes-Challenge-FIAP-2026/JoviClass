@@ -596,6 +596,63 @@ function iniciarSenhaSeguranca() {
 
 
 /* =========================================================
+   MOSTRAR / OCULTAR SENHA ("olhinho")
+========================================================= */
+
+// O ícone troca de verdade: olho fechado enquanto a senha
+// está criptografada na tela (type="password") e olho aberto
+// quando ela fica visível (type="text"). Funciona pra
+// qualquer input de senha que tenha um botão com a classe
+// "toggle-senha" e o atributo data-target apontando pro id
+// do input. Usado nos campos do modal "Senha e Segurança"
+// (campoSenhaAtual, campoSenhaNova, campoSenhaConfirma).
+
+const ICONE_OLHO_ABERTO = `
+  <svg class="icone-olho" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="20" height="20">
+    <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+    <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.7"/>
+  </svg>
+`;
+
+const ICONE_OLHO_FECHADO = `
+  <svg class="icone-olho" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="20" height="20">
+    <path d="M3 3l18 18" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+    <path d="M10.6 5.2A10.7 10.7 0 0 1 12 5c6.5 0 10 7 10 7a13.2 13.2 0 0 1-3.1 3.9M6.4 6.4C4 8 2 12 2 12s3.5 7 10 7c1.4 0 2.7-.3 3.9-.8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M9.9 9.9a3 3 0 0 0 4.2 4.2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>
+`;
+
+function atualizarIconeToggleSenha(btn, senhaVisivel) {
+  btn.innerHTML = senhaVisivel ? ICONE_OLHO_ABERTO : ICONE_OLHO_FECHADO;
+
+  btn.classList.toggle("mostrando", senhaVisivel);
+
+  btn.setAttribute(
+    "aria-label",
+    senhaVisivel ? "Ocultar senha" : "Mostrar senha"
+  );
+}
+
+function iniciarToggleSenha() {
+  document.querySelectorAll(".toggle-senha").forEach((btn) => {
+    const alvo = document.getElementById(btn.dataset.target);
+    if (!alvo) return;
+
+    // Estado inicial: o campo começa como password (oculto),
+    // então o ícone começa fechado.
+    atualizarIconeToggleSenha(btn, alvo.type !== "password");
+
+    btn.addEventListener("click", () => {
+      const senhaVaiFicarVisivel = alvo.type === "password";
+      alvo.type = senhaVaiFicarVisivel ? "text" : "password";
+
+      atualizarIconeToggleSenha(btn, senhaVaiFicarVisivel);
+    });
+  });
+}
+
+
+/* =========================================================
    INSTITUIÇÃO DE ENSINO (continua local por enquanto)
 ========================================================= */
 
@@ -885,6 +942,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   iniciarEdicaoDePerfil();
   iniciarSenhaSeguranca();
+  iniciarToggleSenha();
 
   iniciarPreferenciasDoPerfil();
   iniciarInstituicao();

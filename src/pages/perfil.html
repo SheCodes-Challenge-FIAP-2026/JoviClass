@@ -221,17 +221,41 @@
       <form id="formSenha" novalidate>
         <div class="campo" id="blocoSenhaAtual">
           <label for="campoSenhaAtual">Senha atual</label>
-          <input type="password" id="campoSenhaAtual" name="senhaAtual" placeholder="Digite sua senha atual" autocomplete="current-password">
+          <div class="campo-senha-wrapper">
+            <input type="password" id="campoSenhaAtual" name="senhaAtual" placeholder="Digite sua senha atual" autocomplete="current-password">
+            <button type="button" class="toggle-senha" data-target="campoSenhaAtual" aria-label="Mostrar senha">
+              <svg class="icone-olho" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="20" height="20">
+                <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+                <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.7"/>
+              </svg>
+            </button>
+          </div>
         </div>
 
         <div class="campo">
           <label for="campoSenhaNova">Nova senha</label>
-          <input type="password" id="campoSenhaNova" name="senhaNova" required placeholder="Mínimo de 6 caracteres" autocomplete="new-password">
+          <div class="campo-senha-wrapper">
+            <input type="password" id="campoSenhaNova" name="senhaNova" required placeholder="Mínimo de 6 caracteres" autocomplete="new-password">
+            <button type="button" class="toggle-senha" data-target="campoSenhaNova" aria-label="Mostrar senha">
+              <svg class="icone-olho" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="20" height="20">
+                <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+                <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.7"/>
+              </svg>
+            </button>
+          </div>
         </div>
 
         <div class="campo">
           <label for="campoSenhaConfirma">Confirmar nova senha</label>
-          <input type="password" id="campoSenhaConfirma" name="senhaConfirma" required placeholder="Repita a nova senha" autocomplete="new-password">
+          <div class="campo-senha-wrapper">
+            <input type="password" id="campoSenhaConfirma" name="senhaConfirma" required placeholder="Repita a nova senha" autocomplete="new-password">
+            <button type="button" class="toggle-senha" data-target="campoSenhaConfirma" aria-label="Mostrar senha">
+              <svg class="icone-olho" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="20" height="20">
+                <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+                <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.7"/>
+              </svg>
+            </button>
+          </div>
         </div>
 
         <p class="campo-ajuda">Sua senha fica salva apenas neste dispositivo (armazenamento local do navegador).</p>

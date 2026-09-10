@@ -1095,3 +1095,60 @@ a {
     grid-template-columns: repeat(4, 1fr);
   }
 }
+
+/* =========================================================
+   MOSTRAR / OCULTAR SENHA (olhinho)
+========================================================= */
+
+.campo-senha-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.campo-senha-wrapper input {
+  width: 100%;
+  padding-right: 44px; /* espaço pro botão do olho */
+}
+
+.toggle-senha {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+
+  width: 34px;
+  height: 34px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: none;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+
+  color: var(--bg-color5);
+  transition: color 0.2s ease, background 0.2s ease;
+}
+
+.toggle-senha:hover {
+  background: var(--lilas-suave);
+  color: var(--bg-color1);
+}
+
+.toggle-senha.mostrando {
+  color: var(--bg-color1);
+}
+
+.toggle-senha .icone-olho {
+  width: 20px;
+  height: 20px;
+  display: block;
+}
+
+.toggle-senha:focus-visible {
+  outline: 2px solid var(--bg-color4);
+  outline-offset: 2px;
+}

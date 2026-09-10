@@ -680,7 +680,22 @@ function inicializarLoginEmail() {
 
 /* =========================================================
    CADASTRO COM E-MAIL E SENHA
+   (agora em 2 passos: dados -> código de confirmação)
 ========================================================= */
+
+/*
+    Guardamos aqui os dados que o usuário preencheu no
+    passo 1 do cadastro (nome, e-mail, senha), pra não
+    precisar pedir de novo depois que ele confirmar o
+    código recebido por e-mail. A conta só é criada de
+    verdade no passo 2, quando o código é confirmado.
+*/
+
+const cadastroPendente = {
+    nome: "",
+    email: "",
+    senha: ""
+};
 
 function inicializarCadastroEmail() {
 
@@ -698,9 +713,7 @@ function inicializarCadastroEmail() {
 
         e.preventDefault();
 
-        if (authErro) {
-            authErro.textContent = "";
-        }
+        limparErroAuth();
 
         const nome =
             document.getElementById("cadastroNome")?.value.trim();
@@ -736,8 +749,14 @@ function inicializarCadastroEmail() {
 
         try {
 
+            /*
+                Passo 1: NÃO cria a conta ainda.
+                Só pede pro backend gerar o código e
+                mandar pro e-mail informado.
+            */
+
             const resposta = await fetch(
-                `${API_BASE}/auth/cadastro`,
+                `${API_BASE}/auth/cadastro/enviar-codigo`,
                 {
                     method: "POST",
 
@@ -761,25 +780,21 @@ function inicializarCadastroEmail() {
 
                 throw new Error(
                     dados.erro ||
-                    "Não foi possível criar a conta."
+                    "Não foi possível enviar o código de confirmação."
                 );
             }
 
-            console.log(
-                "Cadastro realizado:",
-                dados.usuario
-            );
+            // Guarda os dados pra usar na confirmação do código
+            cadastroPendente.nome = nome;
+            cadastroPendente.email = email;
+            cadastroPendente.senha = senha;
 
-            cadastroForm.reset();
-
-            atualizarSaudacao(dados.usuario);
-
-            liberarAplicacao();
+            mostrarCodigoCadastro(email);
 
         } catch (erro) {
 
             console.error(
-                "Erro no cadastro:",
+                "Erro ao solicitar código de cadastro:",
                 erro
             );
 
@@ -788,6 +803,903 @@ function inicializarCadastroEmail() {
             }
         }
     });
+}
+
+
+/* =========================================================
+   MOSTRAR / OCULTAR SENHA ("olhinho")
+========================================================= */
+
+// O ícone troca de verdade: olho fechado enquanto a senha
+// está criptografada na tela (type="password") e olho aberto
+// quando ela fica visível (type="text"). Funciona pra
+// qualquer input de senha que tenha um botão com a classe
+// "toggle-senha" e o atributo data-target apontando pro id
+// do input. Usado nos campos loginSenha e cadastroSenha.
+
+const ICONE_OLHO_ABERTO = `
+    <svg class="icone-olho" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="20" height="20">
+        <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+        <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.7"/>
+    </svg>
+`;
+
+const ICONE_OLHO_FECHADO = `
+    <svg class="icone-olho" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="20" height="20">
+        <path d="M3 3l18 18" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+        <path d="M10.6 5.2A10.7 10.7 0 0 1 12 5c6.5 0 10 7 10 7a13.2 13.2 0 0 1-3.1 3.9M6.4 6.4C4 8 2 12 2 12s3.5 7 10 7c1.4 0 2.7-.3 3.9-.8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M9.9 9.9a3 3 0 0 0 4.2 4.2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+`;
+
+function atualizarIconeToggleSenha(btn, senhaVisivel) {
+
+    btn.innerHTML =
+        senhaVisivel ? ICONE_OLHO_ABERTO : ICONE_OLHO_FECHADO;
+
+    btn.classList.toggle(
+        "mostrando",
+        senhaVisivel
+    );
+
+    btn.setAttribute(
+        "aria-label",
+        senhaVisivel ? "Ocultar senha" : "Mostrar senha"
+    );
+}
+
+function inicializarToggleSenha() {
+
+    document
+        .querySelectorAll(".toggle-senha")
+        .forEach((btn) => {
+
+            const alvo =
+                document.getElementById(btn.dataset.target);
+
+            if (!alvo) {
+                return;
+            }
+
+            // Estado inicial: o campo começa como password
+            // (oculto), então o ícone começa fechado.
+            atualizarIconeToggleSenha(
+                btn,
+                alvo.type !== "password"
+            );
+
+            btn.addEventListener("click", () => {
+
+                const senhaVaiFicarVisivel =
+                    alvo.type === "password";
+
+                alvo.type =
+                    senhaVaiFicarVisivel ? "text" : "password";
+
+                atualizarIconeToggleSenha(
+                    btn,
+                    senhaVaiFicarVisivel
+                );
+            });
+        });
+}
+
+
+/* =========================================================
+   RECUPERAÇÃO DE SENHA ("ESQUECEU A SENHA?")
+========================================================= */
+
+/*
+    Fluxo em 3 passos dentro do mesmo modal de login:
+
+    1) formRecuperarSenha         -> pede o e-mail
+    2) formCodigoRecuperacao      -> pede o código de 6 dígitos
+    3) formNovaSenhaRecuperacao   -> pede a nova senha + confirmação
+
+    Guardamos o e-mail e o código confirmados aqui, pra não
+    precisar pedir de novo na hora de salvar a nova senha.
+*/
+
+const recuperacaoSenha = {
+    email: "",
+    codigo: ""
+};
+
+function ocultarTodosOsPassosAuth() {
+
+    const loginForm =
+        document.getElementById("loginForm");
+
+    const cadastroForm =
+        document.getElementById("cadastroForm");
+
+    const formVerificarEmail =
+        document.getElementById("formVerificarEmail");
+
+    const formRecuperarSenha =
+        document.getElementById("formRecuperarSenha");
+
+    const formCodigoRecuperacao =
+        document.getElementById("formCodigoRecuperacao");
+
+    const formNovaSenhaRecuperacao =
+        document.getElementById("formNovaSenhaRecuperacao");
+
+    const formCodigoCadastro =
+        document.getElementById("formCodigoCadastro");
+
+    const authTabs =
+        document.querySelector(".auth-tabs");
+
+    const authOu =
+        document.querySelector(".auth-ou");
+
+    const googleLogin =
+        document.querySelector(".google-login");
+
+    [
+        loginForm,
+        cadastroForm,
+        formVerificarEmail,
+        formRecuperarSenha,
+        formCodigoRecuperacao,
+        formNovaSenhaRecuperacao,
+        formCodigoCadastro
+    ].forEach((el) => {
+        if (el) {
+            el.style.display = "none";
+        }
+    });
+
+    if (authTabs) authTabs.style.display = "none";
+    if (authOu) authOu.style.display = "none";
+    if (googleLogin) googleLogin.style.display = "none";
+}
+
+function limparErroAuth() {
+
+    const authErro =
+        document.getElementById("authErro");
+
+    if (authErro) {
+        authErro.style.color = "";
+        authErro.textContent = "";
+    }
+}
+
+function mostrarRecuperarSenha() {
+
+    ocultarTodosOsPassosAuth();
+    limparErroAuth();
+
+    const formRecuperarSenha =
+        document.getElementById("formRecuperarSenha");
+
+    const authTitulo =
+        document.getElementById("authTitulo");
+
+    const authDescricao =
+        document.getElementById("authDescricao");
+
+    if (formRecuperarSenha) formRecuperarSenha.style.display = "flex";
+
+    if (authTitulo) {
+        authTitulo.textContent = "Recuperar senha";
+    }
+
+    if (authDescricao) {
+        authDescricao.textContent =
+            "Informe seu e-mail para receber um código de verificação.";
+    }
+}
+
+function mostrarCodigoRecuperacao(email) {
+
+    ocultarTodosOsPassosAuth();
+    limparErroAuth();
+
+    const formCodigoRecuperacao =
+        document.getElementById("formCodigoRecuperacao");
+
+    const authTitulo =
+        document.getElementById("authTitulo");
+
+    const authDescricao =
+        document.getElementById("authDescricao");
+
+    const emailAlvo =
+        document.getElementById("recuperarEmailAlvo");
+
+    if (formCodigoRecuperacao) formCodigoRecuperacao.style.display = "flex";
+
+    if (authTitulo) {
+        authTitulo.textContent = "Digite o código";
+    }
+
+    if (authDescricao) {
+        authDescricao.textContent =
+            "Enviamos um código de 6 dígitos para o seu e-mail.";
+    }
+
+    if (emailAlvo) {
+        emailAlvo.textContent = email;
+    }
+}
+
+function mostrarNovaSenhaRecuperacao() {
+
+    ocultarTodosOsPassosAuth();
+    limparErroAuth();
+
+    const formNovaSenhaRecuperacao =
+        document.getElementById("formNovaSenhaRecuperacao");
+
+    const authTitulo =
+        document.getElementById("authTitulo");
+
+    const authDescricao =
+        document.getElementById("authDescricao");
+
+    if (formNovaSenhaRecuperacao) formNovaSenhaRecuperacao.style.display = "flex";
+
+    if (authTitulo) {
+        authTitulo.textContent = "Criar nova senha";
+    }
+
+    if (authDescricao) {
+        authDescricao.textContent =
+            "Escolha uma nova senha para acessar sua conta.";
+    }
+}
+
+function voltarParaLogin() {
+
+    ocultarTodosOsPassosAuth();
+    limparErroAuth();
+
+    const loginForm =
+        document.getElementById("loginForm");
+
+    const authTabs =
+        document.querySelector(".auth-tabs");
+
+    const authOu =
+        document.querySelector(".auth-ou");
+
+    const googleLogin =
+        document.querySelector(".google-login");
+
+    const btnLogin =
+        document.getElementById("btnLogin");
+
+    const btnCadastro =
+        document.getElementById("btnCadastro");
+
+    const authTitulo =
+        document.getElementById("authTitulo");
+
+    const authDescricao =
+        document.getElementById("authDescricao");
+
+    if (loginForm) loginForm.style.display = "flex";
+    if (authTabs) authTabs.style.display = "flex";
+    if (authOu) authOu.style.display = "flex";
+    if (googleLogin) googleLogin.style.display = "flex";
+
+    if (btnLogin) btnLogin.classList.add("ativo");
+    if (btnCadastro) btnCadastro.classList.remove("ativo");
+
+    if (authTitulo) {
+        authTitulo.textContent = "Falta pouco para começar";
+    }
+
+    if (authDescricao) {
+        authDescricao.textContent =
+            "Entre na sua conta para continuar seus estudos.";
+    }
+}
+
+function inicializarRecuperacaoSenha() {
+
+    const linkEsqueci =
+        document.getElementById("linkEsqueciSenha");
+
+    const formRecuperarSenha =
+        document.getElementById("formRecuperarSenha");
+
+    const formCodigoRecuperacao =
+        document.getElementById("formCodigoRecuperacao");
+
+    const formNovaSenhaRecuperacao =
+        document.getElementById("formNovaSenhaRecuperacao");
+
+    const voltarParaLoginBtn =
+        document.getElementById("voltarParaLoginDeRecuperar");
+
+    const reenviarCodigoBtn =
+        document.getElementById("reenviarCodigoRecuperacao");
+
+    const authErro =
+        document.getElementById("authErro");
+
+    if (!linkEsqueci) {
+        return;
+    }
+
+
+    /* -----------------------------------------------------
+       ABRIR O PASSO 1 (E-MAIL)
+    ----------------------------------------------------- */
+
+    linkEsqueci.addEventListener("click", (e) => {
+        e.preventDefault();
+        mostrarRecuperarSenha();
+    });
+
+    if (voltarParaLoginBtn) {
+        voltarParaLoginBtn.addEventListener("click", voltarParaLogin);
+    }
+
+
+    /* -----------------------------------------------------
+       PASSO 1 -> ENVIA O CÓDIGO
+    ----------------------------------------------------- */
+
+    if (formRecuperarSenha) {
+
+        formRecuperarSenha.addEventListener("submit", async (e) => {
+
+            e.preventDefault();
+            console.log("submit capturado!"); // linha temporária
+            limparErroAuth();
+
+            const email =
+                document.getElementById("recuperarEmail")?.value.trim();
+
+            if (!email) {
+
+                if (authErro) {
+                    authErro.textContent = "Informe seu e-mail.";
+                }
+
+                return;
+            }
+
+            try {
+
+                const resposta = await fetch(
+                    `${API_BASE}/auth/recuperar-senha`,
+                    {
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+
+                        credentials: "include",
+
+                        body: JSON.stringify({ email })
+                    }
+                );
+
+                const dados = await resposta.json();
+
+                if (!resposta.ok || !dados.sucesso) {
+
+                    throw new Error(
+                        dados.erro ||
+                        "Não foi possível enviar o código."
+                    );
+                }
+
+                recuperacaoSenha.email = email;
+                recuperacaoSenha.codigo = "";
+
+                mostrarCodigoRecuperacao(email);
+
+            } catch (erro) {
+
+                if (authErro) {
+                    authErro.textContent = erro.message;
+                }
+            }
+        });
+    }
+
+
+    /* -----------------------------------------------------
+       PASSO 2 -> CONFERE O CÓDIGO
+    ----------------------------------------------------- */
+
+    if (formCodigoRecuperacao) {
+
+        formCodigoRecuperacao.addEventListener("submit", async (e) => {
+
+            e.preventDefault();
+            limparErroAuth();
+
+            const codigo =
+                document
+                    .getElementById("campoCodigoRecuperacao")
+                    ?.value.trim();
+
+            if (!codigo) {
+
+                if (authErro) {
+                    authErro.textContent =
+                        "Informe o código recebido por e-mail.";
+                }
+
+                return;
+            }
+
+            try {
+
+                const resposta = await fetch(
+                    `${API_BASE}/auth/verificar-codigo-recuperacao`,
+                    {
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+
+                        credentials: "include",
+
+                        body: JSON.stringify({
+                            email: recuperacaoSenha.email,
+                            codigo
+                        })
+                    }
+                );
+
+                const dados = await resposta.json();
+
+                if (!resposta.ok || !dados.sucesso) {
+
+                    throw new Error(
+                        dados.erro ||
+                        "Código incorreto."
+                    );
+                }
+
+                recuperacaoSenha.codigo = codigo;
+
+                mostrarNovaSenhaRecuperacao();
+
+            } catch (erro) {
+
+                if (authErro) {
+                    authErro.textContent = erro.message;
+                }
+            }
+        });
+    }
+
+
+    /* -----------------------------------------------------
+       REENVIAR CÓDIGO (PASSO 2)
+    ----------------------------------------------------- */
+
+    if (reenviarCodigoBtn) {
+
+        reenviarCodigoBtn.addEventListener("click", async (e) => {
+
+            e.preventDefault();
+            limparErroAuth();
+
+            try {
+
+                const resposta = await fetch(
+                    `${API_BASE}/auth/recuperar-senha`,
+                    {
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+
+                        credentials: "include",
+
+                        body: JSON.stringify({
+                            email: recuperacaoSenha.email
+                        })
+                    }
+                );
+
+                const dados = await resposta.json();
+
+                if (!resposta.ok || !dados.sucesso) {
+
+                    throw new Error(
+                        dados.erro ||
+                        "Não foi possível reenviar o código."
+                    );
+                }
+
+                if (authErro) {
+                    authErro.style.color = "#1a9c5c";
+                    authErro.textContent =
+                        "Novo código enviado! Confira seu e-mail.";
+                }
+
+            } catch (erro) {
+
+                if (authErro) {
+                    authErro.style.color = "";
+                    authErro.textContent = erro.message;
+                }
+            }
+        });
+    }
+
+
+    /* -----------------------------------------------------
+       PASSO 3 -> SALVA A NOVA SENHA E VOLTA PRO LOGIN
+    ----------------------------------------------------- */
+
+    if (formNovaSenhaRecuperacao) {
+
+        formNovaSenhaRecuperacao.addEventListener("submit", async (e) => {
+
+            e.preventDefault();
+            limparErroAuth();
+
+            const senhaNova =
+                document.getElementById("campoNovaSenhaRecuperacao")?.value;
+
+            const senhaConfirma =
+                document.getElementById("campoConfirmaSenhaRecuperacao")?.value;
+
+            if (!senhaNova || senhaNova.length < 6) {
+
+                if (authErro) {
+                    authErro.textContent =
+                        "A nova senha deve ter pelo menos 6 caracteres.";
+                }
+
+                return;
+            }
+
+            if (senhaNova !== senhaConfirma) {
+
+                if (authErro) {
+                    authErro.textContent =
+                        "A confirmação não corresponde à nova senha.";
+                }
+
+                return;
+            }
+
+            try {
+
+                const resposta = await fetch(
+                    `${API_BASE}/auth/redefinir-senha`,
+                    {
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+
+                        credentials: "include",
+
+                        body: JSON.stringify({
+                            email: recuperacaoSenha.email,
+                            codigo: recuperacaoSenha.codigo,
+                            senhaNova
+                        })
+                    }
+                );
+
+                const dados = await resposta.json();
+
+                if (!resposta.ok || !dados.sucesso) {
+
+                    throw new Error(
+                        dados.erro ||
+                        "Não foi possível redefinir a senha."
+                    );
+                }
+
+                recuperacaoSenha.email = "";
+                recuperacaoSenha.codigo = "";
+
+                formNovaSenhaRecuperacao.reset();
+
+                voltarParaLogin();
+
+                if (authErro) {
+                    authErro.style.color = "#1a9c5c";
+                    authErro.textContent =
+                        "Senha redefinida com sucesso! Faça login com a nova senha.";
+                }
+
+            } catch (erro) {
+
+                if (authErro) {
+                    authErro.textContent = erro.message;
+                }
+            }
+        });
+    }
+}
+
+
+/* =========================================================
+   CONFIRMAÇÃO DE CADASTRO POR CÓDIGO
+========================================================= */
+
+/*
+    Passo 2 do cadastro: usuário já preencheu nome, e-mail
+    e senha (guardados em cadastroPendente) e o backend já
+    mandou o código pro e-mail dele. Aqui ele digita o
+    código e, se estiver certo, a conta é criada de fato
+    e a sessão é aberta — igual acontecia antes direto no
+    passo 1.
+*/
+
+function mostrarCodigoCadastro(email) {
+
+    ocultarTodosOsPassosAuth();
+    limparErroAuth();
+
+    const formCodigoCadastro =
+        document.getElementById("formCodigoCadastro");
+
+    const authTitulo =
+        document.getElementById("authTitulo");
+
+    const authDescricao =
+        document.getElementById("authDescricao");
+
+    const emailAlvo =
+        document.getElementById("cadastroEmailAlvo");
+
+    if (formCodigoCadastro) formCodigoCadastro.style.display = "flex";
+
+    if (authTitulo) {
+        authTitulo.textContent = "Confirme seu e-mail";
+    }
+
+    if (authDescricao) {
+        authDescricao.textContent =
+            "Digite o código de 6 dígitos que enviamos para você.";
+    }
+
+    if (emailAlvo) {
+        emailAlvo.textContent = email;
+    }
+}
+
+function voltarParaCadastroDoCodigo() {
+
+    ocultarTodosOsPassosAuth();
+    limparErroAuth();
+
+    const cadastroForm =
+        document.getElementById("cadastroForm");
+
+    const authTabs =
+        document.querySelector(".auth-tabs");
+
+    const authOu =
+        document.querySelector(".auth-ou");
+
+    const googleLogin =
+        document.querySelector(".google-login");
+
+    const btnLogin =
+        document.getElementById("btnLogin");
+
+    const btnCadastro =
+        document.getElementById("btnCadastro");
+
+    const authTitulo =
+        document.getElementById("authTitulo");
+
+    const authDescricao =
+        document.getElementById("authDescricao");
+
+    if (cadastroForm) cadastroForm.style.display = "flex";
+    if (authTabs) authTabs.style.display = "flex";
+    if (authOu) authOu.style.display = "flex";
+    if (googleLogin) googleLogin.style.display = "flex";
+
+    if (btnCadastro) btnCadastro.classList.add("ativo");
+    if (btnLogin) btnLogin.classList.remove("ativo");
+
+    if (authTitulo) {
+        authTitulo.textContent = "Crie sua conta";
+    }
+
+    if (authDescricao) {
+        authDescricao.textContent =
+            "Leva menos de um minuto para começar.";
+    }
+}
+
+function inicializarConfirmacaoCadastro() {
+
+    const formCodigoCadastro =
+        document.getElementById("formCodigoCadastro");
+
+    const reenviarCodigoBtn =
+        document.getElementById("reenviarCodigoCadastro");
+
+    const voltarBtn =
+        document.getElementById("voltarParaCadastroDoCodigo");
+
+    const authErro =
+        document.getElementById("authErro");
+
+    if (!formCodigoCadastro) {
+        return;
+    }
+
+
+    /* -----------------------------------------------------
+       CONFIRMAR CÓDIGO -> CRIA A CONTA DE VERDADE
+    ----------------------------------------------------- */
+
+    formCodigoCadastro.addEventListener("submit", async (e) => {
+
+        e.preventDefault();
+        limparErroAuth();
+
+        const codigo =
+            document
+                .getElementById("campoCodigoCadastro")
+                ?.value.trim();
+
+        if (!codigo) {
+
+            if (authErro) {
+                authErro.textContent =
+                    "Informe o código recebido por e-mail.";
+            }
+
+            return;
+        }
+
+        try {
+
+            const resposta = await fetch(
+                `${API_BASE}/auth/cadastro/confirmar`,
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+
+                    credentials: "include",
+
+                    body: JSON.stringify({
+                        nome: cadastroPendente.nome,
+                        email: cadastroPendente.email,
+                        senha: cadastroPendente.senha,
+                        codigo
+                    })
+                }
+            );
+
+            const dados = await resposta.json();
+
+            if (!resposta.ok || !dados.sucesso) {
+
+                throw new Error(
+                    dados.erro ||
+                    "Código incorreto ou expirado."
+                );
+            }
+
+            console.log(
+                "Cadastro confirmado:",
+                dados.usuario
+            );
+
+            const cadastroForm =
+                document.getElementById("cadastroForm");
+
+            if (cadastroForm) {
+                cadastroForm.reset();
+            }
+
+            formCodigoCadastro.reset();
+
+            cadastroPendente.nome = "";
+            cadastroPendente.email = "";
+            cadastroPendente.senha = "";
+
+            atualizarSaudacao(dados.usuario);
+
+            liberarAplicacao();
+
+        } catch (erro) {
+
+            console.error(
+                "Erro ao confirmar cadastro:",
+                erro
+            );
+
+            if (authErro) {
+                authErro.textContent = erro.message;
+            }
+        }
+    });
+
+
+    /* -----------------------------------------------------
+       REENVIAR CÓDIGO DE CADASTRO
+    ----------------------------------------------------- */
+
+    if (reenviarCodigoBtn) {
+
+        reenviarCodigoBtn.addEventListener("click", async (e) => {
+
+            e.preventDefault();
+            limparErroAuth();
+
+            try {
+
+                const resposta = await fetch(
+                    `${API_BASE}/auth/cadastro/enviar-codigo`,
+                    {
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+
+                        credentials: "include",
+
+                        body: JSON.stringify({
+                            nome: cadastroPendente.nome,
+                            email: cadastroPendente.email,
+                            senha: cadastroPendente.senha
+                        })
+                    }
+                );
+
+                const dados = await resposta.json();
+
+                if (!resposta.ok || !dados.sucesso) {
+
+                    throw new Error(
+                        dados.erro ||
+                        "Não foi possível reenviar o código."
+                    );
+                }
+
+                if (authErro) {
+                    authErro.style.color = "#1a9c5c";
+                    authErro.textContent =
+                        "Novo código enviado! Confira seu e-mail.";
+                }
+
+            } catch (erro) {
+
+                if (authErro) {
+                    authErro.style.color = "";
+                    authErro.textContent = erro.message;
+                }
+            }
+        });
+    }
+
+
+    /* -----------------------------------------------------
+       VOLTAR PARA O PASSO 1 DO CADASTRO
+    ----------------------------------------------------- */
+
+    if (voltarBtn) {
+
+        voltarBtn.addEventListener("click", (e) => {
+            e.preventDefault();
+            voltarParaCadastroDoCodigo();
+        });
+    }
 }
 
 
@@ -1194,6 +2106,9 @@ document.addEventListener(
         inicializarAbasAuth();
         inicializarLoginEmail();
         inicializarCadastroEmail();
+        inicializarConfirmacaoCadastro();
+        inicializarToggleSenha();
+        inicializarRecuperacaoSenha();
 
 
         /*
