@@ -2516,6 +2516,16 @@ const ai = new GoogleGenAI({
     apiKey: process.env.GEMINI_API_KEY
 });
 
+if (!process.env.GEMINI_API_KEY_CAMERA) {
+    console.error("❌ ERRO: GEMINI_API_KEY_CAMERA não foi encontrada no arquivo .env");
+    process.exit(1);
+}
+
+
+const aiCamera = new GoogleGenAI({
+    apiKey: process.env.GEMINI_API_KEY_CAMERA
+});
+
 // ======================================================
 // RETRY DO GEMINI
 // ======================================================
@@ -3011,68 +3021,55 @@ app.post(
     exigirLogin,
     async (req, res) => {
 
+
         console.log(
             "\n======================================"
         );
+
 
         console.log(
             "📥 NOVA REQUISIÇÃO DE IDENTIFICAÇÃO DE IMAGEM"
         );
 
+
         console.log(
             "======================================"
         );
 
+
         try {
 
-            const {
-                imagemBase64
-            } = req.body;
+
+            const { imagemBase64 } = req.body;
+
 
             if (!imagemBase64) {
-
                 return res.status(400).json({
+
 
                     erro: "Nenhuma imagem foi enviada."
                 });
             }
 
-            console.log(
-                "🤖 Enviando imagem para o Gemini..."
+
+            console.log("🤖 Enviando imagem para o Gemini...");
+
+
+            const resposta = await chamarGeminiComRetry(
+                {
+                    model: "gemini-3.5-flash",
+                    contents: [{
+                        role: "user",
+                        parts: [
+                            { text: "Classifique esta imagem em uma única palavra: 'lousa', 'caderno' ou 'outro'. Responda só a palavra, sem pontuação." },
+                            { inlineData: { mimeType: "image/jpeg", data: imagemBase64 } }
+                        ]
+                    }]
+                },
+                3,
+                aiCamera // ← só essa chamada usa a chave separada
             );
 
-            const resposta =
-                await chamarGeminiComRetry({
-
-                    model: "gemini-3.5-flash",
-
-                    contents: [
-
-                        {
-
-                            role: "user",
-
-                            parts: [
-
-                                {
-
-                                    text:
-                                        "Classifique esta imagem em uma única palavra: 'lousa', 'caderno' ou 'outro'. Responda só a palavra, sem pontuação."
-                                },
-
-                                {
-
-                                    inlineData: {
-
-                                        mimeType: "image/jpeg",
-
-                                        data: imagemBase64
-                                    }
-                                }
-                            ]
-                        }
-                    ]
-                });
 
             const tipo =
                 resposta.text
@@ -3080,29 +3077,38 @@ app.post(
                     .toLowerCase() ||
                 "outro";
 
+
             console.log(
                 "✅ Classificação:",
                 tipo
             );
 
+
             console.log(
                 "======================================\n"
             );
 
+
             res.json({
+
 
                 tipo: tipo
             });
 
+
         } catch (erro) {
+
 
             console.error(
                 "❌ ERRO NA IDENTIFICAÇÃO DE IMAGEM"
             );
 
+
             console.error(erro);
 
+
             res.status(500).json({
+
 
                 erro:
                     erro.message ||
@@ -3111,6 +3117,7 @@ app.post(
         }
     }
 );
+
 
 // ======================================================
 // TESTE DO GEMINI
