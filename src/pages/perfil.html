@@ -5,12 +5,13 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="../css/perfil.css">
+  <link rel="stylesheet" href="../css/suporte.css">
   <link rel="shortcut icon" href="/src/assets/favicon.ico" type="image/x-icon">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400..900&family=Manrope:wght@200..800&display=swap"
     rel="stylesheet">
-  <title>Perfil · JoviClass</title>
+  <title>Perfil - JoviClass</title>
 </head>
 
 <body>
@@ -49,7 +50,7 @@
     </div>
 
     <nav class="menu-links" id="menuLinks">
-      <a href="../../index.html" class="ativo">Início</a>
+      <a href="../../index.html">Início</a>
       <a href="../pages/materias.html">Matérias</a>
       <a href="../pages/calendario.html">Calendário</a>
       <a href="../pages/comunidade.html">Comunidades</a>
@@ -345,6 +346,51 @@
       <span>Perfil</span>
     </a>
   </nav>
+
+  <button
+      type="button"
+      id="botaoSuporte"
+      class="botao-suporte"
+      aria-label="Abrir suporte">
+
+      <img src="../assets/img/logoSuporte.png" alt="Suporte"/>
+
+  </button>
+
+    <div id="chatbot" class="chatbot">
+        <div class="chatbot-header">
+
+            <div class="chatbot-header-info">
+                <div>
+                    <h3>Suporte JoviClass</h3>
+                    <p>Como podemos ajudar?</p>
+                </div>
+            </div>
+
+            <button
+                type="button"
+                id="fecharChatbot"
+                class="fechar-chatbot"
+                aria-label="Fechar suporte">
+                ×
+            </button>
+
+        </div>
+
+        <div
+            id="conteudoChatbot"
+            class="conteudo-chatbot">
+            <p class="mensagem-bot">
+                Olá! 👋 Como posso ajudar?
+            </p>
+        </div>
+    </div>
+
+    <!-- =====================================================
+       JAVASCRIPT DO CHATBOT
+       ===================================================== -->
+
+    <script src="../js/suporte.js"></script>
 
   <script src="../js/perfil.js"></script>
 </body>
