@@ -2,711 +2,1121 @@
 <html lang="pt-BR">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="./src/css/style.css">
 
-    <link
-        href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400..900&family=Manrope:wght@200..800&display=swap"
-        rel="stylesheet"
-    >
+  <link rel="shortcut icon" href="/src/assets/favicon.ico" type="image/x-icon">
 
-    <link rel="stylesheet" href="../css/comunidade.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
-    <title>Comunidade</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400..900&family=Manrope:wght@200..800&display=swap"
+    rel="stylesheet">
+
+  <title>JoviClass</title>
 </head>
 
 <body>
 
-    <div id="overlay"></div>
+  <!-- =====================================================
+       LOGIN / CADASTRO
+       ===================================================== -->
 
-    <div id="overlayMenu" onclick="fecharMenuOpcoes()"></div>
+  <div class="auth-overlay" id="authOverlay">
 
+    <div class="auth-modal">
 
-    <!-- =====================================================
-         HEADER
-         ===================================================== -->
+      <!-- LOGO -->
 
-    <header class="menu">
+      <div class="auth-logo">
 
-        <div class="menu-header">
+        <img src="./src/assets/img/logo.png" alt="Logo JoviClass">
 
-            <div class="logoJovi">
+        <span>JoviClass</span>
 
-                <img
-                    src="../assets/img/logo.png"
-                    alt="Logo JoviClass"
-                    id="logo"
-                >
-
-                <h2>JoviClass</h2>
-
-            </div>
+      </div>
 
 
-            <div class="menu-actions">
+      <!-- TÍTULO -->
 
-                <div class="notif-wrapper">
+      <div class="auth-topo">
 
-                    <button
-                        class="icon-btn"
-                        id="notifBtn"
-                        aria-label="Notificações"
-                        aria-haspopup="true"
-                        aria-expanded="false"
-                    >
+        <h1 id="authTitulo">
+          Falta pouco para começar
+        </h1>
 
-                        <svg
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            xmlns="http://www.w3.org/2000/svg"
-                        >
+        <p id="authDescricao">
+          Entre na sua conta para continuar seus estudos.
+        </p>
 
-                            <path
-                                d="M12 3a6 6 0 0 0-6 6v3.586l-1.707 1.707A1 1 0 0 0 5 16h14a1 1 0 0 0 .707-1.707L18 12.586V9a6 6 0 0 0-6-6Z"
-                                stroke="currentColor"
-                                stroke-width="1.7"
-                                stroke-linejoin="round"
-                            />
-
-                            <path
-                                d="M9.5 19a2.5 2.5 0 0 0 5 0"
-                                stroke="currentColor"
-                                stroke-width="1.7"
-                                stroke-linecap="round"
-                            />
-
-                        </svg>
-
-                        <span
-                            class="notif-dot"
-                            id="notifDot"
-                            hidden
-                        >
-                            0
-                        </span>
-
-                    </button>
+      </div>
 
 
-                    <div
-                        class="notif-panel"
-                        id="notifPanel"
-                        hidden
-                    >
+      <!-- ABAS -->
 
-                        <div class="notif-panel-header">
+      <div class="auth-tabs">
 
-                            <strong>Notificações</strong>
+        <button type="button" class="auth-tab ativo" id="btnLogin">
+          Já tenho conta
+        </button>
 
-                            <button
-                                id="notifMarcarLidas"
-                                class="notif-marcar"
-                            >
-                                Marcar todas como lidas
-                            </button>
+        <button type="button" class="auth-tab" id="btnCadastro">
+          Criar conta
+        </button>
 
-                        </div>
+      </div>
 
 
-                        <div
-                            class="notif-lista"
-                            id="notifLista"
-                        >
-                        </div>
+      <!-- =================================================
+           FORMULÁRIO DE LOGIN
+           ================================================= -->
 
-                    </div>
+      <form id="loginForm" class="auth-form">
 
-                </div>
+        <div class="campo-auth">
 
+          <label for="loginEmail">
+            E-mail
+          </label>
 
-                <div
-                    class="hamburger"
-                    id="hamburger"
-                >
-
-                    <span></span>
-                    <span></span>
-                    <span></span>
-
-                </div>
-
-            </div>
+          <input type="email" id="loginEmail" name="email" placeholder="seuemail@email.com" autocomplete="email"
+            required>
 
         </div>
 
 
-        <nav
-            class="menu-links"
-            id="menuLinks"
-        >
+        <div class="campo-auth">
 
-            <a
-                href="../../index.html"
-                class="ativo"
-            >
-                Início
-            </a>
+          <label for="loginSenha">
+            Senha
+          </label>
 
-            <a href="../pages/materias.html">
-                Matérias
-            </a>
+          <div class="campo-senha-wrapper">
 
-            <a href="../pages/calendario.html">
-                Calendário
-            </a>
+            <input type="password" id="loginSenha" name="senha" placeholder="Digite sua senha"
+              autocomplete="current-password" required>
 
-            <a href="../pages/expansaoConhecimento.html">
-                Expansão do Conhecimento
-            </a>
-
-            <a href="../pages/camera.html">
-                Voltar a câmera ↩
-            </a>
-
-        </nav>
-
-    </header>
-
-
-    <!-- =====================================================
-         CONTEÚDO PRINCIPAL
-         ===================================================== -->
-
-    <div id="comunidade">
-
-
-        <!-- =================================================
-             TOPO
-             ================================================= -->
-
-        <div class="topoComunidade">
-
-            <div>
-
-                <h1>
-                    Comunidades
-                </h1>
-
-                <p id="subtituloComunidade">
-                    Participe de grupos de estudo e colabore
-                    com outros estudantes.
-                </p>
-
-            </div>
-
-
-            <button
-                type="button"
-                onclick="abrirFormulario()"
-                id="btnNovaComunidade"
-            >
-                + Nova Comunidade
+            <button type="button" class="toggle-senha" data-target="loginSenha" aria-label="Mostrar senha">
+              <svg class="icone-olho" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="20" height="20">
+                <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+                <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.7"/>
+              </svg>
             </button>
 
-        </div>
-
-
-        <!-- =================================================
-             FORMULÁRIO DE NOVA COMUNIDADE
-             ================================================= -->
-
-        <div id="formulario">
-
-            <form>
-
-                <button
-                    type="button"
-                    onclick="fecharAba()"
-                    id="fechar"
-                >
-                    ✕
-                </button>
-
-
-                <h2
-                    id="tituloFormulario"
-                    style="margin-bottom:8px;"
-                >
-                    Nova Comunidade
-                </h2>
-
-
-                <div class="fotoPreviewBox">
-
-                    <div
-                        class="fotoPlaceholder"
-                        id="fotoPlaceholder"
-                        onclick="document.getElementById('inputFoto').click()"
-                    >
-                        📷
-                    </div>
-
-
-                    <img
-                        id="fotoPreview"
-                        src=""
-                        alt="foto da comunidade"
-                    >
-
-
-                    <input
-                        type="file"
-                        id="inputFoto"
-                        accept="image/*"
-                    >
-
-
-                    <label
-                        class="labelFoto"
-                        onclick="document.getElementById('inputFoto').click()"
-                    >
-                        Adicionar foto da comunidade
-                    </label>
-
-                </div>
-
-
-                <label for="nomeComunidade">
-                    Nome da Comunidade:
-                </label>
-
-                <input
-                    type="text"
-                    placeholder="Ex. Cálculo"
-                    id="nomeComunidade"
-                >
-
-
-                <label for="descricao">
-                    Descrição:
-                </label>
-
-                <input
-                    type="text"
-                    placeholder="Descreva o objetivo da comunidade..."
-                    id="descricao"
-                >
-
-
-                <label for="categoria">
-                    Categoria:
-                </label>
-
-                <select id="categoria">
-
-                    <option value="Estudo">
-                        Estudo
-                    </option>
-
-                    <option value="Projeto">
-                        Projeto
-                    </option>
-
-                    <option value="Discussão">
-                        Discussão
-                    </option>
-
-                    <option value="Tutoria">
-                        Tutoria
-                    </option>
-
-                    <option value="Social">
-                        Social
-                    </option>
-
-                </select>
-
-
-                <label for="privacidade">
-                    Privacidade:
-                </label>
-
-                <select id="privacidade">
-
-                    <option value="Pública">
-                        Pública
-                    </option>
-
-                    <option value="Privada">
-                        Privada
-                    </option>
-
-                </select>
-
-
-                <button
-                    type="button"
-                    id="btnConfirmarForm"
-                    onclick="criarComunidade()"
-                >
-                    Criar comunidade
-                </button>
-
-            </form>
+          </div>
 
         </div>
 
 
-        <!-- =================================================
-             MENU DE OPÇÕES
-             ================================================= -->
+        <a href="#" id="linkEsqueciSenha" class="auth-link-secundario">
+          Esqueceu a senha?
+        </a>
 
-        <div id="menuOpcoes">
 
-            <button
-                onclick="acaoMenuOpcoes('convidar')"
-            >
-                🔗 Convidar membros
+        <button type="submit" class="auth-btn" id="loginBtn">
+          Continuar
+        </button>
+
+      </form>
+
+
+      <!-- =================================================
+           RECUPERAR SENHA — PASSO 1: E-MAIL
+           ================================================= -->
+
+      <form id="formRecuperarSenha" class="auth-form" style="display: none;">
+
+        <div class="campo-auth">
+
+          <label for="recuperarEmail">
+            E-mail
+          </label>
+
+          <input type="email" id="recuperarEmail" name="email" placeholder="seuemail@email.com" autocomplete="email"
+            required>
+
+        </div>
+
+
+        <button type="submit" class="auth-btn" id="recuperarBtn">
+          Enviar código
+        </button>
+
+        <button type="button" class="auth-link-secundario" id="voltarParaLoginDeRecuperar">
+          Voltar para o login
+        </button>
+
+      </form>
+
+
+      <!-- =================================================
+           RECUPERAR SENHA — PASSO 2: CÓDIGO
+           ================================================= -->
+
+      <form id="formCodigoRecuperacao" class="auth-form" style="display: none;">
+
+        <p class="auth-texto-auxiliar">
+          Enviamos um código de 6 dígitos para
+          <strong id="recuperarEmailAlvo"></strong>.
+        </p>
+
+        <div class="campo-auth">
+
+          <label for="campoCodigoRecuperacao">
+            Código recebido
+          </label>
+
+          <input type="text" id="campoCodigoRecuperacao" name="codigo" inputmode="numeric" maxlength="6"
+            placeholder="000000" autocomplete="one-time-code" required>
+
+        </div>
+
+
+        <button type="submit" class="auth-btn" id="confirmarCodigoRecuperacaoBtn">
+          Confirmar código
+        </button>
+
+        <button type="button" class="auth-link-secundario" id="reenviarCodigoRecuperacao">
+          Reenviar código
+        </button>
+
+      </form>
+
+
+      <!-- =================================================
+           RECUPERAR SENHA — PASSO 3: NOVA SENHA
+           ================================================= -->
+
+      <form id="formNovaSenhaRecuperacao" class="auth-form" style="display: none;">
+
+        <div class="campo-auth">
+
+          <label for="campoNovaSenhaRecuperacao">
+            Digite uma senha nova
+          </label>
+
+          <div class="campo-senha-wrapper">
+
+            <input type="password" id="campoNovaSenhaRecuperacao" name="senhaNova"
+              placeholder="Mínimo de 6 caracteres" autocomplete="new-password" minlength="6" required>
+
+            <button type="button" class="toggle-senha" data-target="campoNovaSenhaRecuperacao" aria-label="Mostrar senha">
+              <svg class="icone-olho" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="20" height="20">
+                <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+                <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.7"/>
+              </svg>
             </button>
 
-            <button
-                onclick="acaoMenuOpcoes('editar')"
-            >
-                ✏️ Editar comunidade
+          </div>
+
+        </div>
+
+
+        <div class="campo-auth">
+
+          <label for="campoConfirmaSenhaRecuperacao">
+            Confirme a senha nova
+          </label>
+
+          <div class="campo-senha-wrapper">
+
+            <input type="password" id="campoConfirmaSenhaRecuperacao" name="senhaConfirma"
+              placeholder="Repita a nova senha" autocomplete="new-password" minlength="6" required>
+
+            <button type="button" class="toggle-senha" data-target="campoConfirmaSenhaRecuperacao" aria-label="Mostrar senha">
+              <svg class="icone-olho" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="20" height="20">
+                <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+                <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.7"/>
+              </svg>
             </button>
 
-            <button
-                onclick="acaoMenuOpcoes('excluir')"
-                class="btnExcluir"
-            >
-                🗑️ Excluir comunidade
+          </div>
+
+        </div>
+
+
+        <button type="submit" class="auth-btn" id="salvarNovaSenhaBtn">
+          Salvar nova senha
+        </button>
+
+      </form>
+
+
+      <!-- =================================================
+           CADASTRO — PASSO 1: DADOS
+           ================================================= -->
+
+      <form id="cadastroForm" class="auth-form" style="display: none;">
+
+        <div class="campo-auth">
+
+          <label for="cadastroNome">
+            Nome Completo:
+          </label>
+
+          <input type="text" id="cadastroNome" name="nome" placeholder="Como podemos te chamar?" autocomplete="name"
+            required>
+
+        </div>
+
+
+        <div class="campo-auth">
+
+          <label for="cadastroEmail">
+            E-mail
+          </label>
+
+          <input type="email" id="cadastroEmail" name="email" placeholder="seuemail@email.com" autocomplete="email"
+            required>
+
+        </div>
+
+
+        <div class="campo-auth">
+
+          <label for="cadastroSenha">
+            Senha
+          </label>
+
+          <div class="campo-senha-wrapper">
+
+            <input type="password" id="cadastroSenha" name="senha" placeholder="Crie uma senha"
+              autocomplete="new-password" minlength="6" required>
+
+            <button type="button" class="toggle-senha" data-target="cadastroSenha" aria-label="Mostrar senha">
+              <svg class="icone-olho" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="20" height="20">
+                <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+                <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.7"/>
+              </svg>
             </button>
 
-        </div>
-
-
-        <!-- =================================================
-             MODAL DE CONVITE
-             ================================================= -->
-
-        <div id="modalConvidar">
-
-            <div id="conteudoConvidar">
-
-                <button
-                    type="button"
-                    onclick="fecharModalConvidar()"
-                    id="fecharConvidar"
-                >
-                    ✕
-                </button>
-
-
-                <h2>
-                    Convidar para a Comunidade
-                </h2>
-
-
-                <p class="subtituloConvidar">
-                    Compartilhe o link abaixo para convidar
-                    outros estudantes.
-                </p>
-
-
-                <div class="linkConvite">
-
-                    <input
-                        type="text"
-                        id="inputLinkConvite"
-                        readonly
-                    >
-
-                    <button
-                        type="button"
-                        onclick="copiarLink()"
-                        id="btnCopiarLink"
-                    >
-                        Copiar
-                    </button>
-
-                </div>
-
-
-                <div id="statusCopiar"></div>
-
-
-                <div class="divisorConvidar">
-
-                    <span>
-                        ou convide por e-mail
-                    </span>
-
-                </div>
-
-
-                <label for="emailConvite">
-                    E-mail do estudante:
-                </label>
-
-
-                <div class="emailRow">
-
-                    <input
-                        type="email"
-                        id="emailConvite"
-                        placeholder="exemplo@email.com"
-                    >
-
-                    <button
-                        type="button"
-                        onclick="enviarConviteEmail()"
-                    >
-                        Enviar convite
-                    </button>
-
-                </div>
-
-
-                <div id="listaConvidados">
-
-                    <p class="labelConvidados">
-                        Convites enviados:
-                    </p>
-
-                    <div id="convidadosItens"></div>
-
-                </div>
-
-            </div>
+          </div>
 
         </div>
 
 
-        <!-- =================================================
-             LISTA DE COMUNIDADES
-             ================================================= -->
+        <label class="auth-termos-check">
 
-        <div id="listadeComunidades"></div>
+          <input type="checkbox" id="aceitarTermos" required>
 
+          <span>
+            Concordo com os termos de uso e a política de
+            privacidade do JoviClass.
+          </span>
 
-        <!-- =================================================
-             PÁGINA INTERNA DA COMUNIDADE
-             ================================================= -->
-
-        <div id="paginaComunidade">
-
-            <div class="topoPagina">
-
-                <div class="caminho">
-
-                    <span
-                        onclick="voltarComunidades()"
-                        id="setaVoltar"
-                    >
-                        ←
-                    </span>
+        </label>
 
 
-                    <p>
-                        Comunidades ›
-                        <span id="NomeDiferenciado"></span>
-                    </p>
+        <button type="submit" class="auth-btn" id="cadastroBtn">
+          Criar minha conta
+        </button>
+
+      </form>
 
 
-                    <button
-                        class="btnTresPontos"
-                        id="btnTresPontosPagina"
-                        onclick="abrirMenuOpcoesPagina(event)"
-                    >
+      <!-- =================================================
+           CADASTRO — PASSO 2: CÓDIGO DE CONFIRMAÇÃO
+           ================================================= -->
 
-                        <span></span>
-                        <span></span>
-                        <span></span>
+      <form id="formCodigoCadastro" class="auth-form" style="display: none;">
 
-                    </button>
+        <p class="auth-texto-auxiliar">
+          Enviamos um código de 6 dígitos para
+          <strong id="cadastroEmailAlvo"></strong>.
+        </p>
 
-                </div>
+        <div class="campo-auth">
 
+          <label for="campoCodigoCadastro">
+            Código recebido
+          </label>
 
-                <div
-                    class="bannerComunidade"
-                    id="bannerComunidade"
-                >
-
-                    <span
-                        class="semFotoBanner"
-                        id="bannerEmoji"
-                    ></span>
-
-                </div>
-
-
-                <div>
-
-                    <h1 id="tituloComunidade"></h1>
-
-                    <p
-                        id="descricaoComunidade"
-                        style="color:#666;margin-top:6px;"
-                    ></p>
-
-                </div>
-
-            </div>
-
-
-            <!-- =================================================
-                 SALAS
-                 ================================================= -->
-
-            <div id="salasArea">
-
-                <p class="tituloSalas">
-                    Salas
-                </p>
-
-                <div
-                    class="listaSalas"
-                    id="listaSalas"
-                ></div>
-
-            </div>
-
-
-            <!-- =================================================
-                 SALA INTERNA
-                 ================================================= -->
-
-            <div id="salaInterna">
-
-                <div class="topSalaInterna">
-
-                    <span
-                        id="setaVoltarSala"
-                        onclick="voltarSalas()"
-                    >
-                        ←
-                    </span>
-
-                    <span id="nomeSalaAtual"></span>
-
-                </div>
-
-
-                <div id="arquivoArea"></div>
-
-
-                <div id="chatArea">
-
-                    <h2>
-                        💬 Chat
-                    </h2>
-
-
-                    <div
-                        id="mensagensChat"
-                    ></div>
-
-
-                    <div class="chatInput">
-
-                        <input
-                            type="text"
-                            id="inputMensagem"
-                            placeholder="Digite uma mensagem..."
-                        >
-
-
-                        <button
-                            onclick="enviarMensagem()"
-                        >
-                            Enviar
-                        </button>
-
-                    </div>
-
-                </div>
-
-            </div>
+          <input type="text" id="campoCodigoCadastro" name="codigo" inputmode="numeric" maxlength="6"
+            placeholder="000000" autocomplete="one-time-code" required>
 
         </div>
+
+
+        <button type="submit" class="auth-btn" id="confirmarCodigoCadastroBtn">
+          Confirmar código
+        </button>
+
+        <button type="button" class="auth-link-secundario" id="reenviarCodigoCadastro">
+          Reenviar código
+        </button>
+
+
+      </form>
+
+
+      <!-- DIVISOR -->
+
+      <div class="auth-ou">
+
+        <span></span>
+
+        <p>ou</p>
+
+        <span></span>
+
+      </div>
+
+
+      <!-- =================================================
+           LOGIN GOOGLE
+           ================================================= -->
+
+      <div class="google-login">
+
+        <div id="googleBtn"></div>
+
+      </div>
+
+
+      <!-- MENSAGEM DE ERRO -->
+
+      <p id="authErro" class="auth-erro" role="alert"></p>
+
+
+      <!-- TEXTO INFORMATIVO -->
+
+      <p class="auth-privacidade">
+
+        Seus dados são utilizados apenas para
+        autenticação e funcionamento do JoviClass.
+
+      </p>
+
+    </div>
+
+  </div>
+
+
+  <!-- =====================================================
+       HEADER
+       ===================================================== -->
+
+  <header class="menu">
+
+    <div class="menu-header">
+
+      <div class="logoJovi">
+
+        <img src="./src/assets/img/logo.png" alt="Logo JoviClass" id="logo">
+
+        <h2>JoviClass</h2>
+
+      </div>
+
+
+      <div class="menu-actions">
+
+        <div class="notif-wrapper">
+
+          <button class="icon-btn" id="notifBtn" aria-label="Notificações" aria-haspopup="true" aria-expanded="false">
+
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+
+              <path
+                d="M12 3a6 6 0 0 0-6 6v3.586l-1.707 1.707A1 1 0 0 0 5 16h14a1 1 0 0 0 .707-1.707L18 12.586V9a6 6 0 0 0-6-6Z"
+                stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" />
+
+              <path d="M9.5 19a2.5 2.5 0 0 0 5 0" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" />
+
+            </svg>
+
+            <span class="notif-dot" id="notifDot" hidden>
+              0
+            </span>
+
+          </button>
+
+
+          <div class="notif-panel" id="notifPanel" hidden>
+
+            <div class="notif-panel-header">
+
+              <strong>
+                Notificações
+              </strong>
+
+              <button id="notifMarcarLidas" class="notif-marcar">
+                Marcar todas como lidas
+              </button>
+
+            </div>
+
+            <div class="notif-lista" id="notifLista">
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <div class="hamburger" id="hamburger">
+
+          <span></span>
+          <span></span>
+          <span></span>
+
+        </div>
+
+      </div>
 
     </div>
 
 
-    <!-- =====================================================
-         NAVEGAÇÃO MOBILE
-         ===================================================== -->
+    <nav class="menu-links" id="menuLinks">
 
-    <nav class="nav-mobile">
+      <a href="./src/pages/materias.html">
+        Matérias
+      </a>
 
-        <a
-            href="../../index.html"
-            class="ativo"
-        >
+      <a href="./src/pages/calendario.html">
+        Calendário
+      </a>
 
-            <span class="nav-icone">
-                🏠︎
-            </span>
+      <a href="./src/pages/comunidade.html">
+        Comunidades
+      </a>
 
-            <span>
-                Início
-            </span>
+      <a href="./src/pages/expansaoConhecimento.html">
+        Expansão do Conhecimento
+      </a>
 
-        </a>
-
-
-        <a href="../pages/materias.html">
-
-            <span class="nav-icone">
-                📖
-            </span>
-
-            <span>
-                Matérias
-            </span>
-
-        </a>
-
-
-        <a
-            href="../pages/camera.html"
-            class="nav-camera"
-        >
-
-            <span class="nav-icone-camera">
-                📷
-            </span>
-
-        </a>
-
-
-        <a href="../pages/calendario.html">
-
-            <span class="nav-icone">
-                📝
-            </span>
-
-            <span>
-                Tarefas
-            </span>
-
-        </a>
-
-
-        <a href="../pages/perfil.html">
-
-            <span class="nav-icone">
-                👤
-            </span>
-
-            <span>
-                Perfil
-            </span>
-
-        </a>
+      <a href="./src/pages/camera.html">
+        Voltar a câmera ↩
+      </a>
 
     </nav>
 
+  </header>
 
-    <!-- =====================================================
-         JAVASCRIPT
-         ===================================================== -->
 
-    <script src="../js/comunidade.js"></script>
+  <!-- =====================================================
+       CONTEÚDO PRINCIPAL
+       ===================================================== -->
+
+  <main class="conteudo">
+
+    <div class="saudacao">
+
+      <div>
+
+        <h1>
+          Olá, <span id="nomeUsuario">visitante</span>!
+        </h1>
+
+        <p>
+          Vamos continuar seus estudos?
+        </p>
+
+      </div>
+
+    </div>
+
+
+    <!-- PROGRESSO -->
+
+    <section class="progresso-card">
+
+      <div class="progresso-anel" style="--valor: 78">
+
+        <svg viewBox="0 0 120 120">
+
+          <circle class="anel-fundo" cx="60" cy="60" r="52"></circle>
+
+          <circle class="anel-valor" cx="60" cy="60" r="52"></circle>
+
+        </svg>
+
+        <div class="anel-texto">
+          78%
+        </div>
+
+      </div>
+
+
+      <div class="progresso-info">
+
+        <span class="progresso-label">
+          ✦ Seu progresso hoje
+        </span>
+
+
+        <div class="progresso-barrinhas" aria-hidden="true">
+
+          <span class="ativa"></span>
+          <span class="ativa"></span>
+          <span class="ativa"></span>
+          <span class="ativa"></span>
+          <span class="ativa"></span>
+          <span class="ativa"></span>
+          <span class="ativa"></span>
+          <span class="ativa"></span>
+          <span class="ativa meio"></span>
+
+          <span></span>
+          <span></span>
+          <span></span>
+          <span></span>
+
+        </div>
+
+
+        <div class="progresso-stats">
+
+          <div class="stat">
+
+            <strong id="statTarefas">
+              3
+            </strong>
+
+            <span>
+              tarefas concluídas
+            </span>
+
+          </div>
+
+
+          <div class="stat">
+
+            <strong id="statMaterias">
+              2
+            </strong>
+
+            <span>
+              matérias estudadas
+            </span>
+
+          </div>
+
+
+          <div class="stat">
+
+            <strong id="statAnotacoes">
+              12
+            </strong>
+
+            <span>
+              anotações feitas
+            </span>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- RESUMO -->
+
+    <h2 class="titulo-secao">
+      Seu resumo
+    </h2>
+
+
+    <div class="cards">
+
+      <div class="card">
+
+        <span>
+          Matérias
+        </span>
+
+        <p>
+          6
+        </p>
+
+      </div>
+
+
+      <div class="card">
+
+        <span>
+          Arquivos
+        </span>
+
+        <p>
+          24
+        </p>
+
+      </div>
+
+
+      <div class="card">
+
+        <span>
+          Anotações
+        </span>
+
+        <p>
+          136
+        </p>
+
+      </div>
+
+
+      <div class="card">
+
+        <span>
+          Tarefas
+        </span>
+
+        <p>
+          8
+        </p>
+
+      </div>
+
+    </div>
+
+
+    <!-- ACESSO RÁPIDO -->
+
+    <div class="secao-header">
+
+      <h2 class="titulo-secao">
+        Acesso rápido
+      </h2>
+
+      <a href="./src/pages/materias.html" class="ver-todos">
+        Ver todos
+      </a>
+
+    </div>
+
+
+    <div class="acesso-rapido">
+
+      <a href="./src/pages/materias.html" class="acesso-item">
+
+        <span class="acesso-icone roxo">
+          📘
+        </span>
+
+        <span>
+          Matérias
+        </span>
+
+      </a>
+
+
+      <a href="./src/pages/materias.html" class="acesso-item">
+
+        <span class="acesso-icone azul">
+          🗂️
+        </span>
+
+        <span>
+          Arquivos
+        </span>
+
+      </a>
+
+
+      <a href="./src/pages/materias.html" class="acesso-item">
+
+        <span class="acesso-icone laranja">
+          ✏️
+        </span>
+
+        <span>
+          Anotações
+        </span>
+
+      </a>
+
+
+      <a href="./src/pages/calendario.html" class="acesso-item">
+
+        <span class="acesso-icone verde">
+          ✅
+        </span>
+
+        <span>
+          Tarefas
+        </span>
+
+      </a>
+
+    </div>
+
+
+    <!-- SEÇÕES -->
+
+    <div class="secoes">
+
+
+      <!-- PRÓXIMAS PROVAS -->
+
+      <div class="secao">
+
+        <div class="secao-header">
+
+          <h3>
+            Próximas provas
+          </h3>
+
+        </div>
+
+
+        <div class="item">
+
+          <div class="item-esq">
+
+            <span class="item-icone roxo">
+              ƒ(x)
+            </span>
+
+            <div>
+
+              <div class="nome">
+                Cálculo I
+              </div>
+
+              <div class="detalhe">
+                25/05/2024
+              </div>
+
+              <div class="mini-barra">
+                <span style="width:65%"></span>
+              </div>
+
+            </div>
+
+          </div>
+
+          <span class="badge">
+            10 dias
+          </span>
+
+        </div>
+
+
+        <div class="item">
+
+          <div class="item-esq">
+
+            <span class="item-icone verde">
+              ⚛️
+            </span>
+
+            <div>
+
+              <div class="nome">
+                Física II
+              </div>
+
+              <div class="detalhe">
+                02/06/2024
+              </div>
+
+              <div class="mini-barra">
+                <span style="width:40%"></span>
+              </div>
+
+            </div>
+
+          </div>
+
+          <span class="badge">
+            18 dias
+          </span>
+
+        </div>
+
+
+        <div class="item">
+
+          <div class="item-esq">
+
+            <span class="item-icone azul">
+              💹
+            </span>
+
+            <div>
+
+              <div class="nome">
+                Economia
+              </div>
+
+              <div class="detalhe">
+                10/06/2024
+              </div>
+
+              <div class="mini-barra">
+                <span style="width:20%"></span>
+              </div>
+
+            </div>
+
+          </div>
+
+          <span class="badge">
+            26 dias
+          </span>
+
+        </div>
+
+
+        <a href="./src/pages/calendario.html" class="ver-todos">
+          Ver todas →
+        </a>
+
+      </div>
+
+
+      <!-- ÚLTIMOS ARQUIVOS -->
+
+      <div class="secao">
+
+        <div class="secao-header">
+
+          <h3>
+            Últimos arquivos
+          </h3>
+
+        </div>
+
+
+        <div class="item">
+
+          <div class="item-esq">
+
+            <span class="item-icone laranja">
+              📄
+            </span>
+
+            <div>
+
+              <div class="nome">
+                Funções de 2° grau
+              </div>
+
+              <div class="detalhe">
+                Matemática · 20/05
+              </div>
+
+            </div>
+
+          </div>
+
+          <span class="chevron">
+            ›
+          </span>
+
+        </div>
+
+
+        <div class="item">
+
+          <div class="item-esq">
+
+            <span class="item-icone verde">
+              📄
+            </span>
+
+            <div>
+
+              <div class="nome">
+                Leis de Newton
+              </div>
+
+              <div class="detalhe">
+                Física · 19/05
+              </div>
+
+            </div>
+
+          </div>
+
+          <span class="chevron">
+            ›
+          </span>
+
+        </div>
+
+
+        <div class="item">
+
+          <div class="item-esq">
+
+            <span class="item-icone azul">
+              📄
+            </span>
+
+            <div>
+
+              <div class="nome">
+                Demanda e Oferta
+              </div>
+
+              <div class="detalhe">
+                Economia · 18/05
+              </div>
+
+            </div>
+
+          </div>
+
+          <span class="chevron">
+            ›
+          </span>
+
+        </div>
+
+
+        <a href="./src/pages/materias.html" class="ver-todos">
+          Ver todas →
+        </a>
+
+      </div>
+
+    </div>
+
+
+    <!-- SUGESTÃO -->
+
+    <section class="sugestao-card">
+
+      <div class="sugestao-texto">
+
+        <span class="sugestao-eyebrow">
+          ✦ Sugestão para hoje
+        </span>
+
+        <p>
+          Você tem uma prova de Cálculo em 10 dias.
+          Que tal revisar derivadas por 30 minutos?
+        </p>
+
+        <a href="./src/pages/materias.html" class="btn-revisao">
+          Começar revisão
+        </a>
+
+      </div>
+
+    </section>
+
+  </main>
+
+
+  <!-- =====================================================
+       OVERLAY EXISTENTE DO SITE
+       ===================================================== -->
+
+  <div class="overlay" id="overlay">
+
+    <div class="overlay-box">
+
+      <p>
+        Deseja confirmar esta ação?
+      </p>
+
+      <div class="overlay-botoes">
+
+        <button id="cancelBtn" class="btn-secundario">
+          Cancelar
+        </button>
+
+        <button id="okBtn" class="btn-primario">
+          Confirmar
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- =====================================================
+       NAVEGAÇÃO MOBILE
+       ===================================================== -->
+
+  <nav class="nav-mobile">
+
+    <a href="#" class="ativo">
+
+      <span class="nav-icone">
+        🏠︎
+      </span>
+
+      <span>
+        Início
+      </span>
+
+    </a>
+
+
+    <a href="./src/pages/materias.html">
+
+      <span class="nav-icone">
+        📖
+      </span>
+
+      <span>
+        Matérias
+      </span>
+
+    </a>
+
+
+    <a href="./src/pages/camera.html" class="nav-camera">
+
+      <span class="nav-icone-camera">
+        📷
+      </span>
+
+    </a>
+
+
+    <a href="./src/pages/calendario.html">
+
+      <span class="nav-icone">
+        📝
+      </span>
+
+      <span>
+        Tarefas
+      </span>
+
+    </a>
+
+
+    <a href="./src/pages/perfil.html">
+
+      <span class="nav-icone">
+        👤
+      </span>
+
+      <span>
+        Perfil
+      </span>
+
+    </a>
+
+  </nav>
+
+
+  <!-- =====================================================
+       GOOGLE IDENTITY SERVICES
+       ===================================================== -->
+
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+
+
+  <!-- =====================================================
+       JAVASCRIPT DO JOVICLASS
+       ===================================================== -->
+
+  <script src="./src/js/script.js"></script>
 
 </body>
 

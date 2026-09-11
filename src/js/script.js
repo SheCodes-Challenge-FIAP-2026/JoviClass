@@ -1456,23 +1456,22 @@ function mostrarCodigoCadastro(email) {
     const emailAlvo =
         document.getElementById("cadastroEmailAlvo");
 
-    if (formCodigoCadastro) {
-        formCodigoCadastro.style.display = "flex";
-    }
+    if (formCodigoCadastro) formCodigoCadastro.style.display = "flex";
 
     if (authTitulo) {
-        authTitulo.textContent = "Digite o código";
+        authTitulo.textContent = "Confirme seu e-mail";
     }
 
     if (authDescricao) {
         authDescricao.textContent =
-            "Enviamos um código de 6 dígitos para o seu e-mail.";
+            "Digite o código de 6 dígitos que enviamos para você.";
     }
 
     if (emailAlvo) {
         emailAlvo.textContent = email;
     }
 }
+
 function voltarParaCadastroDoCodigo() {
 
     ocultarTodosOsPassosAuth();
