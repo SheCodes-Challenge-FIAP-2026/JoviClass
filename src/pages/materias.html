@@ -3,7 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="shortcut icont" href="../assets/favicon.ico" type="image/x-icon">
   <link rel="stylesheet" href="../css/materias.css">
+  <link rel="stylesheet" href="../css/suporte.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&display=swap" rel="stylesheet">
@@ -134,6 +136,51 @@
       <span>Perfil</span>
     </a>
   </nav>
+
+  <button
+      type="button"
+      id="botaoSuporte"
+      class="botao-suporte"
+      aria-label="Abrir suporte">
+
+      <img src="../assets/img/logoSuporte.png" alt="Suporte"/>
+
+  </button>
+
+    <div id="chatbot" class="chatbot">
+        <div class="chatbot-header">
+
+            <div class="chatbot-header-info">
+                <div>
+                    <h3>Suporte JoviClass</h3>
+                    <p>Como podemos ajudar?</p>
+                </div>
+            </div>
+
+            <button
+                type="button"
+                id="fecharChatbot"
+                class="fechar-chatbot"
+                aria-label="Fechar suporte">
+                ×
+            </button>
+
+        </div>
+
+        <div
+            id="conteudoChatbot"
+            class="conteudo-chatbot">
+            <p class="mensagem-bot">
+                Olá! 👋 Como posso ajudar?
+            </p>
+        </div>
+    </div>
+
+    <!-- =====================================================
+       JAVASCRIPT DO CHATBOT
+       ===================================================== -->
+
+    <script src="../js/suporte.js"></script>
 
   <script src="../js/materias.js"></script>
 </body>
