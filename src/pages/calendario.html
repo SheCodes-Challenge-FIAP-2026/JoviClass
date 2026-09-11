@@ -104,7 +104,14 @@
                     <span class="secao-icone">✅</span>
                     Checklist de Entregas
                 </h2>
-                <button class="btn-add-tarefa" id="btnAddTarefa">+ Nova tarefa</button>
+                <div class="checklist-acoes">
+                    <label for="ordenacaoChecklist">Ordenar por:</label>
+                    <select id="ordenacaoChecklist">
+                        <option value="data" selected>Data</option>
+                        <option value="prioridade">Prioridade</option>
+                    </select>
+                    <button class="btn-add-tarefa" id="btnAddTarefa">+ Nova tarefa</button>
+                </div>
             </div>
 
             <div class="checklist-barra-progresso">
@@ -146,6 +153,13 @@
             <label for="descricaoEvento">Descrição:</label>
             <textarea id="descricaoEvento" placeholder="Descreva o evento..."></textarea>
 
+            <label for="prioridadeEvento">Prioridade:</label>
+            <select id="prioridadeEvento">
+                <option value="alta">Alta</option>
+                <option value="media" selected>Média</option>
+                <option value="baixa">Baixa</option>
+            </select>
+
             <button type="button" onclick="salvarEvento()">Salvar Evento</button>
         </form>
     </div>
@@ -185,6 +199,16 @@
 
             <label for="materiaTarefa">Matéria:</label>
             <input type="text" id="materiaTarefa" placeholder="Ex. Matemática">
+
+            <label for="dataTarefa">Data:</label>
+            <input type="date" id="dataTarefa">
+
+            <label for="prioridadeTarefa">Prioridade:</label>
+            <select id="prioridadeTarefa">
+                <option value="alta">Alta</option>
+                <option value="media" selected>Média</option>
+                <option value="baixa">Baixa</option>
+            </select>
 
             <button type="button" onclick="salvarTarefa()">Adicionar Tarefa</button>
         </form>

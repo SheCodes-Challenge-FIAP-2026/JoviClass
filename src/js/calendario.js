@@ -32,6 +32,18 @@ document.addEventListener('DOMContentLoaded', function () {
 
     let eventosLocais = [];
 
+    const ordemPrioridade = { alta: 0, media: 1, baixa: 2 };
+
+    function criarDataLocal(dataTexto) {
+        if (!dataTexto) return null;
+        const [ano, mes, dia] = dataTexto.split('-').map(Number);
+        return new Date(ano, mes - 1, dia);
+    }
+
+    function formatarDataISO(ano, mes, dia) {
+        return `${ano}-${String(mes + 1).padStart(2, '0')}-${String(dia).padStart(2, '0')}`;
+    }
+
     async function buscarEventosGoogle() {
         try {
             const resp = await fetch(`${API_BASE}/api/calendar/eventos`, { credentials: 'include' });
@@ -158,22 +170,52 @@ document.addEventListener('DOMContentLoaded', function () {
         const titulo = document.getElementById("tituloEvento").value.trim();
         const categoria = document.getElementById("categoria").value;
         const descricao = document.getElementById("descricaoEvento").value.trim();
+        const prioridade = document.getElementById("prioridadeEvento").value;
 
         if (titulo && diaSelecionado) {
             const { ano, mes, dia } = diaSelecionado;
 
+            const id = Date.now();
+            const data = formatarDataISO(ano, mes, dia);
+
             eventosLocais.push({
-                id: `local-${Date.now()}`,
+                id,
                 titulo,
                 categoria,
                 descricao,
-                data: new Date(ano, mes, dia)
+                data: new Date(ano, mes, dia),
+                tarefaId: id
             });
+
+            entregas.push({
+                id,
+                titulo,
+                materia: categoria,
+                data,
+                prioridade
+            });
+
+            tarefas.push({
+                id,
+                texto: titulo,
+                materia: categoria,
+                data,
+                prioridade,
+                concluida: false
+            });
+
+            entregas.sort((a, b) =>
+                ordemPrioridade[a.prioridade] - ordemPrioridade[b.prioridade] ||
+                (a.data || '9999-12-31').localeCompare(b.data || '9999-12-31')
+            );
 
             document.getElementById("tituloEvento").value = "";
             document.getElementById("descricaoEvento").value = "";
             document.getElementById("categoria").value = "Projeto";
+            document.getElementById("prioridadeEvento").value = "media";
             calendario(dataAtual);
+            renderizarEntregas();
+            renderizarChecklist();
             fecharFormularioEvento();
         }
     }
@@ -292,25 +334,38 @@ document.addEventListener('DOMContentLoaded', function () {
         const entrega = { id: entregaId, titulo, materia, data, prioridade };
         entregas.push(entrega);
 
-        entregas.sort((a, b) => {
-            if (!a.data) return 1;
-            if (!b.data) return -1;
-            return new Date(a.data) - new Date(b.data);
-        });
+        entregas.sort((a, b) =>
+            ordemPrioridade[a.prioridade] - ordemPrioridade[b.prioridade] ||
+            (a.data || '9999-12-31').localeCompare(b.data || '9999-12-31')
+        );
 
-        const tarefa = { id: entregaId, texto: titulo, materia, concluida: false, fromEntrega: true };
+        const tarefa = { id: entregaId, texto: titulo, materia, data, prioridade, concluida: false, fromEntrega: true };
         tarefas.push(tarefa);
+
+        if (data) {
+            eventosLocais.push({
+                id: entregaId,
+                titulo,
+                categoria: materia || 'Entrega',
+                descricao: '',
+                data: criarDataLocal(data),
+                tarefaId: entregaId
+            });
+        }
 
         renderizarEntregas();
         renderizarChecklist();
+        calendario(dataAtual);
         fecharFormularioEntrega();
     }
 
     function removerEntrega(id) {
         entregas = entregas.filter(e => e.id !== id);
         tarefas = tarefas.filter(t => t.id !== id);
+        eventosLocais = eventosLocais.filter(e => e.tarefaId !== id);
         renderizarEntregas();
         renderizarChecklist();
+        calendario(dataAtual);
     }
 
     function formatarData(dataStr) {
@@ -323,12 +378,29 @@ document.addEventListener('DOMContentLoaded', function () {
         const itens = entregasLista.querySelectorAll('.entrega-item');
         itens.forEach(el => el.remove());
 
-        if (entregas.length === 0) {
+        const hoje = new Date();
+        hoje.setHours(0, 0, 0, 0);
+
+        const limite = new Date(hoje);
+        limite.setDate(limite.getDate() + 10);
+
+        const proximasEntregas = entregas
+            .filter(entrega => {
+                const dataEntrega = criarDataLocal(entrega.data);
+                return dataEntrega && dataEntrega >= hoje && dataEntrega <= limite;
+            })
+            .sort((a, b) =>
+                ordemPrioridade[a.prioridade] - ordemPrioridade[b.prioridade] ||
+                a.data.localeCompare(b.data)
+            );
+
+        if (proximasEntregas.length === 0) {
             entregasVazias.style.display = 'block';
+            entregasVazias.textContent = 'Nenhuma entrega prevista para os próximos 10 dias.';
             return;
         }
         entregasVazias.style.display = 'none';
-        entregas.forEach(entrega => {
+        proximasEntregas.forEach(entrega => {
             const item = document.createElement('div');
             item.classList.add('entrega-item', `prioridade-${entrega.prioridade}`);
             const labelPrioridade = { alta: 'Alta', media: 'Média', baixa: 'Baixa' };
@@ -360,6 +432,9 @@ document.addEventListener('DOMContentLoaded', function () {
     const btnAddTarefa = document.getElementById('btnAddTarefa');
     const checklistLista = document.getElementById('checklistLista');
     const checklistVazio = document.getElementById('checklistVazio');
+    const ordenacaoChecklist = document.getElementById('ordenacaoChecklist');
+
+    ordenacaoChecklist.addEventListener('change', renderizarChecklist);
 
     btnAddTarefa.addEventListener('click', function () {
         document.getElementById('formularioTarefa').style.display = 'flex';
@@ -369,18 +444,49 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('formularioTarefa').style.display = 'none';
         document.getElementById('textoTarefa').value = '';
         document.getElementById('materiaTarefa').value = '';
+        document.getElementById('dataTarefa').value = '';
+        document.getElementById('prioridadeTarefa').value = 'media';
     }
 
     function salvarTarefa() {
         const texto = document.getElementById('textoTarefa').value.trim();
         const materia = document.getElementById('materiaTarefa').value.trim();
+        const data = document.getElementById('dataTarefa').value;
+        const prioridade = document.getElementById('prioridadeTarefa').value;
 
         if (!texto) return;
 
-        const tarefa = { id: Date.now(), texto, materia, concluida: false };
+        const id = Date.now();
+        const tarefa = { id, texto, materia, data, prioridade, concluida: false };
         tarefas.push(tarefa);
 
+        if (data) {
+            entregas.push({
+                id,
+                titulo: texto,
+                materia,
+                data,
+                prioridade
+            });
+
+            entregas.sort((a, b) =>
+                ordemPrioridade[a.prioridade] - ordemPrioridade[b.prioridade] ||
+                a.data.localeCompare(b.data)
+            );
+
+            eventosLocais.push({
+                id,
+                titulo: texto,
+                categoria: materia || 'Tarefa',
+                descricao: '',
+                data: criarDataLocal(data),
+                tarefaId: id
+            });
+        }
+
         renderizarChecklist();
+        renderizarEntregas();
+        calendario(dataAtual);
         fecharFormularioTarefa();
     }
 
@@ -418,11 +524,27 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         checklistVazio.style.display = 'none';
-        const ordenadas = [...tarefas].sort((a, b) => a.concluida - b.concluida);
+        const ordenadas = [...tarefas].sort((a, b) => {
+            if (ordenacaoChecklist.value === 'prioridade') {
+                return ordemPrioridade[a.prioridade || 'media'] - ordemPrioridade[b.prioridade || 'media'] ||
+                    (a.data || '9999-12-31').localeCompare(b.data || '9999-12-31');
+            }
+
+            return (a.data || '9999-12-31').localeCompare(b.data || '9999-12-31') ||
+                ordemPrioridade[a.prioridade || 'media'] - ordemPrioridade[b.prioridade || 'media'];
+        });
         ordenadas.forEach(tarefa => {
             const li = document.createElement('li');
             li.classList.add('tarefa-item');
             if (tarefa.concluida) li.classList.add('concluida');
+
+            const hoje = new Date();
+            hoje.setHours(0, 0, 0, 0);
+            const dataDaTarefa = criarDataLocal(tarefa.data);
+            const vencida = dataDaTarefa && dataDaTarefa < hoje && !tarefa.concluida;
+
+            if (vencida) li.classList.add('vencida');
+
             li.innerHTML = `
                 <input 
                     type="checkbox" 
@@ -433,7 +555,12 @@ document.addEventListener('DOMContentLoaded', function () {
                 <div class="tarefa-info">
                     <span class="tarefa-texto">${tarefa.texto}</span>
                     ${tarefa.materia ? `<span class="tarefa-materia">${tarefa.materia}</span>` : ''}
+                    ${tarefa.data ? `<span class="tarefa-data">📅 ${formatarData(tarefa.data)}</span>` : '<span class="tarefa-data">Sem data</span>'}
                 </div>
+                ${vencida ? '<span class="tag-vencida">Vencida</span>' : ''}
+                <span class="tag-prioridade tag-${tarefa.prioridade || 'media'}">
+                    ${{ alta: 'Alta', media: 'Média', baixa: 'Baixa' }[tarefa.prioridade || 'media']}
+                </span>
                 <button class="btn-remover-tarefa" data-id="${tarefa.id}" title="Remover">✕</button>
             `;
             li.querySelector('.tarefa-checkbox').addEventListener('change', function () {

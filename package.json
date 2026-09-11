@@ -1,8 +1,13 @@
 {
   "dependencies": {
-    "@google/genai": "^2.18.0",
+    "@google/genai": "^2.22.0",
+    "bcryptjs": "^3.0.3",
+    "cookie-session": "^2.1.1",
+    "cors": "^2.8.6",
     "dotenv": "^17.4.2",
+    "express": "^5.2.1",
     "google-auth-library": "^11.0.2",
-    "googleapis": "^180.0.0"
+    "googleapis": "^180.0.0",
+    "nodemailer": "^10.0.8"
   }
 }

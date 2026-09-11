@@ -915,6 +915,29 @@ a {
     background-color: var(--bg-color1);
 }
 
+.checklist-acoes {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.checklist-acoes label {
+    color: #666;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+#ordenacaoChecklist {
+    padding: 8px 10px;
+    border: 1px solid #d8d8e2;
+    border-radius: 8px;
+    background-color: white;
+    color: #333;
+    font-family: inherit;
+    cursor: pointer;
+}
+
 .lista-vazia {
     color: #999;
     font-size: 0.9rem;
@@ -1063,6 +1086,27 @@ a {
     color: #999;
 }
 
+.tarefa-item.vencida {
+    border-left: 4px solid #e53935;
+    background-color: #fff7f7;
+}
+
+.tarefa-item.vencida .tarefa-data {
+    color: #c62828;
+    font-weight: 700;
+}
+
+.tag-vencida {
+    padding: 3px 9px;
+    border-radius: 20px;
+    background-color: #fde8e8;
+    color: #c62828;
+    font-size: 0.72rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+
 .tarefa-checkbox {
     width: 20px;
     height: 20px;
@@ -1089,7 +1133,23 @@ a {
     color: #888;
 }
 
+.tarefa-data {
+    font-size: 0.76rem;
+    color: #777;
+}
+
 @media (max-width: 699px) {
+    .checklist-acoes {
+        width: 100%;
+    }
+
+    .tarefa-item {
+        flex-wrap: wrap;
+    }
+
+    .tarefa-info {
+        min-width: calc(100% - 44px);
+    }
     .dia-card {
         height: 55px;
         padding: 5px;
