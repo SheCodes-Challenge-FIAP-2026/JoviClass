@@ -5,12 +5,13 @@
     "curso": "",
     "email": "giscalzone@gmail.com",
     "senha": "$2b$10$X45S6NEV9pyj/rAUHwFQFeztspGsg5BCqCEgQaiyq8K0MWneFwqyS",
-    "foto": null,
-    "provedor": "email",
+    "foto": "https://lh3.googleusercontent.com/a/ACg8ocKOS4eUv3WyMDJYDvWdHHiP9xW0XapabueU_q0RR11k4aZVDw=s96-c",
+    "provedor": "google",
     "emailVerificado": true,
     "codigoVerificacao": null,
     "codigoVerificacaoExpira": null,
     "codigoRecuperacaoSenha": "$2b$10$pLFPZ8p404i/RBcNIy9F0eAfPvhKHsCvN2wKw5BMpps0llj.txqEu",
-    "codigoRecuperacaoSenhaExpira": 1789073930759
+    "codigoRecuperacaoSenhaExpira": 1789073930759,
+    "googleId": "115157201591849322744"
   }
 ]
