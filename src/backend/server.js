@@ -7,6 +7,9 @@ const bcrypt = require("bcryptjs");
 const fs = require("fs");
 const path = require("path");
 
+// BANCO DE DADOS ==========================
+// const { db } = require("./config/firebase");
+
 const { OAuth2Client } = require("google-auth-library");
 const { GoogleGenAI } = require("@google/genai");
 
