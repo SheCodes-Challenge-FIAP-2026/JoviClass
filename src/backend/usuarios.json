@@ -1,1 +1,17 @@
-[]
+[
+  {
+    "id": "1789158882474",
+    "nome": "scalzone gi",
+    "curso": "",
+    "email": "giscalzone@gmail.com",
+    "senha": "$2b$10$oNSWVRBEPxJhvOM5tZ.0nOgmWyET9cS2uvVzg4JcwhWCiTXZqAfv2",
+    "foto": "https://lh3.googleusercontent.com/a/ACg8ocKOS4eUv3WyMDJYDvWdHHiP9xW0XapabueU_q0RR11k4aZVDw=s96-c",
+    "provedor": "email_google",
+    "emailVerificado": true,
+    "codigoVerificacao": null,
+    "codigoVerificacaoExpira": null,
+    "codigoRecuperacaoSenha": null,
+    "codigoRecuperacaoSenhaExpira": null,
+    "googleId": "115157201591849322744"
+  }
+]

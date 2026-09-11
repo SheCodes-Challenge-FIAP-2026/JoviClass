@@ -32,6 +32,23 @@ const salasPadrao = [
     { icone: "📢", nome: "Avisos", desc: "Comunicados importantes da comunidade", tipo: "chat" },
 ];
 
+/* =========================================================
+   REGRAS DA COMUNIDADE
+========================================================= */
+
+// Regras padrão aplicadas a toda comunidade nova. Ficam
+// salvas junto com os dados da própria comunidade, então
+// cada uma "carrega" a sua lista (por enquanto igual pra
+// todas, mas já preparado pra virar customizável no futuro).
+const REGRAS_PADRAO = [
+    "Respeite todos os membros da comunidade — sem ofensas, preconceito ou assédio.",
+    "Mantenha as conversas relacionadas ao propósito da comunidade (estudos, dúvidas, materiais).",
+    "Não compartilhe conteúdo ilegal, ofensivo ou que viole direitos autorais.",
+    "Não faça spam, propaganda ou divulgação não relacionada aos estudos.",
+    "Ao compartilhar resumos, exercícios ou materiais de terceiros, cite a fonte sempre que possível.",
+    "Em caso de conflitos ou dúvidas sobre as regras, procure um administrador da comunidade."
+];
+
 const dadosSalas = {};
 
 const dadosComunidades = {};
@@ -48,7 +65,8 @@ function salvarNoStorage() {
                 descricao: com.descricao,
                 categoria: com.categoria,
                 privacidade: com.privacidade,
-                convidados: com.convidados
+                convidados: com.convidados,
+                regras: com.regras || REGRAS_PADRAO
             };
         });
         localStorage.setItem("joviclass_comunidades", JSON.stringify(comunidadesSemFoto));
@@ -172,7 +190,18 @@ function criarComunidade() {
         dadosSalas[id][s.nome] = { mensagens: [], arquivos: [], compartilhada: false };
     });
 
-    dadosComunidades[id] = { id, nome, descricao, categoria, privacidade, foto, convidados: [] };
+    // Toda comunidade nova nasce com o mesmo conjunto de
+    // regras padrão, que fica salvo junto com ela.
+    dadosComunidades[id] = {
+        id,
+        nome,
+        descricao,
+        categoria,
+        privacidade,
+        foto,
+        convidados: [],
+        regras: [...REGRAS_PADRAO]
+    };
 
     renderizarCard(dadosComunidades[id]);
 
@@ -554,7 +583,143 @@ function renderizarConvidadosPasta(comId) {
     });
 }
 
+/* =========================================================
+   RENDERIZAR REGRAS AO ENTRAR NA COMUNIDADE
+========================================================= */
+
+function renderizarRegras(com) {
+    const lista = document.getElementById("listaRegras");
+    if (!lista || !com) return;
+
+    // Comunidades criadas antes dessa funcionalidade existir
+    // não têm "regras" salvas ainda — nesse caso aplicamos
+    // as padrão e já gravamos, pra não pedir de novo depois.
+    if (!com.regras || com.regras.length === 0) {
+        com.regras = [...REGRAS_PADRAO];
+        salvarNoStorage();
+    }
+
+    lista.innerHTML = com.regras
+        .map((regra) => `<li>${regra}</li>`)
+        .join("");
+}
+
+function inicializarToggleRegras() {
+    const btn = document.getElementById("btnToggleRegras");
+    const lista = document.getElementById("listaRegras");
+
+    if (!btn || !lista) return;
+
+    btn.addEventListener("click", () => {
+        const estaVisivel = lista.style.display !== "none";
+
+        lista.style.display = estaVisivel ? "none" : "flex";
+        btn.textContent = estaVisivel ? "Mostrar" : "Ocultar";
+        btn.setAttribute("aria-expanded", String(!estaVisivel));
+    });
+}
+
+/* =========================================================
+   CONTROLE DE ACEITE OBRIGATÓRIO DAS REGRAS
+========================================================= */
+
+// Guarda o id de cada comunidade cujas regras a pessoa já
+// leu e aceitou neste navegador. Sem isso, o conteúdo da
+// comunidade (salas, chat, arquivos) não é liberado.
+const CHAVE_REGRAS_ACEITAS = "joviclass_regras_aceitas";
+
+function carregarRegrasAceitas() {
+    try {
+        return new Set(JSON.parse(localStorage.getItem(CHAVE_REGRAS_ACEITAS)) || []);
+    } catch {
+        return new Set();
+    }
+}
+
+function salvarRegrasAceitas(set) {
+    localStorage.setItem(CHAVE_REGRAS_ACEITAS, JSON.stringify([...set]));
+}
+
+let regrasAceitas = carregarRegrasAceitas();
+
+// Guarda temporariamente qual comunidade está esperando
+// aceite, enquanto o modal está aberto.
+let comunidadePendente = null;
+
+function mostrarModalRegras(id, nome, descricao, foto) {
+    comunidadePendente = { id, nome, descricao, foto };
+
+    const com = dadosComunidades[id];
+
+    if (com && (!com.regras || com.regras.length === 0)) {
+        com.regras = [...REGRAS_PADRAO];
+        salvarNoStorage();
+    }
+
+    const lista = document.getElementById("listaRegrasModal");
+    const nomeAlvo = document.getElementById("nomeComunidadeModalRegras");
+    const checkbox = document.getElementById("checkAceitarRegras");
+    const btnAceitar = document.getElementById("btnAceitarRegras");
+    const modal = document.getElementById("modalRegrasComunidade");
+
+    if (lista) {
+        lista.innerHTML = (com?.regras || REGRAS_PADRAO)
+            .map((regra) => `<li>${regra}</li>`)
+            .join("");
+    }
+
+    if (nomeAlvo) nomeAlvo.textContent = nome;
+    if (checkbox) checkbox.checked = false;
+    if (btnAceitar) btnAceitar.disabled = true;
+
+    if (modal) modal.style.display = "flex";
+}
+
+function fecharModalRegras() {
+    const modal = document.getElementById("modalRegrasComunidade");
+    if (modal) modal.style.display = "none";
+    comunidadePendente = null;
+}
+
+function inicializarModalRegras() {
+    const checkbox = document.getElementById("checkAceitarRegras");
+    const btnAceitar = document.getElementById("btnAceitarRegras");
+    const btnRecusar = document.getElementById("btnRecusarRegras");
+
+    if (checkbox && btnAceitar) {
+        checkbox.addEventListener("change", () => {
+            btnAceitar.disabled = !checkbox.checked;
+        });
+    }
+
+    if (btnAceitar) {
+        btnAceitar.addEventListener("click", () => {
+            if (!comunidadePendente || btnAceitar.disabled) return;
+
+            const { id, nome, descricao, foto } = comunidadePendente;
+
+            regrasAceitas.add(id);
+            salvarRegrasAceitas(regrasAceitas);
+
+            fecharModalRegras();
+            entrarNaComunidade(id, nome, descricao, foto);
+        });
+    }
+
+    if (btnRecusar) {
+        btnRecusar.addEventListener("click", fecharModalRegras);
+    }
+}
+
 function abrirComunidade(id, nome, descricao, foto) {
+    if (regrasAceitas.has(id)) {
+        entrarNaComunidade(id, nome, descricao, foto);
+    } else {
+        mostrarModalRegras(id, nome, descricao, foto);
+    }
+}
+
+function entrarNaComunidade(id, nome, descricao, foto) {
     comunidadeAtiva = id;
 
     document.getElementById("listadeComunidades").style.display = "none";
@@ -573,6 +738,11 @@ function abrirComunidade(id, nome, descricao, foto) {
     } else {
         banner.innerHTML = `<span class="semFotoBanner">🏫</span>`;
     }
+
+    // As regras continuam visíveis (recolhíveis) dentro da
+    // página da comunidade, além do aceite obrigatório na
+    // entrada.
+    renderizarRegras(dadosComunidades[id]);
 
     const listaSalas = document.getElementById("listaSalas");
     listaSalas.innerHTML = "";
@@ -748,6 +918,8 @@ function voltarComunidades() {
 }
 
 
+inicializarToggleRegras();
+inicializarModalRegras();
 
 carregarDoStorage();
 Object.values(dadosComunidades).forEach(com => renderizarCard(com));

@@ -149,6 +149,37 @@
 
         <div id="listadeComunidades"></div>
 
+        <div id="modalRegrasComunidade">
+            <div id="conteudoModalRegras">
+                <div class="modalRegrasBanner">
+                    <span class="modalRegrasIcone">📋</span>
+                    <h2>Regras da comunidade</h2>
+                    <p class="subtituloModalRegras">
+                        Antes de entrar em <strong id="nomeComunidadeModalRegras"></strong>,
+                        leia e aceite as regras abaixo.
+                    </p>
+                </div>
+
+                <div class="modalRegrasCorpo">
+                    <ul id="listaRegrasModal" class="listaRegras"></ul>
+
+                    <label class="aceitarRegrasCheck">
+                        <input type="checkbox" id="checkAceitarRegras">
+                        <span>Li e concordo com as regras desta comunidade.</span>
+                    </label>
+
+                    <div class="botoesModalRegras">
+                        <button type="button" id="btnRecusarRegras" class="btnRecusarRegras">
+                            Voltar
+                        </button>
+                        <button type="button" id="btnAceitarRegras" class="btnAceitarRegras" disabled>
+                            Entrar na comunidade
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div id="paginaComunidade">
             <div class="topoPagina">
                 <div class="caminho">
@@ -168,6 +199,16 @@
                     <h1 id="tituloComunidade"></h1>
                     <p id="descricaoComunidade" style="color:#666;margin-top:6px;"></p>
                 </div>
+            </div>
+
+            <div id="regrasComunidade" class="regrasComunidade">
+                <div class="regrasCabecalho">
+                    <h2>Regras da comunidade</h2>
+                    <button type="button" id="btnToggleRegras" class="btnToggleRegras" aria-expanded="true">
+                        Ocultar
+                    </button>
+                </div>
+                <ul id="listaRegras" class="listaRegras"></ul>
             </div>
 
             <div id="salasArea">
