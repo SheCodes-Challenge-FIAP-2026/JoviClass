@@ -1,0 +1,162 @@
+{
+  "conta": {
+    "titulo": "Conta e perfil",
+    "acoes": {
+      "editar_perfil": {
+        "titulo": "Editar meus dados",
+        "mensagem": "Acesse a página de Perfil. Nela, você poderá editar os dados disponíveis da sua conta, clicando no botão 'Editar Perfil'.",
+        "rota": "/src/pages/perfil.html"
+      },
+      "alterar_senha": {
+        "titulo": "Alterar minha senha",
+        "mensagem": "Acesse a página de Perfil e procure a opção de alteração de senha. Informe os dados solicitados para cadastrar uma nova senha.",
+        "rota": "/src/pages/perfil.html"
+      },
+      "alterar_foto": {
+        "titulo": "Alterar minha foto",
+        "mensagem": "Acesse a página de Perfil e selecione o botão disponível no canto inferior direito da sua foto, para alterar sua foto de perfil.",
+        "rota": "/src/pages/perfil.html"
+      },
+      "alterar_instuicao": {
+        "titulo": "Vincular/Alterar Instituição de Ensino",
+        "mensagem": "Acesse a página de Perfil e selecione a opção para vincular ou alterar sua instituição de ensino.",
+        "rota": "/src/pages/perfil.html"
+      }
+    }
+  },
+  "materias": {
+    "titulo": "Matérias",
+    "acoes": {
+      "acessar_materias": {
+        "titulo": "Acessar minhas matérias",
+        "mensagem": "Acesse a página de Matérias para visualizar suas matérias e os conteúdos disponíveis.",
+        "rota": "/src/pages/materias.html"
+      },
+      "criar_materia": {
+        "titulo": "Criar uma nova matéria",
+        "mensagem": "Na página de Matérias, clique no botão '+ Nova Matéria'. Informe o nome da matéria, escolha uma cor e clique em 'Criar Matéria'.",
+        "rota": "/src/pages/materias.html"
+      },
+      "editar_materia": {
+        "titulo": "Editar ou excluir uma matéria",
+        "mensagem": "Na página de Matérias, clique no menu de opções da matéria desejada. Por esse menu, você pode renomear, excluir ou alterar o compartilhamento da matéria.",
+        "rota": "/src/pages/materias.html"
+      },
+      "criar_anotacao": {
+        "titulo": "Criar uma anotação",
+        "mensagem": "Abra a matéria desejada e, na área de Ações Rápidas, clique em 'Anotações'. Informe o título e o conteúdo da anotação e depois clique em 'Salvar anotação'.",
+        "rota": "/src/pages/materias.html"
+      },
+      "enviar_arquivo": {
+        "titulo": "Enviar um arquivo",
+        "mensagem": "Abra a matéria desejada e, na área de Ações Rápidas, clique em 'Enviar arquivo' para selecionar um arquivo do seu dispositivo.",
+        "rota": "/src/pages/materias.html"
+      },
+      "pesquisar_arquivo": {
+        "titulo": "Pesquisar um arquivo",
+        "mensagem": "Dentro da matéria, utilize o campo de busca localizado na parte superior da página para procurar pelos seus arquivos.",
+        "rota": "/src/pages/materias.html"
+      },
+      "acoes_arquivo": {
+        "titulo": "Opções disponíveis nos arquivos",
+        "mensagem": "Dentro da matéria, abra o menu de opções do arquivo desejado. Você pode abrir o arquivo, narrar o conteúdo completo, narrar um resumo, utilizar a IA, baixar ou excluir o arquivo.",
+        "rota": "/src/pages/materias.html"
+      }
+    }
+  },
+  "calendario": {
+    "titulo": "Calendário",
+    "acoes": {
+      "acessar_calendario": {
+        "titulo": "Acessar calendário",
+        "mensagem": "Acesse a página de Calendário para visualizar seus eventos e compromissos acadêmicos.",
+        "rota": "/src/pages/calendario.html"
+      },
+      "criar_evento": {
+        "titulo": "Adicionar um evento no calendário",
+        "mensagem": "No Calendário, clique no dia em que deseja adicionar o evento. Informe o título, escolha uma categoria, adicione uma descrição e clique em 'Salvar Evento'.",
+        "rota": "/src/pages/calendario.html"
+      },
+      "criar_entrega": {
+        "titulo": "Adicionar uma entrega",
+        "mensagem": "Na área de Próximas Entregas, clique em '+ Nova entrega'. Informe o título, a matéria, a data de entrega e a prioridade, e depois salve.",
+        "rota": "/src/pages/calendario.html"
+      },
+      "criar_tarefa": {
+        "titulo": "Adicionar uma tarefa",
+        "mensagem": "Na área de Checklist de Entregas, clique em '+ Nova tarefa'. Informe a tarefa e a matéria e depois clique em 'Adicionar Tarefa'.",
+        "rota": "/src/pages/calendario.html"
+      },
+      "acompanhar_entregas": {
+        "titulo": "Acompanhar próximas entregas",
+        "mensagem": "Na página de Calendário, consulte a área de Próximas Entregas para visualizar seus compromissos ordenados pela prioridade de cada um.",
+        "rota": "/src/pages/calendario.html"
+      }
+    }
+  },
+  "integracoes": {
+    "titulo": "Integrações",
+    "acoes": {
+      "google": {
+        "titulo": "Sincronizar Google Calendar",
+        "mensagem": "Utilize a integração com o Google para conectar os recursos disponíveis do JoviClass à sua agenda Google.",
+        "rota": ""
+      },
+      "google_drive": {
+        "titulo": "Importar arquivos do Google Drive",
+        "mensagem": "Abra a matéria desejada e, na área de Ações Rápidas, clique em 'Google Drive' para importar arquivos da sua conta.",
+        "rota": "/src/pages/materias.html"
+      },
+      "importar_notion": {
+        "titulo": "Importar conteúdo do Notion",
+        "mensagem": "Abra a matéria desejada e, na área de Ações Rápidas, clique em 'Notion' para importar conteúdos da sua conta.",
+        "rota": "/src/pages/materias.html"
+      }
+    }
+  },
+  "comunidade": {
+    "titulo": "Comunidade",
+    "acoes": {
+      "acessar_comunidade": {
+        "titulo": "Acessar comunidade",
+        "mensagem": "Acesse a página de Comunidade para visualizar as publicações e interagir com suas comunidades no JoviClass.",
+        "rota": "/src/pages/comunidade.html"
+      },
+      "criar_comunidade": {
+        "titulo": "Criar uma nova comunidade",
+        "mensagem": "Na página de Comunidades, clique em '+ Nova Comunidade'. Informe o nome, descrição, categoria e privacidade. Você também pode adicionar uma foto para a comunidade.",
+        "rota": "/src/pages/comunidade.html"
+      },
+      "convidar_membros": {
+        "titulo": "Convidar membros",
+        "mensagem": "Abra o menu de opções da comunidade e clique em 'Convidar membros'. Você pode compartilhar o link da comunidade ou enviar um convite por e-mail.",
+        "rota": "/src/pages/comunidade.html"
+      },
+      "acessar_salas": {
+        "titulo": "Acessar as salas da comunidade",
+        "mensagem": "Entre na comunidade desejada e selecione uma das salas disponíveis para acessar os recursos daquele espaço.",
+        "rota": "/src/pages/comunidade.html"
+      },
+      "usar_chat": {
+        "titulo": "Conversar no chat da comunidade",
+        "mensagem": "Entre em uma comunidade, abra uma sala e utilize o campo de mensagem disponível na área de Chat para conversar com os outros participantes.",
+        "rota": "/src/pages/comunidade.html"
+      },
+      "compartilhar_arquivos": {
+        "titulo": "Compartilhar arquivos em uma sala",
+        "mensagem": "Entre na comunidade desejada e acesse a aba de arquivos. Utilize a área de arquivos disponível na sala para compartilhar conteúdos com os participantes.",
+        "rota": "/src/pages/comunidade.html"
+      }
+    }
+  },
+  "outro": {
+    "titulo": "Outro problema",
+    "acoes": {
+      "nao_encontrei": {
+        "titulo": "Minha dúvida não está aqui",
+        "mensagem": "Não encontrou o que precisava? Consulte as outras opções disponíveis no suporte.",
+        "rota": ""
+      }
+    }
+  }
+}

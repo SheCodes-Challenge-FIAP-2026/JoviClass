@@ -13,5 +13,19 @@
     "codigoRecuperacaoSenha": "$2b$10$pLFPZ8p404i/RBcNIy9F0eAfPvhKHsCvN2wKw5BMpps0llj.txqEu",
     "codigoRecuperacaoSenhaExpira": 1789073930759,
     "googleId": "115157201591849322744"
+  },
+  {
+    "id": "1789087572882",
+    "nome": "Nayra Sousa Duarte",
+    "curso": "",
+    "email": "nayrasdteste@gmail.com",
+    "senha": "$2b$10$WJl/5fxNGDx63cUl9a0I3uc5aEXtii2akIamkXIupv8fTaZPv9p.K",
+    "foto": null,
+    "provedor": "email",
+    "emailVerificado": true,
+    "codigoVerificacao": null,
+    "codigoVerificacaoExpira": null,
+    "codigoRecuperacaoSenha": null,
+    "codigoRecuperacaoSenhaExpira": null
   }
 ]

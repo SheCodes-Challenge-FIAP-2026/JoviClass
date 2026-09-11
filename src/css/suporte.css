@@ -1,0 +1,298 @@
+.botao-suporte {
+    position: fixed;
+    right: 24px;
+    bottom: 24px;
+
+    width: 80px;
+    height: 80px;
+
+    padding: 0;
+    margin: 0;
+
+    border: none;
+    outline: none;
+
+    background: transparent;
+
+    cursor: pointer;
+
+    z-index: 9998;
+
+    transition: transform 0.2s ease;
+}
+
+.botao-suporte:hover {
+    transform: scale(1.06);
+}
+
+.botao-suporte img {
+    width: 100%;
+    height: 100%;
+
+    object-fit: contain;
+
+    display: block;
+
+    pointer-events: none;
+}
+
+.chatbot {
+    position: fixed;
+
+    right: 24px;
+    bottom: 115px;
+
+    width: 360px;
+
+    max-width: calc(100vw - 32px);
+    max-height: min(600px, calc(100vh - 150px));
+
+    background: #ffffff;
+
+    border-radius: 18px;
+
+    box-shadow: 0 16px 45px rgba(0, 0, 0, 0.2);
+
+    overflow: hidden;
+
+    display: none;
+
+    flex-direction: column;
+
+    z-index: 9999;
+}
+
+.chatbot.chatbot-aberto {
+    display: flex;
+}
+
+.chatbot-header {
+    background: #000fb0;
+
+    color: white;
+
+    padding: 17px 18px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.chatbot-header-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.chatbot-header h3 {
+    margin: 0;
+
+    font-family: "Manrope", sans-serif;
+
+    font-size: 16px;
+}
+
+.chatbot-header p {
+    margin: 2px 0 0;
+
+    font-size: 11px;
+
+    opacity: 0.85;
+}
+
+.fechar-chatbot {
+    border: none;
+
+    background: transparent;
+
+    color: white;
+
+    font-size: 22px;
+
+    cursor: pointer;
+
+    padding: 4px 8px;
+}
+
+.conteudo-chatbot {
+    padding: 18px;
+
+    overflow-y: auto;
+
+    font-family: "Manrope", sans-serif;
+}
+
+.mensagem-bot {
+    background: #f3f4f8;
+
+    padding: 12px 14px;
+
+    border-radius: 12px;
+
+    margin-bottom: 14px;
+
+    font-size: 13px;
+
+    line-height: 1.5;
+
+    color: #333;
+}
+
+.mensagem-bot p {
+    margin-bottom: 0;
+}
+
+.texto-suporte {
+    font-size: 13px;
+
+    margin-bottom: 10px;
+
+    color: #555;
+}
+
+.opcao-suporte {
+    width: 100%;
+
+    padding: 11px 13px;
+
+    margin-bottom: 8px;
+
+    background: white;
+
+    color: #232323;
+
+    border: 1px solid #dedede;
+
+    border-radius: 9px;
+
+    cursor: pointer;
+
+    text-align: left;
+
+    font-family: "Manrope", sans-serif;
+
+    font-size: 13px;
+
+    transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.opcao-suporte:hover {
+    background: #f6f7ff;
+
+    border-color: #000fb0;
+}
+
+.voltar-suporte {
+    border: none;
+
+    background: transparent;
+
+    color: #000fb0;
+
+    font-weight: 600;
+
+    cursor: pointer;
+
+    margin-bottom: 13px;
+
+    padding: 0;
+
+    font-family: "Manrope", sans-serif;
+}
+
+.titulo-categoria {
+    margin: 0 0 14px;
+
+    font-size: 17px;
+
+    color: #222;
+}
+
+.link-suporte {
+    display: block;
+
+    width: fit-content;
+
+    padding: 9px 13px;
+
+    margin: 4px 0 18px;
+
+    background: #000fb0;
+
+    color: white;
+
+    border-radius: 8px;
+
+    text-decoration: none;
+
+    font-size: 12px;
+
+    font-weight: 600;
+}
+
+.pergunta-resolvido {
+    margin-top: 15px;
+
+    padding-top: 13px;
+
+    border-top: 1px solid #eeeeee;
+}
+
+.pergunta-resolvido p {
+    font-size: 13px;
+
+    color: #444;
+
+    margin-bottom: 10px;
+}
+
+.botoes-resolvido {
+    display: flex;
+
+    gap: 8px;
+}
+
+.botoes-resolvido button {
+    flex: 1;
+
+    border: 1px solid #000fb0;
+
+    border-radius: 8px;
+
+    padding: 9px;
+
+    cursor: pointer;
+
+    font-family: "Manrope", sans-serif;
+
+    font-weight: 600;
+
+    background: white;
+
+    color: #000fb0;
+}
+
+.botoes-resolvido button:first-child {
+    background: #000fb0;
+
+    color: white;
+}
+
+@media (max-width: 480px) {
+    .botao-suporte {
+        right: 16px;
+        bottom: 85px;
+
+        width: 70px;
+        height: 70px;
+    }
+
+    .chatbot {
+        right: 16px;
+        bottom: 165px;
+
+        width: calc(100vw - 32px);
+
+        max-height: calc(100vh - 200px);
+    }
+}

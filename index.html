@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <link rel="stylesheet" href="./src/css/style.css">
+  <link rel="stylesheet" href="./src/css/suporte.css">
 
   <link rel="shortcut icon" href="/src/assets/favicon.ico" type="image/x-icon">
 
@@ -1104,6 +1105,50 @@
 
   </nav>
 
+  <button
+    type="button"
+    id="botaoSuporte"
+    class="botao-suporte"
+    aria-label="Abrir suporte"
+    hidden>
+
+    <img
+        src="./src/assets/img/logoSuporte.png"
+        alt="Suporte"/>
+
+  </button>
+
+  <div id="chatbot" class="chatbot">
+      <div class="chatbot-header">
+
+          <div class="chatbot-header-info">
+              <div>
+                  <h3>Suporte JoviClass</h3>
+                  <p>Como podemos ajudar?</p>
+              </div>
+          </div>
+
+          <button
+              type="button"
+              id="fecharChatbot"
+              class="fechar-chatbot"
+              aria-label="Fechar suporte"
+          >
+              ×
+          </button>
+
+      </div>
+
+      <div
+          id="conteudoChatbot"
+          class="conteudo-chatbot"
+      >
+          <p class="mensagem-bot">
+              Olá! 👋 Como posso ajudar?
+          </p>
+      </div>
+  </div>
+
 
   <!-- =====================================================
        GOOGLE IDENTITY SERVICES
@@ -1117,6 +1162,13 @@
        ===================================================== -->
 
   <script src="./src/js/script.js"></script>
+
+
+  <!-- =====================================================
+       JAVASCRIPT Do CHATBOT
+       ===================================================== -->
+
+  <script src="./src/js/suporte.js"></script>
 
 </body>
 

@@ -2068,10 +2068,15 @@ function liberarAplicacao() {
     const authOverlay =
         document.getElementById("authOverlay");
 
+    const botaoSuporte =
+        document.getElementById("botaoSuporte");
+
 
     if (!authOverlay) {
         return;
     }
+
+    botaoSuporte.hidden = false;
 
 
     authOverlay.style.display = "none";
