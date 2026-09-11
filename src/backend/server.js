@@ -170,156 +170,690 @@ function montarSessao(usuario) {
         possuiSenha: !!usuario.senha
     };
 }
+// ======================================================
+// GMAIL API — ENVIO DE E-MAIL
+// ======================================================
+//
+// O JoviClass usa a Gmail API do Google através de HTTPS.
+// NÃO usa SMTP.
+// NÃO usa porta 587.
+// NÃO usa porta 465.
+//
+// A conta Gmail configurada aqui será usada como REMETENTE
+// dos códigos de confirmação e recuperação.
+//
+// ======================================================
+
+const gmailOAuth2Client = new OAuth2Client(
+    process.env.GOOGLE_GMAIL_CLIENT_ID,
+    process.env.GOOGLE_GMAIL_CLIENT_SECRET,
+    process.env.GOOGLE_GMAIL_REDIRECT_URI
+);
+
+const GMAIL_SCOPES = [
+    "https://www.googleapis.com/auth/gmail.send"
+];
+
 
 // ======================================================
-// VERIFICAÇÃO DE E-MAIL POR CÓDIGO
+// ROTA PARA AUTORIZAR A CONTA GMAIL DO JOVICLASS
+// ======================================================
+//
+// Abra no navegador:
+//
+// http://localhost:3000/auth/gmail
+//
+// Isso abrirá a tela do Google para você autorizar
+// a conta Gmail que será usada para enviar os códigos.
+//
 // ======================================================
 
-const nodemailer = require("nodemailer");
+app.get("/auth/gmail", (req, res) => {
 
-const transportadorEmail = nodemailer.createTransport({
-    service: "gmail",
+    try {
 
-    auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS
+        const url =
+            gmailOAuth2Client.generateAuthUrl({
+
+                access_type: "offline",
+
+                scope: GMAIL_SCOPES,
+
+                prompt: "consent"
+            });
+
+        return res.redirect(url);
+
+    } catch (erro) {
+
+        console.error(
+            "❌ Erro ao gerar autorização do Gmail:",
+            erro
+        );
+
+        return res.status(500).send(
+            "Erro ao iniciar autorização do Gmail."
+        );
     }
 });
+
+
+// ======================================================
+// CALLBACK DO GOOGLE
+// ======================================================
+//
+// O Google redireciona para:
+//
+// /auth/gmail/callback
+//
+// Depois da autorização, recebemos um código.
+// Esse código é trocado por um refresh token.
+//
+// ======================================================
+
+app.get("/auth/gmail/callback", async (req, res) => {
+
+    try {
+
+        const { code, error } = req.query;
+
+        if (error) {
+
+            console.error(
+                "❌ Google recusou a autorização:",
+                error
+            );
+
+            return res.status(400).send(
+                `Autorização recusada pelo Google: ${error}`
+            );
+        }
+
+        if (!code) {
+
+            return res.status(400).send(
+                "Código de autorização não recebido."
+            );
+        }
+
+        const { tokens } =
+            await gmailOAuth2Client.getToken(code);
+
+        if (!tokens.refresh_token) {
+
+            console.error(
+                "❌ O Google não retornou refresh token."
+            );
+
+            return res.status(500).send(
+                `
+                <h2>Não foi possível obter o refresh token.</h2>
+                <p>Verifique se a autorização foi feita corretamente.</p>
+                <p>Veja o terminal do servidor para mais detalhes.</p>
+                `
+            );
+        }
+
+        console.log(
+            "\n======================================"
+        );
+
+        console.log(
+            "✅ GMAIL AUTORIZADO COM SUCESSO"
+        );
+
+        console.log(
+            "======================================"
+        );
+
+        console.log(
+            "🔑 GMAIL_REFRESH_TOKEN:"
+        );
+
+        console.log(
+            tokens.refresh_token
+        );
+
+        console.log(
+            "======================================\n"
+        );
+
+        return res.send(
+            `
+            <!DOCTYPE html>
+
+            <html lang="pt-BR">
+
+            <head>
+                <meta charset="UTF-8">
+
+                <title>Gmail autorizado</title>
+
+                <style>
+
+                    body {
+                        font-family: Arial, sans-serif;
+                        background: #f5f7fb;
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        min-height: 100vh;
+                        margin: 0;
+                    }
+
+                    .box {
+                        background: white;
+                        padding: 40px;
+                        border-radius: 18px;
+                        max-width: 500px;
+                        text-align: center;
+                        box-shadow:
+                            0 10px 30px
+                            rgba(0,0,0,0.08);
+                    }
+
+                    h1 {
+                        color: #16a34a;
+                    }
+
+                    p {
+                        color: #555;
+                        line-height: 1.6;
+                    }
+
+                    strong {
+                        color: #111;
+                    }
+
+                </style>
+
+            </head>
+
+            <body>
+
+                <div class="box">
+
+                    <h1>
+                        ✅ Gmail autorizado!
+                    </h1>
+
+                    <p>
+                        A conta Gmail foi autorizada
+                        para o JoviClass.
+                    </p>
+
+                    <p>
+                        O <strong>refresh token</strong>
+                        foi exibido no terminal
+                        do servidor.
+                    </p>
+
+                    <p>
+                        Copie esse token para o
+                        arquivo <strong>.env</strong>.
+                    </p>
+
+                    <p>
+                        Depois reinicie o servidor.
+                    </p>
+
+                </div>
+
+            </body>
+
+            </html>
+            `
+        );
+
+    } catch (erro) {
+
+        console.error(
+            "❌ Erro no callback do Gmail:",
+            erro
+        );
+
+        return res.status(500).send(
+            `
+            <h2>Erro ao autorizar o Gmail.</h2>
+
+            <p>
+                Veja o terminal do servidor
+                para descobrir o erro.
+            </p>
+            `
+        );
+    }
+});
+
+
+// ======================================================
+// HTML SEGURO
+// ======================================================
+
+function escaparHtml(texto) {
+
+    return String(texto)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+
+// ======================================================
+// CODIFICAR MENSAGEM PARA A GMAIL API
+// ======================================================
+//
+// A Gmail API recebe o conteúdo do e-mail em uma string
+// MIME codificada em base64url.
+//
+// ======================================================
+
+function codificarBase64Url(texto) {
+
+    return Buffer
+        .from(texto, "utf8")
+        .toString("base64")
+        .replace(/\+/g, "-")
+        .replace(/\//g, "_")
+        .replace(/=+$/, "");
+}
+
+
+// ======================================================
+// OBTER ACCESS TOKEN DO GMAIL
+// ======================================================
+
+async function obterAccessTokenGmail() {
+
+    const refreshToken =
+        process.env.GMAIL_REFRESH_TOKEN;
+
+    if (!refreshToken) {
+
+        throw new Error(
+            "GMAIL_REFRESH_TOKEN não foi configurado no .env"
+        );
+    }
+
+    gmailOAuth2Client.setCredentials({
+        refresh_token: refreshToken
+    });
+
+    const {
+        token
+    } = await gmailOAuth2Client.getAccessToken();
+
+    if (!token) {
+
+        throw new Error(
+            "Não foi possível obter um access token do Gmail."
+        );
+    }
+
+    return token;
+}
+
+
+// ======================================================
+// ENVIAR E-MAIL PELA GMAIL API
+// ======================================================
+
+async function enviarEmailGmail({
+    destinatario,
+    assunto,
+    titulo,
+    mensagem,
+    codigo
+}) {
+
+    const remetente =
+        process.env.EMAIL_USER;
+
+    if (!remetente) {
+
+        throw new Error(
+            "EMAIL_USER não foi configurado no .env"
+        );
+    }
+
+    const accessToken =
+        await obterAccessTokenGmail();
+
+
+    const mensagemSegura =
+        escaparHtml(mensagem);
+
+    const codigoSeguro =
+        codigo
+            ? escaparHtml(codigo)
+            : "";
+
+
+    const html = `
+        <!DOCTYPE html>
+
+        <html lang="pt-BR">
+
+        <head>
+
+            <meta charset="UTF-8">
+
+            <meta
+                name="viewport"
+                content="width=device-width,
+                initial-scale=1.0"
+            >
+
+            <title>
+                ${escaparHtml(titulo)}
+            </title>
+
+        </head>
+
+
+        <body style="
+            margin: 0;
+            padding: 0;
+            background: #f5f7fb;
+            font-family: Arial, Helvetica, sans-serif;
+        ">
+
+            <div style="
+                max-width: 600px;
+                margin: 40px auto;
+                background: #ffffff;
+                border-radius: 16px;
+                padding: 40px;
+                box-sizing: border-box;
+            ">
+
+                <h1 style="
+                    margin: 0 0 20px;
+                    color: #111827;
+                    font-size: 26px;
+                ">
+
+                    ${escaparHtml(titulo)}
+
+                </h1>
+
+
+                <p style="
+                    color: #4b5563;
+                    font-size: 16px;
+                    line-height: 1.6;
+                    white-space: pre-line;
+                ">
+
+                    ${mensagemSegura}
+
+                </p>
+
+
+                ${codigoSeguro
+            ? `
+
+                            <div style="
+                                margin: 30px 0;
+                                padding: 20px;
+                                background: #f3f4f6;
+                                border-radius: 12px;
+                                text-align: center;
+                            ">
+
+                                <div style="
+                                    color: #6b7280;
+                                    font-size: 14px;
+                                    margin-bottom: 10px;
+                                ">
+
+                                    Seu código de verificação
+
+                                </div>
+
+
+                                <div style="
+                                    font-size: 32px;
+                                    font-weight: bold;
+                                    letter-spacing: 8px;
+                                    color: #111827;
+                                ">
+
+                                    ${codigoSeguro}
+
+                                </div>
+
+                            </div>
+
+                        `
+            : ""
+        }
+
+
+                <p style="
+                    color: #9ca3af;
+                    font-size: 13px;
+                    line-height: 1.5;
+                ">
+
+                    Se você não solicitou este código,
+                    pode ignorar este e-mail.
+
+                </p>
+
+            </div>
+
+        </body>
+
+        </html>
+    `;
+
+
+    // --------------------------------------------------
+    // MIME
+    // --------------------------------------------------
+
+    const mimeMessage = [
+
+        `From: "JoviClass" <${remetente}>`,
+
+        `To: ${destinatario}`,
+
+        `Subject: ${assunto}`,
+
+        "MIME-Version: 1.0",
+
+        "Content-Type: text/html; charset=UTF-8",
+
+        "Content-Transfer-Encoding: 8bit",
+
+        "",
+
+        html
+
+    ].join("\r\n");
+
+
+    const raw =
+        codificarBase64Url(mimeMessage);
+
+
+    // --------------------------------------------------
+    // ENVIO PELA GMAIL API
+    // --------------------------------------------------
+
+    const resposta =
+        await fetch(
+            "https://gmail.googleapis.com/gmail/v1/users/me/messages/send",
+            {
+
+                method: "POST",
+
+                headers: {
+
+                    "Authorization":
+                        `Bearer ${accessToken}`,
+
+                    "Content-Type":
+                        "application/json"
+
+                },
+
+                body: JSON.stringify({
+                    raw: raw
+                })
+            }
+        );
+
+
+    const textoResposta =
+        await resposta.text();
+
+
+    let dadosResposta = {};
+
+    try {
+
+        dadosResposta =
+            textoResposta
+                ? JSON.parse(textoResposta)
+                : {};
+
+    } catch {
+
+        dadosResposta = {
+            resposta: textoResposta
+        };
+    }
+
+
+    if (!resposta.ok) {
+
+        console.error(
+            "❌ Erro retornado pela Gmail API:",
+            resposta.status,
+            dadosResposta
+        );
+
+        throw new Error(
+            `Gmail API retornou HTTP ${resposta.status}`
+        );
+    }
+
+
+    console.log(
+        `📧 E-mail enviado pelo Gmail para ${destinatario}`
+    );
+
+
+    return {
+
+        sucesso: true,
+
+        dados: dadosResposta
+
+    };
+}
+
+
+// ======================================================
+// CÓDIGO DE VERIFICAÇÃO
+// ======================================================
+
+async function enviarCodigoVerificacao(
+    destinatario,
+    codigo
+) {
+
+    return await enviarEmailGmail({
+
+        destinatario,
+
+        assunto:
+            "Confirme seu e-mail — JoviClass",
+
+        titulo:
+            "Confirme seu e-mail",
+
+        mensagem:
+            "Use o código abaixo para confirmar " +
+            "sua conta no JoviClass:",
+
+        codigo
+    });
+}
+
+
+// ======================================================
+// CÓDIGO DE CONFIRMAÇÃO DE CADASTRO
+// ======================================================
+
+async function enviarCodigoConfirmacaoCadastro(
+    destinatario,
+    codigo
+) {
+
+    return await enviarEmailGmail({
+
+        destinatario,
+
+        assunto:
+            "Confirme seu cadastro — JoviClass",
+
+        titulo:
+            "Confirme sua conta",
+
+        mensagem:
+            "Use o código abaixo para concluir " +
+            "a criação da sua conta no JoviClass:",
+
+        codigo
+    });
+}
+
+
+// ======================================================
+// CÓDIGO DE RECUPERAÇÃO DE SENHA
+// ======================================================
+
+async function enviarCodigoRecuperacaoSenha(
+    destinatario,
+    codigo
+) {
+
+    return await enviarEmailGmail({
+
+        destinatario,
+
+        assunto:
+            "Recupere sua senha — JoviClass",
+
+        titulo:
+            "Redefinir senha",
+
+        mensagem:
+            "Use o código abaixo para criar " +
+            "uma nova senha no JoviClass:",
+
+        codigo
+    });
+}
+
+
+// ======================================================
+// GERAR CÓDIGO DE VERIFICAÇÃO
+// ======================================================
 
 function gerarCodigoVerificacao() {
 
     return String(
-        Math.floor(100000 + Math.random() * 900000)
+        Math.floor(
+            100000 +
+            Math.random() * 900000
+        )
     );
-}
-
-async function enviarCodigoVerificacao(destinatario, codigo) {
-
-    // Se as credenciais de e-mail não estiverem configuradas
-    // no .env, caímos num "modo dev": o código só aparece
-    // no console, sem precisar de um provedor de e-mail real.
-    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
-
-        console.log(
-            `✉️  [MODO DEV] Código de verificação para ${destinatario}: ${codigo}`
-        );
-
-        return;
-    }
-
-    await transportadorEmail.sendMail({
-
-        from: `"JoviClass" <${process.env.EMAIL_USER}>`,
-
-        to: destinatario,
-
-        subject: "Confirme seu e-mail — JoviClass",
-
-        html: `
-            <div style="font-family: Arial, sans-serif; max-width: 420px; margin: 0 auto;">
-                <h2 style="color:#000fb0; margin-bottom: 8px;">Confirme seu e-mail</h2>
-                <p style="color:#333; font-size: 14px;">
-                    Use o código abaixo para confirmar sua conta no JoviClass:
-                </p>
-                <p style="font-size: 30px; font-weight: 800; letter-spacing: 8px; color:#000fb0; margin: 18px 0;">
-                    ${codigo}
-                </p>
-                <p style="color:#888; font-size: 12.5px;">
-                    Esse código expira em 10 minutos. Se você não pediu isso, pode ignorar este e-mail.
-                </p>
-            </div>
-        `
-    });
-}
-
-// ------------------------------------------------------
-// E-MAIL DE CONFIRMAÇÃO DE CADASTRO (PASSO 2 DO CADASTRO)
-// ------------------------------------------------------
-//
-// Mesmo formato do código de verificação de e-mail, mas usado
-// especificamente no fluxo de "criar conta com código", antes
-// de a conta existir de fato.
-//
-
-async function enviarCodigoConfirmacaoCadastro(destinatario, codigo) {
-
-    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
-
-        console.log(
-            `✉️  [MODO DEV] Código de confirmação de cadastro para ${destinatario}: ${codigo}`
-        );
-
-        return;
-    }
-
-    await transportadorEmail.sendMail({
-
-        from: `"JoviClass" <${process.env.EMAIL_USER}>`,
-
-        to: destinatario,
-
-        subject: "Confirme seu cadastro — JoviClass",
-
-        html: `
-            <div style="font-family: Arial, sans-serif; max-width: 420px; margin: 0 auto;">
-                <h2 style="color:#000fb0; margin-bottom: 8px;">Confirme sua conta</h2>
-                <p style="color:#333; font-size: 14px;">
-                    Use o código abaixo para concluir a criação da sua conta no JoviClass:
-                </p>
-                <p style="font-size: 30px; font-weight: 800; letter-spacing: 8px; color:#000fb0; margin: 18px 0;">
-                    ${codigo}
-                </p>
-                <p style="color:#888; font-size: 12.5px;">
-                    Esse código expira em 10 minutos. Se você não pediu isso, pode ignorar este e-mail.
-                </p>
-            </div>
-        `
-    });
-}
-
-// ------------------------------------------------------
-// E-MAIL DE RECUPERAÇÃO DE SENHA
-// ------------------------------------------------------
-//
-// Mesmo formato do código de confirmação de e-mail, mas com
-// assunto e texto diferentes pra deixar claro que é sobre
-// redefinir a senha, não sobre confirmar a conta.
-//
-
-async function enviarCodigoRecuperacaoSenha(destinatario, codigo) {
-
-    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
-
-        console.log(
-            `✉️  [MODO DEV] Código de recuperação de senha para ${destinatario}: ${codigo}`
-        );
-
-        return;
-    }
-
-    await transportadorEmail.sendMail({
-
-        from: `"JoviClass" <${process.env.EMAIL_USER}>`,
-
-        to: destinatario,
-
-        subject: "Recupere sua senha — JoviClass",
-
-        html: `
-            <div style="font-family: Arial, sans-serif; max-width: 420px; margin: 0 auto;">
-                <h2 style="color:#000fb0; margin-bottom: 8px;">Redefinir senha</h2>
-                <p style="color:#333; font-size: 14px;">
-                    Use o código abaixo para criar uma nova senha no JoviClass:
-                </p>
-                <p style="font-size: 30px; font-weight: 800; letter-spacing: 8px; color:#000fb0; margin: 18px 0;">
-                    ${codigo}
-                </p>
-                <p style="color:#888; font-size: 12.5px;">
-                    Esse código expira em 10 minutos. Se você não pediu isso, pode ignorar este e-mail — sua senha atual continua a mesma.
-                </p>
-            </div>
-        `
-    });
 }
 
 // ======================================================
