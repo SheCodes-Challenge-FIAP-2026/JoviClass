@@ -913,16 +913,47 @@
 
       </div>
 
+      <div class="playerAcoesTopo">
 
-      <button
-        class="playerFechar"
-        id="playerFechar"
-        type="button"
-        title="Fechar"
-        aria-label="Fechar player"
-      >
-        ✕
-      </button>
+        <button
+          class="playerSalvarMp3"
+          id="btnSalvarNarracaoMp3"
+          type="button"
+          title="Salvar narração em MP3"
+          aria-label="Salvar narração em MP3"
+        >
+
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+            <polyline points="7 10 12 15 17 10" />
+            <line
+              x1="12"
+              y1="15"
+              x2="12"
+              y2="3"
+            />
+          </svg>
+
+        </button>
+
+        <button
+          class="playerFechar"
+          id="playerFechar"
+          type="button"
+          title="Fechar"
+          aria-label="Fechar player"
+        >
+          ✕
+        </button>
+
+      </div>
 
     </div>
 
@@ -1065,7 +1096,7 @@
     <a href="../pages/calendario.html">
       <span class="nav-icone">
         📝
-      <span>
+      </span>
       <span>
         Tarefas
       </span>
@@ -1127,6 +1158,9 @@
        ===================================================== -->
 
     <script src="../js/suporte.js"></script>
+
+  <!-- Codificador MP3 (JS puro), usado para salvar a narração em áudio -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lamejs/1.2.1/lame.min.js"></script>
 
   <script src="../js/paginaMateria.js"></script>
 

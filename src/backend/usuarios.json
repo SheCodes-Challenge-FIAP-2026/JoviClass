@@ -13,5 +13,33 @@
     "codigoRecuperacaoSenha": null,
     "codigoRecuperacaoSenhaExpira": null,
     "googleId": "115157201591849322744"
+  },
+  {
+    "id": "1789167295767",
+    "nome": "Paloma Dantas",
+    "curso": "",
+    "email": "paloma.carmo@yahoo.com",
+    "senha": "$2b$10$Jbv6/2cymQSmVsKiGZEd2.Jgrx7ZslJN0CQPbDCALZlFq21iXmIlK",
+    "foto": null,
+    "provedor": "email",
+    "emailVerificado": true,
+    "codigoVerificacao": null,
+    "codigoVerificacaoExpira": null,
+    "codigoRecuperacaoSenha": null,
+    "codigoRecuperacaoSenhaExpira": null
+  },
+  {
+    "id": "1789170156577",
+    "nome": "Paloma Dantas",
+    "curso": "",
+    "email": "paloma.dantas16@yahoo.com",
+    "senha": "$2b$10$QY9blptd5v8EbD4bDpDkM.Krx7MES801tP8AOEdeErV2mMNwKKEy6",
+    "foto": null,
+    "provedor": "email",
+    "emailVerificado": true,
+    "codigoVerificacao": null,
+    "codigoVerificacaoExpira": null,
+    "codigoRecuperacaoSenha": null,
+    "codigoRecuperacaoSenhaExpira": null
   }
 ]

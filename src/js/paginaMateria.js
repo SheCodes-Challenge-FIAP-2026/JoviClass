@@ -42,6 +42,7 @@ const playerVoltarBtn = document.getElementById('playerVoltar');
 const playerAvancarBtn = document.getElementById('playerAvancar');
 const playerFecharBtn = document.getElementById('playerFechar');
 const playerVelocidadeBtn = document.getElementById('playerVelocidade');
+const btnSalvarNarracaoMp3 = document.getElementById('btnSalvarNarracaoMp3');
 
 const btnAbrirIAViewer = document.getElementById("btnAbrirIAViewer");
 const viewerIA = document.getElementById("viewerIA");
@@ -149,6 +150,7 @@ const estadoPlayer = {
 };
 
 let cancelarPreparoAtual = false;
+let gravandoNarracaoMp3 = false;
 
 function setStatus(texto) {
   if (playerStatus) {
@@ -171,6 +173,10 @@ function setControlesHabilitados(habilitado) {
   if (playerVoltarBtn) playerVoltarBtn.disabled = !habilitado;
   if (playerAvancarBtn) playerAvancarBtn.disabled = !habilitado;
   if (playerVelocidadeBtn) playerVelocidadeBtn.disabled = !habilitado;
+
+  if (btnSalvarNarracaoMp3 && !gravandoNarracaoMp3) {
+    btnSalvarNarracaoMp3.disabled = !habilitado;
+  }
 }
 
 function abrirPlayer(titulo) {
@@ -187,6 +193,10 @@ function abrirPlayer(titulo) {
 function fecharPlayer() {
   if (estadoPlayer.gerando) {
     cancelarPreparoAtual = true;
+  }
+
+  if (gravandoNarracaoMp3) {
+    gravandoNarracaoMp3 = false;
   }
 
   window.speechSynthesis.cancel();
@@ -531,6 +541,319 @@ function iniciarNarracaoDePartes(partes, titulo, origemId) {
   atualizarEstadoBotoesFolder();
 
   falarParteAtual();
+}
+
+// ==========================================================
+// SALVAR NARRAÇÃO EM ÁUDIO (.mp3)
+//
+// O navegador não dá acesso direto ao áudio gerado pelo
+// SpeechSynthesis (a voz do sistema). Por isso, a narração é
+// capturada "ao vivo": pedimos ao usuário para compartilhar o
+// áudio da própria aba, gravamos enquanto o texto é falado do
+// início ao fim, e então convertemos o áudio gravado para MP3
+// de verdade usando o codificador lamejs (JavaScript puro).
+//
+// Funciona em navegadores baseados em Chromium (Chrome, Edge)
+// no computador. É necessário marcar a opção "Compartilhar
+// áudio da guia/aba" na janela que o navegador abre.
+// ==========================================================
+
+function nomeArquivoNarracaoMp3(titulo) {
+  const base = (titulo || 'narracao')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-zA-Z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '')
+    .toLowerCase();
+
+  return `${base || 'narracao'}.mp3`;
+}
+
+async function capturarFluxoDeAudioDaAba() {
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia) {
+    throw new Error('Seu navegador não permite capturar o áudio da narração.');
+  }
+
+  const streamCompleto = await navigator.mediaDevices.getDisplayMedia({
+    video: true,
+    audio: true
+  });
+
+  const faixasAudio = streamCompleto.getAudioTracks();
+
+  if (!faixasAudio.length) {
+    streamCompleto.getTracks().forEach((faixa) => faixa.stop());
+    throw new Error('Marque a opção "Compartilhar áudio da aba" para poder salvar em MP3.');
+  }
+
+  // O vídeo não é usado, então a faixa é encerrada imediatamente.
+  streamCompleto.getVideoTracks().forEach((faixa) => faixa.stop());
+
+  return new MediaStream(faixasAudio);
+}
+
+function decodificarAudioBlob(blob) {
+  return new Promise((resolve, reject) => {
+    const leitor = new FileReader();
+
+    leitor.onload = async () => {
+      try {
+        const ContextoAudio = window.AudioContext || window.webkitAudioContext;
+        const contexto = new ContextoAudio();
+        const bufferDecodificado = await contexto.decodeAudioData(leitor.result);
+
+        contexto.close();
+        resolve(bufferDecodificado);
+      } catch (erro) {
+        reject(erro);
+      }
+    };
+
+    leitor.onerror = () => reject(leitor.error);
+    leitor.readAsArrayBuffer(blob);
+  });
+}
+
+function converterFloat32ParaInt16(dadosFloat) {
+  const dadosInt16 = new Int16Array(dadosFloat.length);
+
+  for (let i = 0; i < dadosFloat.length; i++) {
+    const amostra = Math.max(-1, Math.min(1, dadosFloat[i]));
+    dadosInt16[i] = amostra < 0 ? amostra * 0x8000 : amostra * 0x7fff;
+  }
+
+  return dadosInt16;
+}
+
+function audioBufferParaMp3(audioBuffer) {
+  if (typeof lamejs === 'undefined') {
+    throw new Error('Codificador de MP3 não foi carregado.');
+  }
+
+  const canais = Math.min(audioBuffer.numberOfChannels, 2);
+  const taxaAmostragem = audioBuffer.sampleRate;
+  const TAMANHO_BLOCO = 1152;
+
+  const mp3Encoder = new lamejs.Mp3Encoder(canais, taxaAmostragem, 128);
+
+  const canalEsquerdo = converterFloat32ParaInt16(audioBuffer.getChannelData(0));
+  const canalDireito = canais > 1
+    ? converterFloat32ParaInt16(audioBuffer.getChannelData(1))
+    : null;
+
+  const partesMp3 = [];
+
+  for (let i = 0; i < canalEsquerdo.length; i += TAMANHO_BLOCO) {
+    const blocoEsquerdo = canalEsquerdo.subarray(i, i + TAMANHO_BLOCO);
+
+    let bufferMp3;
+
+    if (canalDireito) {
+      const blocoDireito = canalDireito.subarray(i, i + TAMANHO_BLOCO);
+      bufferMp3 = mp3Encoder.encodeBuffer(blocoEsquerdo, blocoDireito);
+    } else {
+      bufferMp3 = mp3Encoder.encodeBuffer(blocoEsquerdo);
+    }
+
+    if (bufferMp3.length > 0) {
+      partesMp3.push(bufferMp3);
+    }
+  }
+
+  const bufferFinal = mp3Encoder.flush();
+
+  if (bufferFinal.length > 0) {
+    partesMp3.push(bufferFinal);
+  }
+
+  return new Blob(partesMp3, { type: 'audio/mp3' });
+}
+
+function baixarBlob(blob, nomeArquivo) {
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+
+  link.href = url;
+  link.download = nomeArquivo;
+
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+
+  setTimeout(() => URL.revokeObjectURL(url), 5000);
+}
+
+async function falarPartesParaGravacao(partes, velocidade, aoAtualizarProgresso) {
+  const vozes = await obterVozes();
+  const voz = escolherVoz(vozes);
+
+  if (!voz) {
+    throw new Error('Nenhuma voz em português foi encontrada neste navegador.');
+  }
+
+  for (let i = 0; i < partes.length; i++) {
+    if (!gravandoNarracaoMp3) {
+      throw new Error('NARRACAO_MP3_CANCELADA');
+    }
+
+    const texto = prepararTextoParaFala(partes[i]);
+
+    if (aoAtualizarProgresso) {
+      aoAtualizarProgresso(i, partes.length);
+    }
+
+    if (!texto) continue;
+
+    await new Promise((resolve, reject) => {
+      const fala = new SpeechSynthesisUtterance(texto);
+
+      fala.voice = voz;
+      fala.lang = 'pt-BR';
+      fala.rate = MAPA_TAXA_VELOCIDADE[velocidade] || MAPA_TAXA_VELOCIDADE[1];
+      fala.pitch = 1;
+      fala.volume = 1;
+
+      fala.onend = () => resolve();
+
+      fala.onerror = (erro) => {
+        if (erro.error === 'interrupted' || erro.error === 'canceled') {
+          resolve();
+          return;
+        }
+
+        reject(erro);
+      };
+
+      window.speechSynthesis.cancel();
+      window.speechSynthesis.resume();
+
+      setTimeout(() => window.speechSynthesis.speak(fala), 60);
+    });
+  }
+}
+
+async function exportarNarracaoParaMp3(partes, titulo, velocidade = 1) {
+  if (gravandoNarracaoMp3) {
+    mostrarToast('⏳ Já existe uma exportação em andamento.');
+    return;
+  }
+
+  if (!partes || !partes.length) {
+    mostrarToast('⚠️ Não há narração para salvar.');
+    return;
+  }
+
+  if (!('speechSynthesis' in window)) {
+    mostrarToast('⚠️ Seu navegador não suporta narração de texto.');
+    return;
+  }
+
+  if (typeof lamejs === 'undefined') {
+    mostrarToast('⚠️ Não foi possível carregar o codificador de MP3. Verifique sua conexão.');
+    return;
+  }
+
+  let streamAudio;
+
+  try {
+    mostrarToast('🎙️ Selecione "Esta aba" e marque "Compartilhar áudio da aba" na janela que vai abrir.');
+
+    streamAudio = await capturarFluxoDeAudioDaAba();
+  } catch (erro) {
+    console.error('Erro ao capturar áudio da aba:', erro);
+    mostrarToast(`⚠️ ${erro.message || 'Não foi possível capturar o áudio.'}`);
+    return;
+  }
+
+  gravandoNarracaoMp3 = true;
+
+  window.speechSynthesis.cancel();
+
+  if (btnSalvarNarracaoMp3) {
+    btnSalvarNarracaoMp3.disabled = true;
+    btnSalvarNarracaoMp3.classList.add('gravandoMp3');
+    btnSalvarNarracaoMp3.title = 'Gravando narração...';
+  }
+
+  setStatus('🎙️ Gravando narração (0%)...');
+
+  const tipoMime = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
+    ? 'audio/webm;codecs=opus'
+    : 'audio/webm';
+
+  const gravador = new MediaRecorder(streamAudio, { mimeType: tipoMime });
+  const pedacosGravados = [];
+
+  gravador.ondataavailable = (evento) => {
+    if (evento.data && evento.data.size > 0) {
+      pedacosGravados.push(evento.data);
+    }
+  };
+
+  const promessaGravadorParado = new Promise((resolve) => {
+    gravador.onstop = resolve;
+  });
+
+  gravador.start();
+
+  try {
+    await falarPartesParaGravacao(partes, velocidade, (indiceAtual, total) => {
+      const porcentagem = Math.round((indiceAtual / total) * 100);
+      setStatus(`🎙️ Gravando narração (${porcentagem}%)...`);
+    });
+  } catch (erro) {
+    if (erro.message !== 'NARRACAO_MP3_CANCELADA') {
+      console.error('Erro ao gerar áudio para exportação:', erro);
+      mostrarToast('⚠️ Ocorreu um erro ao gerar o áudio da narração.');
+    }
+  }
+
+  const estavaAtivoAoFinal = gravandoNarracaoMp3;
+
+  gravador.stop();
+  streamAudio.getTracks().forEach((faixa) => faixa.stop());
+
+  await promessaGravadorParado;
+
+  gravandoNarracaoMp3 = false;
+
+  if (btnSalvarNarracaoMp3) {
+    btnSalvarNarracaoMp3.disabled = !estadoPlayer.ativo;
+    btnSalvarNarracaoMp3.classList.remove('gravandoMp3');
+    btnSalvarNarracaoMp3.title = 'Salvar narração em MP3';
+  }
+
+  if (!estavaAtivoAoFinal) {
+    // Cancelado no meio do caminho (ex.: o player foi fechado).
+    return;
+  }
+
+  try {
+    setStatus('🎧 Convertendo para MP3...');
+
+    const blobWebm = new Blob(pedacosGravados, { type: tipoMime });
+    const audioBuffer = await decodificarAudioBlob(blobWebm);
+    const blobMp3 = audioBufferParaMp3(audioBuffer);
+
+    baixarBlob(blobMp3, nomeArquivoNarracaoMp3(titulo));
+
+    mostrarToast('✅ Áudio da narração salvo em MP3!');
+    setStatus('✅ Narração salva em MP3');
+  } catch (erro) {
+    console.error('Erro ao converter narração para MP3:', erro);
+    mostrarToast('⚠️ Não foi possível converter o áudio para MP3.');
+  }
+}
+
+if (btnSalvarNarracaoMp3) {
+  btnSalvarNarracaoMp3.addEventListener('click', () => {
+    if (!estadoPlayer.partes.length) {
+      mostrarToast('⚠️ Nenhuma narração carregada para salvar.');
+      return;
+    }
+
+    exportarNarracaoParaMp3(estadoPlayer.partes, estadoPlayer.titulo, estadoPlayer.velocidade);
+  });
 }
 
 async function narrarConteudo({ titulo, origemId, obterPartes }) {
@@ -1097,6 +1420,7 @@ async function gerarResumoViaIA(texto) {
   const resposta = await fetch('http://localhost:3000/ia', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
     body: JSON.stringify({ acao: 'resumo', texto })
   });
 
@@ -2436,6 +2760,7 @@ async function usarIAViewer(acao, item, index) {
     const resposta = await fetch('http://localhost:3000/ia', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
       body: JSON.stringify({ acao, texto })
     });
 

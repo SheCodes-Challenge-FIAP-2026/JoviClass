@@ -1051,6 +1051,58 @@ a {
   background: rgba(255, 255, 255, 0.3);
 }
 
+.playerAcoesTopo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.playerSalvarMp3 {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: none;
+  background: var(--bg-color3);
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.2s, transform 0.15s;
+}
+
+.playerSalvarMp3:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.playerSalvarMp3:active {
+  transform: scale(0.95);
+}
+
+.playerSalvarMp3:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.playerSalvarMp3.gravandoMp3 {
+  background: #ff4d4f;
+  animation: pulsarGravacaoMp3 1s ease-in-out infinite;
+}
+
+@keyframes pulsarGravacaoMp3 {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.55;
+  }
+}
+
 .playerBarraWrapper {
   width: 100%;
   cursor: pointer;

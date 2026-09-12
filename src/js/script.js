@@ -2085,6 +2085,147 @@ function liberarAplicacao() {
     document.body.classList.remove(
         "auth-aberto"
     );
+
+
+    /*
+        Assim que a aplicação libera o botão de suporte,
+        iniciamos o balãozinho "Precisa de ajuda?".
+    */
+
+    iniciarBalaoSuporte();
+}
+
+
+/* =========================================================
+   BALÃO "PRECISA DE AJUDA?" — CHATBOT
+========================================================= */
+
+function posicionarBalaoSuporte() {
+
+    const botaoSuporte =
+        document.getElementById("botaoSuporte");
+
+    const balaoSuporte =
+        document.getElementById("balaoSuporte");
+
+    if (!botaoSuporte || !balaoSuporte) {
+        return;
+    }
+
+    const retanguloBotao =
+        botaoSuporte.getBoundingClientRect();
+
+    /*
+        Posicionamos o balão logo acima do botão,
+        alinhado pela borda direita, usando "fixed"
+        para acompanhar o botão em qualquer resolução.
+    */
+
+    balaoSuporte.style.bottom =
+        `${window.innerHeight - retanguloBotao.top + 14}px`;
+
+    balaoSuporte.style.right =
+        `${window.innerWidth - retanguloBotao.right}px`;
+}
+
+
+function iniciarBalaoSuporte() {
+
+    const botaoSuporte =
+        document.getElementById("botaoSuporte");
+
+    const balaoSuporte =
+        document.getElementById("balaoSuporte");
+
+    if (!botaoSuporte || !balaoSuporte) {
+        return;
+    }
+
+    /*
+        liberarAplicacao() pode ser chamada mais de uma vez
+        (diferentes fluxos de login). Evita registrar os
+        mesmos listeners e timers repetidamente.
+    */
+
+    if (balaoSuporte.dataset.iniciado === "true") {
+        return;
+    }
+
+    balaoSuporte.dataset.iniciado = "true";
+
+    let temporizadorEsconder = null;
+
+
+    function mostrarBalao() {
+
+        posicionarBalaoSuporte();
+
+        balaoSuporte.hidden = false;
+
+        /*
+            Pequeno atraso pra garantir que a transição
+            de opacidade/transform seja animada.
+        */
+
+        requestAnimationFrame(() => {
+            balaoSuporte.classList.add("mostrar");
+        });
+
+        clearTimeout(temporizadorEsconder);
+
+        temporizadorEsconder = setTimeout(
+            esconderBalao,
+            8000
+        );
+    }
+
+
+    function esconderBalao() {
+
+        balaoSuporte.classList.remove("mostrar");
+
+        setTimeout(() => {
+            balaoSuporte.hidden = true;
+        }, 350);
+    }
+
+
+    /*
+        Mostra o balão logo depois que o botão aparece.
+    */
+
+    setTimeout(mostrarBalao, 1500);
+
+
+    /*
+        Clicar no balão abre o suporte, como se tivesse
+        clicado direto no botão.
+    */
+
+    balaoSuporte.addEventListener("click", () => {
+        esconderBalao();
+        botaoSuporte.click();
+    });
+
+
+    /*
+        Clicar no próprio botão de suporte também
+        esconde o balão.
+    */
+
+    botaoSuporte.addEventListener("click", esconderBalao);
+
+
+    /*
+        Reposiciona o balão se a tela for redimensionada
+        ou o dispositivo for rotacionado.
+    */
+
+    window.addEventListener("resize", () => {
+        if (balaoSuporte.classList.contains("mostrar")) {
+            posicionarBalaoSuporte();
+        }
+    });
 }
 
 

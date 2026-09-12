@@ -744,6 +744,73 @@ function iniciarInstituicao() {
 
 
 /* =========================================================
+   ESTATÍSTICAS DO PERFIL (Matérias e Tarefas feitas)
+   Lidas direto do localStorage, que é onde materias.js e
+   calendario.js salvam os dados reais do usuário.
+========================================================= */
+
+const CHAVE_MATERIAS_BASE = "materias";        // mesmo prefixo usado em materias.js
+const CHAVE_TAREFAS_BASE = "joviclass_tarefas"; // mesmo prefixo usado em calendario.js
+
+function chaveMateriasDoUsuario() {
+  return `${CHAVE_MATERIAS_BASE}_${perfilAtual ? perfilAtual.id : ""}`;
+}
+
+function chaveTarefasDoUsuario() {
+  return `${CHAVE_TAREFAS_BASE}_${perfilAtual ? perfilAtual.id : ""}`;
+}
+
+function carregarMateriasDoUsuario() {
+  try {
+    return JSON.parse(localStorage.getItem(chaveMateriasDoUsuario())) || [];
+  } catch {
+    return [];
+  }
+}
+
+function carregarTarefasDoUsuario() {
+  try {
+    return JSON.parse(localStorage.getItem(chaveTarefasDoUsuario())) || [];
+  } catch {
+    return [];
+  }
+}
+
+function atualizarEstatisticasDoPerfil() {
+  const statMaterias = document.getElementById("statMaterias");
+  const statTarefasFeitas = document.getElementById("statTarefasFeitas");
+
+  if (statMaterias) {
+    statMaterias.textContent = carregarMateriasDoUsuario().length;
+  }
+
+  if (statTarefasFeitas) {
+    const tarefas = carregarTarefasDoUsuario();
+    const concluidas = tarefas.filter((t) => t.concluida).length;
+    statTarefasFeitas.textContent = concluidas;
+  }
+}
+
+function iniciarEstatisticasDoPerfil() {
+  atualizarEstatisticasDoPerfil();
+
+  // Se o usuário criar uma matéria ou concluir uma tarefa em
+  // outra aba, esta aba do perfil atualiza os números sozinha.
+  window.addEventListener("storage", (e) => {
+    if (e.key === chaveMateriasDoUsuario() || e.key === chaveTarefasDoUsuario()) {
+      atualizarEstatisticasDoPerfil();
+    }
+  });
+
+  // Cobre o caso comum: usuário vai pra aba de Matérias/Tarefas,
+  // cria algo, e volta pra essa mesma aba do perfil.
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden) atualizarEstatisticasDoPerfil();
+  });
+}
+
+
+/* =========================================================
    ACESSOS E RESUMO SEMANAL
 ========================================================= */
 
@@ -947,4 +1014,5 @@ document.addEventListener("DOMContentLoaded", async () => {
   iniciarPreferenciasDoPerfil();
   iniciarInstituicao();
   iniciarResumoSemanal();
+  iniciarEstatisticasDoPerfil();
 });
