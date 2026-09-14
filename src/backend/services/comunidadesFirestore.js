@@ -117,11 +117,59 @@ async function excluirComunidadeNoFirestore(
     return true;
 }
 
+async function criarConviteNaComunidade(
+    criadorId,
+    comunidadeId,
+    emailConvidado
+) {
+    const referencia = db
+        .collection("comunidades")
+        .doc(String(comunidadeId));
+
+    const documento = await referencia.get();
+
+    if (
+        !documento.exists ||
+        documento.data().criadorId !== String(criadorId)
+    ) {
+        return null;
+    }
+
+    const comunidade = documento.data();
+    const email = String(emailConvidado).toLowerCase();
+
+    const jaConvidado = (
+        comunidade.emailsConvidados || []
+    ).includes(email);
+
+    if (jaConvidado) {
+        return {
+            duplicado: true
+        };
+    }
+
+    await referencia.update({
+        emailsConvidados: FieldValue.arrayUnion(email),
+
+        convidados: FieldValue.arrayUnion({
+            email,
+            status: "pendente"
+        }),
+
+        atualizadoEm: FieldValue.serverTimestamp()
+    });
+
+    return {
+        email,
+        status: "pendente"
+    };
+}
 
 
 module.exports = {
     listarComunidadesDoUsuario,
     criarComunidadeNoFirestore,
     atualizarComunidadeNoFirestore,
-    excluirComunidadeNoFirestore
+    excluirComunidadeNoFirestore,
+    criarConviteNaComunidade
 };

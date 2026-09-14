@@ -618,30 +618,91 @@ function mostrarStatusCopiar(msg) {
     setTimeout(() => { status.textContent = ""; }, 3000);
 }
 
-function enviarConviteEmail() {
-    const emailInput = document.getElementById("emailConvite");
-    const email = emailInput.value.trim();
+async function enviarConviteEmail() {
+    const emailInput =
+        document.getElementById("emailConvite");
+
+    const email = emailInput.value
+        .trim()
+        .toLowerCase();
 
     if (!email || !email.includes("@")) {
         alert("Digite um e-mail válido.");
         return;
     }
 
-    if (!comunidadeAtiva) return;
-    const com = dadosComunidades[comunidadeAtiva];
-    if (!com) return;
-
-    if (com.convidados.find(c => c.email === email)) {
-        alert("Este e-mail já recebeu um convite.");
+    if (!comunidadeAtiva) {
         return;
     }
 
-    com.convidados.push({ email, status: "pendente" });
-    emailInput.value = "";
+    const comunidade =
+        dadosComunidades[comunidadeAtiva];
 
-    salvarNoStorage();
-    renderizarConvidados(comunidadeAtiva);
-    renderizarConvidadosPasta(comunidadeAtiva); 
+    if (!comunidade) {
+        return;
+    }
+
+    const convidados = comunidade.convidados || [];
+
+    if (
+        convidados.some(
+            convidado =>
+                convidado.email.toLowerCase() === email
+        )
+    ) {
+        alert("Esse usuário já faz parte da comunidade.");
+        return;
+    }
+
+    try {
+        const resposta = await fetch(
+            `${API_BASE}/comunidades/${comunidadeAtiva}/convites`,
+            {
+                method: "POST",
+
+                headers: {
+                    "Content-Type": "application/json"
+                },
+
+                credentials: "include",
+
+                body: JSON.stringify({
+                    email
+                })
+            }
+        );
+
+        const dados = await resposta.json();
+
+        if (!resposta.ok) {
+            throw new Error(
+                dados.erro ||
+                "Não foi possível adicionar o membro."
+            );
+        }
+
+        comunidade.convidados = [
+            ...convidados,
+            {
+                email: dados.convite.email,
+                status: "pendente"
+            }
+        ];
+
+        emailInput.value = "";
+
+        renderizarConvidados(comunidadeAtiva);
+        renderizarConvidadosPasta(comunidadeAtiva);
+
+        alert("Convite enviado!");
+    } catch (erro) {
+        console.error(
+            "Erro ao adicionar membro:",
+            erro
+        );
+
+        alert(erro.message);
+    }
 }
 
 function renderizarConvidados(id) {
@@ -665,7 +726,9 @@ function renderizarConvidados(id) {
                 <span>${c.email}</span>
             </div>
             <div class="convidadoAcoes">
-                <span class="badgePendente">Pendente</span>
+                <span class="badgePendente">
+                    ${c.status === "aceito" ? "Membro" : "Pendente"}
+                </span>
                 <button class="btnRemoverConvite" onclick="removerConvite('${id}', ${idx})" title="Remover convite">✕</button>
             </div>
         `;
@@ -786,7 +849,9 @@ function renderizarConvidadosPasta(comId) {
                 <span>${c.email}</span>
             </div>
             <div class="convidadoAcoes">
-                <span class="badgePendente">Pendente</span>
+                <span class="badgePendente">
+                    ${c.status === "aceito" ? "Membro" : "Pendente"}
+                </span>
                 <button class="btnRemoverConvite" onclick="removerConvite('${comId}', ${idx})" title="Remover convite">✕</button>
             </div>
         `;

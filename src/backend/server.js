@@ -15,7 +15,8 @@ const { salvarPerfilNoFirestore, buscarPerfilNoFirestore } = require("./services
 const { listarMateriasDoUsuario, criarMateriaNoFirestore, atualizarMateriaNoFirestore, excluirMateriaNoFirestore, atualizarCompartilhamentoNoFirestore } = require("./services/materiasFirestore");
 const { listarTarefasDoUsuario, criarTarefaNoFirestore, atualizarTarefaNoFirestore, excluirTarefaNoFirestore } = require("./services/tarefasFirestore");
 const { listarEventosDoUsuario, criarEventoNoFirestore, atualizarEventoNoFirestore, excluirEventoNoFirestore } = require("./services/eventosFirestore");
-const { listarComunidadesDoUsuario, criarComunidadeNoFirestore, atualizarComunidadeNoFirestore, excluirComunidadeNoFirestore } = require("./services/comunidadesFirestore");
+const { listarComunidadesDoUsuario, criarComunidadeNoFirestore, atualizarComunidadeNoFirestore, excluirComunidadeNoFirestore, criarConviteNaComunidade } = require("./services/comunidadesFirestore");
+const { listarAnotacoesDaMateria, criarAnotacaoNoFirestore, atualizarAnotacaoNoFirestore, excluirAnotacaoNoFirestore } = require("./services/anotacoesFirestore");
 
 const { OAuth2Client } = require("google-auth-library");
 const { GoogleGenAI } = require("@google/genai");
@@ -3317,6 +3318,256 @@ app.delete(
             return res.status(500).json({
                 sucesso: false,
                 erro: "Erro interno ao excluir comunidade."
+            });
+        }
+    }
+);
+
+// ======================================================
+// COMUNIDADES — CRIAR CONVITE
+// ======================================================
+
+app.post(
+    "/comunidades/:id/convites",
+    exigirLogin,
+    async (req, res) => {
+        try {
+            const email = String(
+                req.body.email || ""
+            )
+                .trim()
+                .toLowerCase();
+
+            if (!email || !email.includes("@")) {
+                return res.status(400).json({
+                    sucesso: false,
+                    erro: "Informe um e-mail válido."
+                });
+            }
+
+            if (
+                email ===
+                String(req.session.usuario.email)
+                    .trim()
+                    .toLowerCase()
+            ) {
+                return res.status(400).json({
+                    sucesso: false,
+                    erro: "Você já é o criador desta comunidade."
+                });
+            }
+
+            const usuarios = lerUsuarios();
+
+            const usuarioConvidado = usuarios.find(
+                usuario =>
+                    String(usuario.email || "")
+                        .trim()
+                        .toLowerCase() === email
+            );
+
+            if (!usuarioConvidado) {
+                return res.status(404).json({
+                    sucesso: false,
+                    erro: "Esse e-mail ainda não possui uma conta no JoviClass."
+                });
+            }
+
+            const convite =
+                await criarConviteNaComunidade(
+                    req.session.usuario.id,
+                    req.params.id,
+                    email
+                );
+
+            if (!convite) {
+                return res.status(403).json({
+                    sucesso: false,
+                    erro: "Somente o criador pode enviar convites."
+                });
+            }
+
+            if (convite.duplicado) {
+                return res.status(409).json({
+                    sucesso: false,
+                    erro: "Esse usuário já foi convidado."
+                });
+            }
+
+            return res.status(201).json({
+                sucesso: true,
+                convite
+            });
+        } catch (erro) {
+            console.error(
+                "❌ Erro ao criar convite:",
+                erro
+            );
+
+            return res.status(500).json({
+                sucesso: false,
+                erro: "Erro interno ao criar convite."
+            });
+        }
+    }
+);
+
+
+// ======================================================
+// ANOTAÇÕES DA MATÉRIA
+// ======================================================
+
+app.get(
+    "/materias/:materiaId/anotacoes",
+    exigirLogin,
+    async (req, res) => {
+        try {
+            const anotacoes = await listarAnotacoesDaMateria(
+                req.session.usuario.id,
+                req.params.materiaId
+            );
+
+            if (!anotacoes) {
+                return res.status(404).json({
+                    sucesso: false,
+                    erro: "Matéria não encontrada."
+                });
+            }
+
+            return res.json({
+                sucesso: true,
+                anotacoes
+            });
+        } catch (erro) {
+            console.error("❌ Erro ao listar anotações:", erro);
+
+            return res.status(500).json({
+                sucesso: false,
+                erro: "Erro ao listar anotações."
+            });
+        }
+    }
+);
+
+app.post(
+    "/materias/:materiaId/anotacoes",
+    exigirLogin,
+    async (req, res) => {
+        try {
+            const titulo = String(
+                req.body.titulo || "Anotação"
+            ).trim();
+
+            const texto = String(
+                req.body.texto || ""
+            ).trim();
+
+            if (!texto) {
+                return res.status(400).json({
+                    sucesso: false,
+                    erro: "Escreva o conteúdo da anotação."
+                });
+            }
+
+            const anotacao = await criarAnotacaoNoFirestore(
+                req.session.usuario.id,
+                req.params.materiaId,
+                { titulo, texto }
+            );
+
+            if (!anotacao) {
+                return res.status(404).json({
+                    sucesso: false,
+                    erro: "Matéria não encontrada."
+                });
+            }
+
+            return res.status(201).json({
+                sucesso: true,
+                anotacao
+            });
+        } catch (erro) {
+            console.error("❌ Erro ao criar anotação:", erro);
+
+            return res.status(500).json({
+                sucesso: false,
+                erro: "Erro ao criar anotação."
+            });
+        }
+    }
+);
+
+app.put(
+    "/materias/:materiaId/anotacoes/:anotacaoId",
+    exigirLogin,
+    async (req, res) => {
+        try {
+            const titulo = String(
+                req.body.titulo || "Anotação"
+            ).trim();
+
+            const texto = String(
+                req.body.texto || ""
+            ).trim();
+
+            const anotacao =
+                await atualizarAnotacaoNoFirestore(
+                    req.session.usuario.id,
+                    req.params.materiaId,
+                    req.params.anotacaoId,
+                    { titulo, texto }
+                );
+
+            if (!anotacao) {
+                return res.status(404).json({
+                    sucesso: false,
+                    erro: "Anotação não encontrada."
+                });
+            }
+
+            return res.json({
+                sucesso: true,
+                anotacao
+            });
+        } catch (erro) {
+            console.error("❌ Erro ao editar anotação:", erro);
+
+            return res.status(500).json({
+                sucesso: false,
+                erro: "Erro ao editar anotação."
+            });
+        }
+    }
+);
+
+app.delete(
+    "/materias/:materiaId/anotacoes/:anotacaoId",
+    exigirLogin,
+    async (req, res) => {
+        try {
+            const excluida =
+                await excluirAnotacaoNoFirestore(
+                    req.session.usuario.id,
+                    req.params.materiaId,
+                    req.params.anotacaoId
+                );
+
+            if (!excluida) {
+                return res.status(404).json({
+                    sucesso: false,
+                    erro: "Anotação não encontrada."
+                });
+            }
+
+            return res.json({
+                sucesso: true
+            });
+        } catch (erro) {
+            console.error("❌ Erro ao excluir anotação:", erro);
+
+            return res.status(500).json({
+                sucesso: false,
+                erro: "Erro ao excluir anotação."
             });
         }
     }

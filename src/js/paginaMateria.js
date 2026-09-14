@@ -1,6 +1,7 @@
 const params = new URLSearchParams(window.location.search);
 const materiaId = params.get('id');
 const materiaNome = params.get('nome') || 'Matéria';
+const API_BASE = `http://${window.location.hostname}:3000`;
 
 document.getElementById('tituloPagina').textContent = materiaNome;
 
@@ -112,7 +113,37 @@ function dbDelete(chaveId) {
 
 const chave = `arquivos_${materiaId}`;
 
-let itens = JSON.parse(localStorage.getItem(chave) || '[]');
+let itens = JSON
+  .parse(localStorage.getItem(chave) || '[]')
+  .filter(item => item.tipo !== 'anotacao');
+
+async function carregarAnotacoesDoFirestore() {
+  const resposta = await fetch(
+    `${API_BASE}/materias/${materiaId}/anotacoes`,
+    {
+      credentials: 'include'
+    }
+  );
+
+  const dados = await resposta.json();
+
+  if (!resposta.ok) {
+    throw new Error(
+      dados.erro || 'Não foi possível carregar as anotações.'
+    );
+  }
+
+  const anotacoes = dados.anotacoes.map(anotacao => ({
+    id: anotacao.id,
+    nome: anotacao.titulo,
+    tipo: 'anotacao',
+    ext: null,
+    conteudo: anotacao.texto,
+    data: 'Salva na nuvem'
+  }));
+
+  itens.push(...anotacoes);
+}
 
 let dropdownAlvoIndex = null;
 let viewerEditandoIndex = null;
@@ -2172,6 +2203,25 @@ dropdownArquivo.querySelectorAll('.dropItem').forEach(btn => {
         await dbDelete(`${materiaId}_${item.id}`);
       }
 
+      if (item.tipo === 'anotacao') {
+        const resposta = await fetch(
+          `${API_BASE}/materias/${materiaId}/anotacoes/${item.id}`,
+          {
+            method: 'DELETE',
+            credentials: 'include'
+          }
+        );
+
+        const dados = await resposta.json();
+
+        if (!resposta.ok) {
+          throw new Error(
+            dados.erro ||
+            'Não foi possível excluir a anotação.'
+          );
+        }
+      }
+
       const origemResumoDoItem = `resumo_${item.id}`;
 
       if (
@@ -2347,8 +2397,10 @@ function fecharAnotacao() {
 btnFecharAnotacao.addEventListener('click', fecharAnotacao);
 btnCancelarAnotacao.addEventListener('click', fecharAnotacao);
 
-btnSalvarAnotacao.addEventListener('click', () => {
-  const titulo = tituloAnotacao.value.trim() || 'Anotação';
+btnSalvarAnotacao.addEventListener('click', async () => {
+  const titulo =
+    tituloAnotacao.value.trim() || 'Anotação';
+
   const texto = textoAnotacao.value.trim();
 
   if (!texto) {
@@ -2356,41 +2408,101 @@ btnSalvarAnotacao.addEventListener('click', () => {
     return;
   }
 
-  const editIdx = areaAnotacao.dataset.editandoIndex;
+  const editIdx =
+    areaAnotacao.dataset.editandoIndex;
 
-  if (editIdx !== undefined) {
-    const index = parseInt(editIdx);
+  try {
+    if (editIdx !== undefined) {
+      const index = parseInt(editIdx);
+      const item = itens[index];
 
-    if (!itens[index]) {
-      mostrarToast('⚠️ Anotação não encontrada.');
-      return;
+      if (!item) {
+        mostrarToast('⚠️ Anotação não encontrada.');
+        return;
+      }
+
+      const resposta = await fetch(
+        `${API_BASE}/materias/${materiaId}/anotacoes/${item.id}`,
+        {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          credentials: 'include',
+          body: JSON.stringify({
+            titulo,
+            texto
+          })
+        }
+      );
+
+      const dados = await resposta.json();
+
+      if (!resposta.ok) {
+        throw new Error(
+          dados.erro ||
+          'Não foi possível editar a anotação.'
+        );
+      }
+
+      item.nome = dados.anotacao.titulo;
+      item.conteudo = dados.anotacao.texto;
+
+      mostrarToast('✏️ Anotação atualizada!');
+    } else {
+      const resposta = await fetch(
+        `${API_BASE}/materias/${materiaId}/anotacoes`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          credentials: 'include',
+          body: JSON.stringify({
+            titulo,
+            texto
+          })
+        }
+      );
+
+      const dados = await resposta.json();
+
+      if (!resposta.ok) {
+        throw new Error(
+          dados.erro ||
+          'Não foi possível salvar a anotação.'
+        );
+      }
+
+      itens.push({
+        id: dados.anotacao.id,
+        nome: dados.anotacao.titulo,
+        tipo: 'anotacao',
+        ext: null,
+        conteudo: dados.anotacao.texto,
+        data: 'Salva na nuvem'
+      });
+
+      mostrarToast('📝 Anotação salva!');
     }
 
-    itens[index].nome = titulo;
-    itens[index].conteudo = texto;
-
-    mostrarToast('✏️ Anotação atualizada!');
-
-  } else {
-    itens.push({
-      id: Date.now(),
-      nome: titulo,
-      tipo: 'anotacao',
-      ext: null,
-      conteudo: texto,
-      data: new Date().toLocaleDateString('pt-BR')
-    });
-
-    mostrarToast('📝 Anotação salva!');
+    renderizar();
+    fecharAnotacao();
+  } catch (erro) {
+    console.error('Erro ao salvar anotação:', erro);
+    mostrarToast(`⚠️ ${erro.message}`);
   }
-
-  salvar();
-  renderizar();
-  fecharAnotacao();
 });
 
 function salvar() {
-  localStorage.setItem(chave, JSON.stringify(itens));
+  const arquivosLocais = itens.filter(
+  item => item.tipo === 'arquivo'
+  );
+
+  localStorage.setItem(
+    chave,
+    JSON.stringify(arquivosLocais)
+  );
 
   const materias = JSON.parse(localStorage.getItem('materias') || '[]');
   const m = materias.find(x => x.id == materiaId);
@@ -2874,7 +2986,7 @@ async function copiarIAViewer() {
   }
 }
 
-function adicionarIAAnotacaoViewer(index) {
+async function adicionarIAAnotacaoViewer(index) {
   if (!ultimoResultadoIAViewer) {
     mostrarToast('⚠️ Não há resultado da IA para adicionar.');
     return;
@@ -2889,16 +3001,56 @@ function adicionarIAAnotacaoViewer(index) {
 
   const atual = String(item.conteudo || '').trim();
 
-  const separador = atual ? '\n\n--- Conteúdo gerado pela Jovi ---\n\n' : '';
+  const separador = atual
+    ? '\n\n--- Conteúdo gerado pela Jovi ---\n\n'
+    : '';
 
-  item.conteudo = atual + separador + ultimoResultadoIAViewer;
+  const novoTexto =
+    atual + separador + ultimoResultadoIAViewer;
 
-  salvar();
-  renderizar();
+  try {
+    const resposta = await fetch(
+      `${API_BASE}/materias/${materiaId}/anotacoes/${item.id}`,
+      {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          titulo: item.nome,
+          texto: novoTexto
+        })
+      }
+    );
 
-  mostrarToast('✨ Resultado da IA adicionado à anotação!');
+    const dados = await resposta.json();
 
-  abrirViewer(index);
+    if (!resposta.ok) {
+      throw new Error(
+        dados.erro ||
+        'Não foi possível atualizar a anotação.'
+      );
+    }
+
+    item.nome = dados.anotacao.titulo;
+    item.conteudo = dados.anotacao.texto;
+
+    renderizar();
+
+    mostrarToast(
+      '✨ Resultado da IA adicionado à anotação!'
+    );
+
+    abrirViewer(index);
+  } catch (erro) {
+    console.error(
+      'Erro ao atualizar anotação com IA:',
+      erro
+    );
+
+    mostrarToast(`⚠️ ${erro.message}`);
+  }
 }
 
 function usarIA(acao) {
@@ -3185,6 +3337,7 @@ if (btnImportarNotion) {
 async function inicializarPaginaMateria() {
   try {
     await abrirDB();
+    await carregarAnotacoesDoFirestore();
 
     renderizarIconePlayPause();
     aplicarVelocidadeBotao();
