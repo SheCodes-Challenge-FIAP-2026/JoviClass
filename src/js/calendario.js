@@ -25,12 +25,13 @@ document.addEventListener('DOMContentLoaded', function () {
     let diaSelecionado = null;
 
 
-    const API_BASE = 'http://localhost:3000';
+    const API_BASE = `http://${window.location.hostname}:3000`;
     let eventosGoogle = [];     
     let googleConectado = false;
 
 
     let eventosLocais = [];
+    let eventosDasTarefas = [];
 
     const ordemPrioridade = { alta: 0, media: 1, baixa: 2 };
 
@@ -83,6 +84,30 @@ document.addEventListener('DOMContentLoaded', function () {
         atualizarStatusGoogle();
     }
 
+    async function buscarEventosLocais() {
+        try {
+            const resposta = await fetch(`${API_BASE}/eventos`, {
+                credentials: 'include'
+            });
+
+            const dados = await resposta.json();
+
+            if (!resposta.ok) {
+                throw new Error(
+                    dados.erro || 'Não foi possível carregar os eventos.'
+                );
+            }
+
+            eventosLocais = (dados.eventos || []).map(evento => ({
+                ...evento,
+                data: criarDataLocal(evento.data)
+            }));
+        } catch (erro) {
+            console.error('Erro ao carregar eventos:', erro);
+            eventosLocais = [];
+        }
+    }
+
     function atualizarStatusGoogle() {
         const status = document.getElementById('googleStatus');
         if (!status) return;
@@ -104,7 +129,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function eventosLocaisDoDia(ano, mes, dia) {
-        return eventosLocais.filter(ev =>
+        return [...eventosLocais, ...eventosDasTarefas].filter(ev =>
             ev.data.getFullYear() === ano &&
             ev.data.getMonth() === mes &&
             ev.data.getDate() === dia
@@ -115,6 +140,125 @@ document.addEventListener('DOMContentLoaded', function () {
         const aux = document.createElement('div');
         aux.textContent = texto ?? '';
         return aux.innerHTML;
+    }
+
+    function renderizarProximosEventos() {
+        const lista = document.getElementById('eventosProximosLista');
+        if (!lista) return;
+
+        const hoje = new Date();
+        hoje.setHours(0, 0, 0, 0);
+
+        const limite = new Date(hoje);
+        limite.setDate(limite.getDate() + 10);
+
+        const eventos = [
+            ...eventosLocais.map(evento => ({ ...evento, origem: 'JoviClass' })),
+            ...eventosGoogle.map(evento => ({
+                ...evento,
+                categoria: 'Google Agenda',
+                origem: 'Google Agenda'
+            }))
+        ]
+            .map(evento => ({
+                ...evento,
+                dataNormalizada: evento.data instanceof Date
+                    ? evento.data
+                    : criarDataLocal(evento.data)
+            }))
+            .filter(evento =>
+                evento.dataNormalizada &&
+                evento.dataNormalizada >= hoje &&
+                evento.dataNormalizada <= limite
+            )
+            .sort((a, b) => a.dataNormalizada - b.dataNormalizada);
+
+        if (eventos.length === 0) {
+            lista.innerHTML = `
+                <p class="lista-vazia">
+                    Nenhum evento previsto para os próximos 10 dias.
+                </p>
+            `;
+            return;
+        }
+
+        lista.innerHTML = eventos.map(evento => {
+            const botaoExcluir = evento.origem === 'JoviClass'
+                ? `
+                    <button
+                        class="btn-remover-entrega btn-remover-evento"
+                        data-id="${evento.id}"
+                        title="Excluir evento"
+                    >✕</button>
+                `
+                : '';
+
+            return `
+                <div class="entrega-item">
+                    <div class="entrega-info">
+                        <span class="entrega-titulo-texto">
+                            ${escapeHTML(evento.titulo)}
+                        </span>
+                        <span class="entrega-meta">
+                            <span>📅 ${evento.dataNormalizada.toLocaleDateString('pt-BR')}</span>
+                            <span>${escapeHTML(evento.categoria || 'Evento')}</span>
+                            <span>${escapeHTML(evento.origem)}</span>
+                        </span>
+                        ${evento.descricao
+                            ? `<span class="entrega-meta">${escapeHTML(evento.descricao)}</span>`
+                            : ''}
+                    </div>
+                    ${botaoExcluir}
+                </div>
+            `;
+        }).join('');
+
+        lista.querySelectorAll('.btn-remover-evento').forEach(botao => {
+            botao.addEventListener('click', function () {
+                removerEvento(this.dataset.id);
+            });
+        });
+    }
+
+    async function removerEvento(id) {
+        const confirmou = window.confirm(
+            'Tem certeza que deseja excluir este evento?'
+        );
+
+        if (!confirmou) return;
+
+        try {
+            const resposta = await fetch(`${API_BASE}/eventos/${id}`, {
+                method: 'DELETE',
+                credentials: 'include'
+            });
+
+            const dados = await resposta.json();
+
+            if (!resposta.ok) {
+                throw new Error(
+                    dados.erro || 'Não foi possível excluir o evento.'
+                );
+            }
+
+            eventosLocais = eventosLocais.filter(
+                evento => String(evento.id) !== String(id)
+            );
+
+            calendario(dataAtual);
+            renderizarProximosEventos();
+
+            if (diaSelecionado) {
+                renderizarEventosDoFormulario(
+                    diaSelecionado.ano,
+                    diaSelecionado.mes,
+                    diaSelecionado.dia
+                );
+            }
+        } catch (erro) {
+            console.error('Erro ao excluir evento:', erro);
+            alert(erro.message || 'Não foi possível excluir o evento.');
+        }
     }
 
     function renderizarEventosDoFormulario(ano, mes, dia) {
@@ -142,11 +286,23 @@ document.addEventListener('DOMContentLoaded', function () {
                         : `${ev.data.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })} · Google Agenda`)
                     : (ev.categoria || 'Evento');
 
+                const botaoExcluir = ev.origem === 'local'
+                    ? `
+                        <button
+                            type="button"
+                            class="btn-remover-entrega btn-remover-evento-dia"
+                            data-id="${ev.id}"
+                            title="Excluir evento"
+                        >✕</button>
+                    `
+                    : '';
+
                 return `
                     <div class="evento-dia-card">
                         <div class="evento-dia-card-topo">
                             <span class="evento-dia-bolinha"></span>
                             <strong>${escapeHTML(ev.titulo)}</strong>
+                            ${botaoExcluir}
                         </div>
                         <span class="evento-dia-hora">${subtitulo}</span>
                         ${ev.descricao ? `<p class="evento-dia-descricao">${escapeHTML(ev.descricao)}</p>` : ''}
@@ -154,71 +310,136 @@ document.addEventListener('DOMContentLoaded', function () {
                 `;
             }).join('')}
         `;
+
+        container.querySelectorAll('.btn-remover-evento-dia').forEach(botao => {
+            botao.addEventListener('click', function () {
+                removerEvento(this.dataset.id);
+            });
+        });
     }
 
     function abrirFormularioEvento(diaDiv, ano, mes, dia) {
-        diaSelecionado = { ano, mes, dia };
-        renderizarEventosDoFormulario(ano, mes, dia);
-        document.getElementById("formularioEvento").style.display = "flex";
-    }
+    diaSelecionado = { ano, mes, dia };
+
+    document.getElementById("dataEvento").value =
+        formatarDataISO(ano, mes, dia);
+
+    renderizarEventosDoFormulario(ano, mes, dia);
+
+    document.getElementById(
+        "formularioEvento"
+    ).style.display = "flex";
+}
 
     function fecharFormularioEvento() {
         document.getElementById("formularioEvento").style.display = "none";
     }
 
-    function salvarEvento() {
-        const titulo = document.getElementById("tituloEvento").value.trim();
-        const categoria = document.getElementById("categoria").value;
-        const descricao = document.getElementById("descricaoEvento").value.trim();
-        const prioridade = document.getElementById("prioridadeEvento").value;
+    const btnAddEvento =
+    document.getElementById("btnAddEvento");
 
-        if (titulo && diaSelecionado) {
-            const { ano, mes, dia } = diaSelecionado;
+btnAddEvento.addEventListener("click", function () {
+    diaSelecionado = null;
 
-            const id = Date.now();
-            const data = formatarDataISO(ano, mes, dia);
+    document.getElementById("dataEvento").value = "";
 
-            eventosLocais.push({
-                id,
-                titulo,
-                categoria,
-                descricao,
-                data: new Date(ano, mes, dia),
-                tarefaId: id
-            });
+    const eventosDoFormulario =
+        document.getElementById("eventosDoFormulario");
 
-            entregas.push({
-                id,
-                titulo,
-                materia: categoria,
-                data,
-                prioridade
-            });
+    eventosDoFormulario.hidden = true;
+    eventosDoFormulario.innerHTML = "";
 
-            tarefas.push({
-                id,
-                texto: titulo,
-                materia: categoria,
-                data,
-                prioridade,
-                concluida: false
-            });
+    document.getElementById(
+        "formularioEvento"
+    ).style.display = "flex";
+});
 
-            entregas.sort((a, b) =>
-                ordemPrioridade[a.prioridade] - ordemPrioridade[b.prioridade] ||
-                (a.data || '9999-12-31').localeCompare(b.data || '9999-12-31')
-            );
+    async function salvarEvento() {
+    const titulo = document
+        .getElementById("tituloEvento")
+        .value
+        .trim();
 
-            document.getElementById("tituloEvento").value = "";
-            document.getElementById("descricaoEvento").value = "";
-            document.getElementById("categoria").value = "Projeto";
-            document.getElementById("prioridadeEvento").value = "media";
-            calendario(dataAtual);
-            renderizarEntregas();
-            renderizarChecklist();
-            fecharFormularioEvento();
-        }
+    const categoria = document
+        .getElementById("categoria")
+        .value;
+
+    const descricao = document
+        .getElementById("descricaoEvento")
+        .value
+        .trim();
+
+    const data = document
+        .getElementById("dataEvento")
+        .value;
+
+    if (!titulo) {
+        alert("Informe o título do evento.");
+        return;
     }
+
+    if (!data) {
+        alert("Informe a data do evento.");
+        return;
+    }
+
+    try {
+        const resposta = await fetch(
+            `${API_BASE}/eventos`,
+            {
+                method: "POST",
+
+                headers: {
+                    "Content-Type": "application/json"
+                },
+
+                credentials: "include",
+
+                body: JSON.stringify({
+                    titulo,
+                    categoria,
+                    descricao,
+                    data
+                })
+            }
+        );
+
+        const dados = await resposta.json();
+
+        if (!resposta.ok) {
+            throw new Error(
+                dados.erro ||
+                "Não foi possível salvar o evento."
+            );
+        }
+
+        const evento = dados.evento;
+
+        eventosLocais.push({
+            id: evento.id,
+            titulo: evento.titulo,
+            categoria: evento.categoria,
+            descricao: evento.descricao,
+            data: criarDataLocal(evento.data)
+        });
+
+        document.getElementById("tituloEvento").value = "";
+        document.getElementById("descricaoEvento").value = "";
+        document.getElementById("dataEvento").value = "";
+        document.getElementById("categoria").value = "Projeto";
+
+        calendario(dataAtual);
+        renderizarProximosEventos();
+        fecharFormularioEvento();
+    } catch (erro) {
+        console.error("Erro ao salvar evento:", erro);
+
+        alert(
+            erro.message ||
+            "Não foi possível salvar o evento."
+        );
+    }
+}
 
     window.fecharFormularioEvento = fecharFormularioEvento;
     window.salvarEvento = salvarEvento;
@@ -297,8 +518,12 @@ document.addEventListener('DOMContentLoaded', function () {
     calendario(dataAtual);
 
     async function atualizarCalendario() {
-        await buscarEventosGoogle();
+        await Promise.all([
+            buscarEventosGoogle(),
+            buscarEventosLocais()
+        ]);
         calendario(dataAtual);
+        renderizarProximosEventos();
         if (typeof renderizarPainel === 'function') renderizarPainel();
     }
 
@@ -322,51 +547,104 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('prioridadeEntrega').value = 'media';
     }
 
-    function salvarEntrega() {
-        const titulo = document.getElementById('tituloEntrega').value.trim();
-        const materia = document.getElementById('materiaEntrega').value.trim();
-        const data = document.getElementById('dataEntrega').value;
-        const prioridade = document.getElementById('prioridadeEntrega').value;
+    async function salvarEntrega() {
+    const titulo = document
+        .getElementById('tituloEntrega')
+        .value
+        .trim();
 
-        if (!titulo) return;
+    const materia = document
+        .getElementById('materiaEntrega')
+        .value
+        .trim();
 
-        const entregaId = Date.now();
-        const entrega = { id: entregaId, titulo, materia, data, prioridade };
-        entregas.push(entrega);
+    const data = document
+        .getElementById('dataEntrega')
+        .value;
 
-        entregas.sort((a, b) =>
-            ordemPrioridade[a.prioridade] - ordemPrioridade[b.prioridade] ||
-            (a.data || '9999-12-31').localeCompare(b.data || '9999-12-31')
+    const prioridade = document
+        .getElementById('prioridadeEntrega')
+        .value;
+
+    if (!titulo) return;
+
+    try {
+        const resposta = await fetch(
+            `${API_BASE}/tarefas`,
+            {
+                method: 'POST',
+
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+
+                credentials: 'include',
+
+                body: JSON.stringify({
+                    texto: titulo,
+                    materia,
+                    data,
+                    prioridade
+                })
+            }
         );
 
-        const tarefa = { id: entregaId, texto: titulo, materia, data, prioridade, concluida: false, fromEntrega: true };
+        const dados = await resposta.json();
+
+        if (!resposta.ok) {
+            throw new Error(
+                dados.erro ||
+                'Não foi possível salvar a entrega.'
+            );
+        }
+
+        const tarefa = dados.tarefa;
+
         tarefas.push(tarefa);
 
-        if (data) {
-            eventosLocais.push({
-                id: entregaId,
-                titulo,
-                categoria: materia || 'Entrega',
+        if (tarefa.data) {
+            entregas.push({
+                id: tarefa.id,
+                titulo: tarefa.texto,
+                materia: tarefa.materia,
+                data: tarefa.data,
+                prioridade: tarefa.prioridade
+            });
+
+            eventosDasTarefas.push({
+                id: tarefa.id,
+                titulo: tarefa.texto,
+                categoria: tarefa.materia || 'Entrega',
                 descricao: '',
-                data: criarDataLocal(data),
-                tarefaId: entregaId
+                data: criarDataLocal(tarefa.data),
+                tarefaId: tarefa.id
             });
         }
+
+        entregas.sort((a, b) =>
+            ordemPrioridade[a.prioridade || 'media'] -
+                ordemPrioridade[b.prioridade || 'media'] ||
+            (a.data || '9999-12-31')
+                .localeCompare(b.data || '9999-12-31')
+        );
 
         renderizarEntregas();
         renderizarChecklist();
         calendario(dataAtual);
         fecharFormularioEntrega();
+    } catch (erro) {
+        console.error('Erro ao salvar entrega:', erro);
+
+        alert(
+            erro.message ||
+            'Não foi possível salvar a entrega.'
+        );
     }
+}
 
     function removerEntrega(id) {
-        entregas = entregas.filter(e => e.id !== id);
-        tarefas = tarefas.filter(t => t.id !== id);
-        eventosLocais = eventosLocais.filter(e => e.tarefaId !== id);
-        renderizarEntregas();
-        renderizarChecklist();
-        calendario(dataAtual);
-    }
+    removerTarefa(id);
+}
 
     function formatarData(dataStr) {
         if (!dataStr) return '';
@@ -387,7 +665,21 @@ document.addEventListener('DOMContentLoaded', function () {
         const proximasEntregas = entregas
             .filter(entrega => {
                 const dataEntrega = criarDataLocal(entrega.data);
-                return dataEntrega && dataEntrega >= hoje && dataEntrega <= limite;
+
+                const tarefaCorrespondente = tarefas.find(
+                    tarefa =>
+                        String(tarefa.id) === String(entrega.id)
+                );
+
+                const estaConcluida =
+                    tarefaCorrespondente?.concluida === true;
+
+                return (
+                    dataEntrega &&
+                    dataEntrega >= hoje &&
+                    dataEntrega <= limite &&
+                    !estaConcluida
+                );
             })
             .sort((a, b) =>
                 ordemPrioridade[a.prioridade] - ordemPrioridade[b.prioridade] ||
@@ -448,39 +740,82 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('prioridadeTarefa').value = 'media';
     }
 
-    function salvarTarefa() {
-        const texto = document.getElementById('textoTarefa').value.trim();
-        const materia = document.getElementById('materiaTarefa').value.trim();
-        const data = document.getElementById('dataTarefa').value;
-        const prioridade = document.getElementById('prioridadeTarefa').value;
+async function salvarTarefa() {
+    const texto = document
+        .getElementById('textoTarefa')
+        .value
+        .trim();
 
-        if (!texto) return;
+    const materia = document
+        .getElementById('materiaTarefa')
+        .value
+        .trim();
 
-        const id = Date.now();
-        const tarefa = { id, texto, materia, data, prioridade, concluida: false };
+    const data = document
+        .getElementById('dataTarefa')
+        .value;
+
+    const prioridade = document
+        .getElementById('prioridadeTarefa')
+        .value;
+
+    if (!texto) return;
+
+    try {
+        const resposta = await fetch(
+            `${API_BASE}/tarefas`,
+            {
+                method: 'POST',
+
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+
+                credentials: 'include',
+
+                body: JSON.stringify({
+                    texto,
+                    materia,
+                    data,
+                    prioridade
+                })
+            }
+        );
+
+        const dados = await resposta.json();
+
+        if (!resposta.ok) {
+            throw new Error(
+                dados.erro || 'Não foi possível salvar a tarefa.'
+            );
+        }
+
+        const tarefa = dados.tarefa;
+
         tarefas.push(tarefa);
 
-        if (data) {
+        if (tarefa.data) {
             entregas.push({
-                id,
-                titulo: texto,
-                materia,
-                data,
-                prioridade
+                id: tarefa.id,
+                titulo: tarefa.texto,
+                materia: tarefa.materia,
+                data: tarefa.data,
+                prioridade: tarefa.prioridade
             });
 
             entregas.sort((a, b) =>
-                ordemPrioridade[a.prioridade] - ordemPrioridade[b.prioridade] ||
+                ordemPrioridade[a.prioridade] -
+                    ordemPrioridade[b.prioridade] ||
                 a.data.localeCompare(b.data)
             );
 
-            eventosLocais.push({
-                id,
-                titulo: texto,
-                categoria: materia || 'Tarefa',
+            eventosDasTarefas.push({
+                id: tarefa.id,
+                titulo: tarefa.texto,
+                categoria: tarefa.materia || 'Tarefa',
                 descricao: '',
-                data: criarDataLocal(data),
-                tarefaId: id
+                data: criarDataLocal(tarefa.data),
+                tarefaId: tarefa.id
             });
         }
 
@@ -488,20 +823,120 @@ document.addEventListener('DOMContentLoaded', function () {
         renderizarEntregas();
         calendario(dataAtual);
         fecharFormularioTarefa();
-    }
+    } catch (erro) {
+        console.error('Erro ao salvar tarefa:', erro);
 
-    function toggleTarefa(id) {
-        const tarefa = tarefas.find(t => t.id === id);
-        if (tarefa) {
-            tarefa.concluida = !tarefa.concluida;
-            renderizarChecklist();
+        alert(
+            erro.message ||
+            'Não foi possível salvar a tarefa.'
+        );
+    }
+}
+
+    async function toggleTarefa(id) {
+    const tarefa = tarefas.find(
+        tarefaAtual => String(tarefaAtual.id) === String(id)
+    );
+
+    if (!tarefa) return;
+
+    const novoEstado = !tarefa.concluida;
+
+    try {
+        const resposta = await fetch(
+            `${API_BASE}/tarefas/${id}`,
+            {
+                method: 'PUT',
+
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+
+                credentials: 'include',
+
+                body: JSON.stringify({
+                    concluida: novoEstado
+                })
+            }
+        );
+
+        const dados = await resposta.json();
+
+        if (!resposta.ok) {
+            throw new Error(
+                dados.erro ||
+                'Não foi possível atualizar a tarefa.'
+            );
         }
-    }
 
-    function removerTarefa(id) {
-        tarefas = tarefas.filter(t => t.id !== id);
+        tarefa.concluida = novoEstado;
+
+        renderizarChecklist();
+        renderizarEntregas();
+    } catch (erro) {
+        console.error(
+            'Erro ao atualizar tarefa:',
+            erro
+        );
+
+        alert(
+            erro.message ||
+            'Não foi possível atualizar a tarefa.'
+        );
+
         renderizarChecklist();
     }
+}
+
+    async function removerTarefa(id) {
+        const confirmou = window.confirm(
+            'Tem certeza que deseja excluir esta tarefa?'
+        );
+
+        if (!confirmou) return;
+        
+        try {
+            const resposta = await fetch(
+                `${API_BASE}/tarefas/${id}`,
+                {
+                    method: 'DELETE',
+                    credentials: 'include'
+                }
+            );
+
+        const dados = await resposta.json();
+
+        if (!resposta.ok) {
+            throw new Error(
+                dados.erro ||
+                'Não foi possível excluir a tarefa.'
+            );
+        }
+
+        tarefas = tarefas.filter(
+            tarefa => String(tarefa.id) !== String(id)
+        );
+
+        entregas = entregas.filter(
+            entrega => String(entrega.id) !== String(id)
+        );
+
+        eventosDasTarefas = eventosDasTarefas.filter(
+            evento => String(evento.tarefaId) !== String(id)
+        );
+
+        renderizarChecklist();
+        renderizarEntregas();
+        calendario(dataAtual);
+    } catch (erro) {
+        console.error('Erro ao excluir tarefa:', erro);
+
+        alert(
+            erro.message ||
+            'Não foi possível excluir a tarefa.'
+        );
+    }
+}
 
     function atualizarProgresso() {
         const total = tarefas.length;
@@ -575,8 +1010,65 @@ document.addEventListener('DOMContentLoaded', function () {
         atualizarProgresso();
     }
 
+    async function carregarTarefas() {
+    try {
+        const resposta = await fetch(
+            `${API_BASE}/tarefas`,
+            {
+                credentials: 'include'
+            }
+        );
+
+        const dados = await resposta.json();
+
+        if (!resposta.ok) {
+            throw new Error(
+                dados.erro || 'Não foi possível carregar as tarefas.'
+            );
+        }
+
+        tarefas = dados.tarefas || [];
+
+        entregas = tarefas
+            .filter(tarefa => tarefa.data)
+            .map(tarefa => ({
+                id: tarefa.id,
+                titulo: tarefa.texto,
+                materia: tarefa.materia,
+                data: tarefa.data,
+                prioridade: tarefa.prioridade
+            }));
+
+        eventosDasTarefas = tarefas
+            .filter(tarefa => tarefa.data)
+            .map(tarefa => ({
+                id: tarefa.id,
+                titulo: tarefa.texto,
+                categoria: tarefa.materia || 'Tarefa',
+                descricao: '',
+                data: criarDataLocal(tarefa.data),
+                tarefaId: tarefa.id
+            }));
+
+        entregas.sort((a, b) =>
+            ordemPrioridade[a.prioridade || 'media'] -
+                ordemPrioridade[b.prioridade || 'media'] ||
+            (a.data || '9999-12-31')
+                .localeCompare(b.data || '9999-12-31')
+        );
+
+        renderizarChecklist();
+        renderizarEntregas();
+        calendario(dataAtual);
+    } catch (erro) {
+        console.error('Erro ao carregar tarefas:', erro);
+    }
+}
+
     window.fecharFormularioTarefa = fecharFormularioTarefa;
     window.salvarTarefa = salvarTarefa;
+
+    carregarTarefas();
 
 });
 

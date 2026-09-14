@@ -1239,3 +1239,8 @@ a {
 .nav-icone-camera {
   font-size: 20px;
 }
+
+#btnAddEvento {
+    justify-self: end;
+    margin-top: 16px;
+}

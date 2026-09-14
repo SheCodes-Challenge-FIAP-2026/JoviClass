@@ -13,6 +13,8 @@ const path = require("path");
 // const { db } = require("./config/firebase");
 const { salvarPerfilNoFirestore, buscarPerfilNoFirestore } = require("./services/usuariosFirestore");
 const { listarMateriasDoUsuario, criarMateriaNoFirestore, atualizarMateriaNoFirestore, excluirMateriaNoFirestore, atualizarCompartilhamentoNoFirestore } = require("./services/materiasFirestore");
+const { listarTarefasDoUsuario, criarTarefaNoFirestore, atualizarTarefaNoFirestore, excluirTarefaNoFirestore } = require("./services/tarefasFirestore");
+const { listarEventosDoUsuario, criarEventoNoFirestore, atualizarEventoNoFirestore, excluirEventoNoFirestore } = require("./services/eventosFirestore");
 
 const { OAuth2Client } = require("google-auth-library");
 const { GoogleGenAI } = require("@google/genai");
@@ -2848,6 +2850,273 @@ app.patch(
         }
     }
 );
+
+
+// ======================================================
+// TAREFAS — LISTAR
+// ======================================================
+
+app.get("/tarefas", exigirLogin, async (req, res) => {
+    try {
+        const tarefas = await listarTarefasDoUsuario(
+            req.session.usuario.id
+        );
+
+        return res.json({
+            sucesso: true,
+            tarefas
+        });
+    } catch (erro) {
+        console.error("❌ Erro ao listar tarefas:", erro);
+
+        return res.status(500).json({
+            sucesso: false,
+            erro: "Erro interno ao listar as tarefas."
+        });
+    }
+});
+
+// ======================================================
+// TAREFAS — CRIAR
+// ======================================================
+
+app.post("/tarefas", exigirLogin, async (req, res) => {
+    try {
+        const { texto, materia, data, prioridade } = req.body;
+
+        if (!texto || !texto.trim()) {
+            return res.status(400).json({
+                sucesso: false,
+                erro: "Informe o texto da tarefa."
+            });
+        }
+
+        const tarefa = await criarTarefaNoFirestore(
+            req.session.usuario.id,
+            {
+                texto: texto.trim(),
+                materia: (materia || "").trim(),
+                data: data || "",
+                prioridade: prioridade || "media"
+            }
+        );
+
+        return res.status(201).json({
+            sucesso: true,
+            tarefa
+        });
+    } catch (erro) {
+        console.error("❌ Erro ao criar tarefa:", erro);
+
+        return res.status(500).json({
+            sucesso: false,
+            erro: "Erro interno ao criar a tarefa."
+        });
+    }
+});
+
+// ======================================================
+// TAREFAS — ATUALIZAR
+// ======================================================
+
+app.put("/tarefas/:id", exigirLogin, async (req, res) => {
+    try {
+        const tarefa = await atualizarTarefaNoFirestore(
+            req.session.usuario.id,
+            req.params.id,
+            req.body
+        );
+
+        if (!tarefa) {
+            return res.status(404).json({
+                sucesso: false,
+                erro: "Tarefa não encontrada."
+            });
+        }
+
+        return res.json({
+            sucesso: true,
+            tarefa
+        });
+    } catch (erro) {
+        console.error("❌ Erro ao atualizar tarefa:", erro);
+
+        return res.status(500).json({
+            sucesso: false,
+            erro: "Erro interno ao atualizar a tarefa."
+        });
+    }
+});
+
+// ======================================================
+// TAREFAS — EXCLUIR
+// ======================================================
+
+app.delete("/tarefas/:id", exigirLogin, async (req, res) => {
+    try {
+        const excluida = await excluirTarefaNoFirestore(
+            req.session.usuario.id,
+            req.params.id
+        );
+
+        if (!excluida) {
+            return res.status(404).json({
+                sucesso: false,
+                erro: "Tarefa não encontrada."
+            });
+        }
+
+        return res.json({
+            sucesso: true
+        });
+    } catch (erro) {
+        console.error("❌ Erro ao excluir tarefa:", erro);
+
+        return res.status(500).json({
+            sucesso: false,
+            erro: "Erro interno ao excluir a tarefa."
+        });
+    }
+});
+
+// ======================================================
+// EVENTOS — LISTAR
+// ======================================================
+
+app.get("/eventos", exigirLogin, async (req, res) => {
+    try {
+        const eventos = await listarEventosDoUsuario(
+            req.session.usuario.id
+        );
+
+        return res.json({
+            sucesso: true,
+            eventos
+        });
+    } catch (erro) {
+        console.error("❌ Erro ao listar eventos:", erro);
+
+        return res.status(500).json({
+            sucesso: false,
+            erro: "Erro interno ao listar os eventos."
+        });
+    }
+});
+
+// ======================================================
+// EVENTOS — CRIAR
+// ======================================================
+
+app.post("/eventos", exigirLogin, async (req, res) => {
+    try {
+        const {
+            titulo,
+            categoria,
+            descricao,
+            data
+        } = req.body;
+
+        if (!titulo || !titulo.trim()) {
+            return res.status(400).json({
+                sucesso: false,
+                erro: "Informe o título do evento."
+            });
+        }
+
+        if (!data) {
+            return res.status(400).json({
+                sucesso: false,
+                erro: "Informe a data do evento."
+            });
+        }
+
+        const evento = await criarEventoNoFirestore(
+            req.session.usuario.id,
+            {
+                titulo: titulo.trim(),
+                categoria: categoria || "Outros",
+                descricao: (descricao || "").trim(),
+                data
+            }
+        );
+
+        return res.status(201).json({
+            sucesso: true,
+            evento
+        });
+    } catch (erro) {
+        console.error("❌ Erro ao criar evento:", erro);
+
+        return res.status(500).json({
+            sucesso: false,
+            erro: "Erro interno ao criar o evento."
+        });
+    }
+});
+
+// ======================================================
+// EVENTOS — ATUALIZAR
+// ======================================================
+
+app.put("/eventos/:id", exigirLogin, async (req, res) => {
+    try {
+        const evento = await atualizarEventoNoFirestore(
+            req.session.usuario.id,
+            req.params.id,
+            req.body
+        );
+
+        if (!evento) {
+            return res.status(404).json({
+                sucesso: false,
+                erro: "Evento não encontrado."
+            });
+        }
+
+        return res.json({
+            sucesso: true,
+            evento
+        });
+    } catch (erro) {
+        console.error("❌ Erro ao atualizar evento:", erro);
+
+        return res.status(500).json({
+            sucesso: false,
+            erro: "Erro interno ao atualizar o evento."
+        });
+    }
+});
+
+// ======================================================
+// EVENTOS — EXCLUIR
+// ======================================================
+
+app.delete("/eventos/:id", exigirLogin, async (req, res) => {
+    try {
+        const excluido = await excluirEventoNoFirestore(
+            req.session.usuario.id,
+            req.params.id
+        );
+
+        if (!excluido) {
+            return res.status(404).json({
+                sucesso: false,
+                erro: "Evento não encontrado."
+            });
+        }
+
+        return res.json({
+            sucesso: true
+        });
+    } catch (erro) {
+        console.error("❌ Erro ao excluir evento:", erro);
+
+        return res.status(500).json({
+            sucesso: false,
+            erro: "Erro interno ao excluir o evento."
+        });
+    }
+});
 
 // ======================================================
 // GEMINI

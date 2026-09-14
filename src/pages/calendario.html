@@ -82,7 +82,32 @@
                 <span>Sáb</span>
             </div>
             <div class="dias" id="dias"></div>
+
+            <div class="calendario-acoes">
+                <button
+                    type="button"
+                    class="btn-add-entrega"
+                    id="btnAddEvento"
+                >
+                    + Novo evento
+                </button>
+            </div>
         </div>
+
+        <section class="secao-entregas secao-eventos">
+            <div class="secao-header">
+                <h2 class="secao-titulo">
+                    <span class="secao-icone">📅</span>
+                    Próximos Eventos
+                </h2>
+            </div>
+
+            <div class="entregas-lista" id="eventosProximosLista">
+                <p class="lista-vazia" id="eventosProximosVazios">
+                    Nenhum evento previsto para os próximos 10 dias.
+                </p>
+            </div>
+        </section>
 
         <section class="secao-entregas">
             <div class="secao-header">
@@ -139,6 +164,9 @@
 
             <h2>Novo Evento</h2>
 
+            <label for="dataEvento">Data:</label>
+            <input type="date" id="dataEvento">
+
             <label for="tituloEvento">Título:</label>
             <input type="text" id="tituloEvento" placeholder="Ex. Trabalho de matemática">
 
@@ -152,13 +180,6 @@
 
             <label for="descricaoEvento">Descrição:</label>
             <textarea id="descricaoEvento" placeholder="Descreva o evento..."></textarea>
-
-            <label for="prioridadeEvento">Prioridade:</label>
-            <select id="prioridadeEvento">
-                <option value="alta">Alta</option>
-                <option value="media" selected>Média</option>
-                <option value="baixa">Baixa</option>
-            </select>
 
             <button type="button" onclick="salvarEvento()">Salvar Evento</button>
         </form>
