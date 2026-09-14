@@ -6,6 +6,7 @@ const session = require("cookie-session");
 const bcrypt = require("bcryptjs");
 const fs = require("fs");
 const path = require("path");
+const multer = require("multer");
 
 //==========================================
 // BANCO DE DADOS 
@@ -17,6 +18,7 @@ const { listarTarefasDoUsuario, criarTarefaNoFirestore, atualizarTarefaNoFiresto
 const { listarEventosDoUsuario, criarEventoNoFirestore, atualizarEventoNoFirestore, excluirEventoNoFirestore } = require("./services/eventosFirestore");
 const { listarComunidadesDoUsuario, criarComunidadeNoFirestore, atualizarComunidadeNoFirestore, excluirComunidadeNoFirestore, criarConviteNaComunidade } = require("./services/comunidadesFirestore");
 const { listarAnotacoesDaMateria, criarAnotacaoNoFirestore, atualizarAnotacaoNoFirestore, excluirAnotacaoNoFirestore } = require("./services/anotacoesFirestore");
+const { listarArquivosDaMateria, salvarArquivoDaMateria, buscarArquivoDaMateria, excluirArquivoDaMateria } = require("./services/arquivosMateria");
 
 const { OAuth2Client } = require("google-auth-library");
 const { GoogleGenAI } = require("@google/genai");
@@ -26,7 +28,13 @@ const { GoogleGenAI } = require("@google/genai");
 // ======================================================
 
 const app = express();
+const uploadArquivo = multer({
+    storage: multer.memoryStorage(),
 
+    limits: {
+        fileSize: 10 * 1024 * 1024
+    }
+});
 const PORT = 3000;
 
 // ------------------------------------------------------
@@ -3568,6 +3576,157 @@ app.delete(
             return res.status(500).json({
                 sucesso: false,
                 erro: "Erro ao excluir anotação."
+            });
+        }
+    }
+);
+
+// ======================================================
+// ARQUIVOS DAS MATÉRIAS
+// ======================================================
+
+app.get(
+    "/materias/:materiaId/arquivos",
+    exigirLogin,
+    async (req, res) => {
+        try {
+            const arquivos = await listarArquivosDaMateria(
+                req.session.usuario.id,
+                req.params.materiaId
+            );
+
+            if (!arquivos) {
+                return res.status(404).json({
+                    sucesso: false,
+                    erro: "Matéria não encontrada."
+                });
+            }
+
+            return res.json({
+                sucesso: true,
+                arquivos
+            });
+        } catch (erro) {
+            console.error("❌ Erro ao listar arquivos:", erro);
+
+            return res.status(500).json({
+                sucesso: false,
+                erro: "Erro ao listar arquivos."
+            });
+        }
+    }
+);
+
+app.post(
+    "/materias/:materiaId/arquivos",
+    exigirLogin,
+    uploadArquivo.single("arquivo"),
+    async (req, res) => {
+        try {
+            if (!req.file) {
+                return res.status(400).json({
+                    sucesso: false,
+                    erro: "Selecione um arquivo."
+                });
+            }
+
+            const arquivo = await salvarArquivoDaMateria(
+                req.session.usuario.id,
+                req.params.materiaId,
+                req.file
+            );
+
+            if (!arquivo) {
+                return res.status(404).json({
+                    sucesso: false,
+                    erro: "Matéria não encontrada."
+                });
+            }
+
+            return res.status(201).json({
+                sucesso: true,
+                arquivo
+            });
+        } catch (erro) {
+            console.error("❌ Erro ao enviar arquivo:", erro);
+
+            return res.status(500).json({
+                sucesso: false,
+                erro: "Erro ao enviar arquivo."
+            });
+        }
+    }
+);
+
+app.get(
+    "/materias/:materiaId/arquivos/:arquivoId",
+    exigirLogin,
+    async (req, res) => {
+        try {
+            const arquivo = await buscarArquivoDaMateria(
+                req.session.usuario.id,
+                req.params.materiaId,
+                req.params.arquivoId
+            );
+
+            if (!arquivo) {
+                return res.status(404).json({
+                    sucesso: false,
+                    erro: "Arquivo não encontrado."
+                });
+            }
+
+            res.setHeader(
+                "Content-Type",
+                arquivo.tipo || "application/octet-stream"
+            );
+
+            res.setHeader(
+                "Content-Disposition",
+                `inline; filename*=UTF-8''${encodeURIComponent(arquivo.nome)}`
+            );
+
+            arquivo.conteudo.pipe(res);
+        } catch (erro) {
+            console.error("❌ Erro ao abrir arquivo:", erro);
+
+            if (!res.headersSent) {
+                return res.status(500).json({
+                    sucesso: false,
+                    erro: "Erro ao abrir arquivo."
+                });
+            }
+        }
+    }
+);
+
+app.delete(
+    "/materias/:materiaId/arquivos/:arquivoId",
+    exigirLogin,
+    async (req, res) => {
+        try {
+            const excluido = await excluirArquivoDaMateria(
+                req.session.usuario.id,
+                req.params.materiaId,
+                req.params.arquivoId
+            );
+
+            if (!excluido) {
+                return res.status(404).json({
+                    sucesso: false,
+                    erro: "Arquivo não encontrado."
+                });
+            }
+
+            return res.json({
+                sucesso: true
+            });
+        } catch (erro) {
+            console.error("❌ Erro ao excluir arquivo:", erro);
+
+            return res.status(500).json({
+                sucesso: false,
+                erro: "Erro ao excluir arquivo."
             });
         }
     }
