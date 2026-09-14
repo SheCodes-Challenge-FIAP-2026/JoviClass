@@ -1,3 +1,5 @@
+const API_BASE =`http://${window.location.hostname}:3000`;
+
 const hamburger = document.getElementById("hamburger");
 const menuLinks = document.getElementById("menuLinks");
 
@@ -108,6 +110,49 @@ function carregarDoStorage() {
     }
 }
 
+async function carregarComunidadesDoFirestore() {
+    try {
+        const resposta = await fetch(
+            `${API_BASE}/comunidades`,
+            {
+                credentials: "include"
+            }
+        );
+
+        const dados = await resposta.json();
+
+        if (!resposta.ok) {
+            throw new Error(
+                dados.erro ||
+                "Não foi possível carregar as comunidades."
+            );
+        }
+
+        Object.keys(dadosComunidades).forEach(id => {
+            delete dadosComunidades[id];
+        });
+
+        dados.comunidades.forEach(comunidade => {
+            dadosComunidades[comunidade.id] = comunidade;
+        });
+
+        const lista = document.getElementById(
+            "listadeComunidades"
+        );
+
+        lista.innerHTML = "";
+
+        Object.values(dadosComunidades).forEach(
+            comunidade => renderizarCard(comunidade)
+        );
+    } catch (erro) {
+        console.error(
+            "Erro ao carregar comunidades:",
+            erro
+        );
+    }
+}
+
 function renderizarCard(com) {
     const { id, nome, descricao, categoria, privacidade, foto } = com;
 
@@ -171,11 +216,21 @@ function resetarFormulario() {
     btn.onclick = criarComunidade;
 }
 
-function criarComunidade() {
-    const nome = document.getElementById("nomeComunidade").value.trim();
-    const descricao = document.getElementById("descricao").value.trim();
+async function criarComunidade() {
+    const nome = document
+        .getElementById("nomeComunidade")
+        .value
+        .trim();
+
+    const descricao = document
+        .getElementById("descricao")
+        .value
+        .trim();
+
     const categoria = document.getElementById("categoria").value;
+
     const privacidade = document.getElementById("privacidade").value;
+
     const foto = fotoDataURL;
 
     if (!nome || !descricao) {
@@ -183,31 +238,72 @@ function criarComunidade() {
         return;
     }
 
-    const id = "com_" + Date.now();
+    try {
+        const resposta = await fetch(
+            `${API_BASE}/comunidades`,
+            {
+                method: "POST",
 
-    dadosSalas[id] = {};
-    salasPadrao.forEach(s => {
-        dadosSalas[id][s.nome] = { mensagens: [], arquivos: [], compartilhada: false };
-    });
+                headers: {
+                    "Content-Type": "application/json"
+                },
 
-    // Toda comunidade nova nasce com o mesmo conjunto de
-    // regras padrão, que fica salvo junto com ela.
-    dadosComunidades[id] = {
-        id,
-        nome,
-        descricao,
-        categoria,
-        privacidade,
-        foto,
-        convidados: [],
-        regras: [...REGRAS_PADRAO]
-    };
+                credentials: "include",
 
-    renderizarCard(dadosComunidades[id]);
+                body: JSON.stringify({
+                    nome,
+                    descricao,
+                    categoria,
+                    privacidade,
+                    foto,
+                    regras: [...REGRAS_PADRAO]
+                })
+            }
+        );
 
-    salvarNoStorage();
+        const dados = await resposta.json();
 
-    fecharAba();
+        if (!resposta.ok) {
+            throw new Error(
+                dados.erro ||
+                "Não foi possível criar a comunidade."
+            );
+        }
+
+        const comunidade = dados.comunidade;
+        const id = comunidade.id;
+
+        dadosComunidades[id] = comunidade;
+
+        dadosSalas[id] = {};
+
+        salasPadrao.forEach(sala => {
+            dadosSalas[id][sala.nome] = {
+                mensagens: [],
+                arquivos: [],
+                compartilhada: false
+            };
+        });
+
+        /*
+         * As salas ainda continuam locais por enquanto.
+         * A comunidade já está sendo salva no Firestore.
+         */
+        localStorage.setItem(
+            "joviclass_salas",
+            JSON.stringify(dadosSalas)
+        );
+
+        renderizarCard(comunidade);
+        fecharAba();
+    } catch (erro) {
+        console.error(
+            "Erro ao criar comunidade:",
+            erro
+        );
+
+        alert(erro.message);
+    }
 }
 
 function abrirFormularioEdicao(id) {
@@ -240,52 +336,130 @@ function abrirFormularioEdicao(id) {
     document.getElementById("overlay").style.display = "block";
 }
 
-function salvarEdicao(id) {
-    const nome = document.getElementById("nomeComunidade").value.trim();
-    const descricao = document.getElementById("descricao").value.trim();
-    const categoria = document.getElementById("categoria").value;
-    const privacidade = document.getElementById("privacidade").value;
+async function salvarEdicao(id) {
+    const nome = document
+        .getElementById("nomeComunidade")
+        .value
+        .trim();
+
+    const descricao = document
+        .getElementById("descricao")
+        .value
+        .trim();
+
+    const categoria =
+        document.getElementById("categoria").value;
+
+    const privacidade =
+        document.getElementById("privacidade").value;
 
     if (!nome || !descricao) {
         alert("Preencha todos os campos!");
         return;
     }
 
-    const com = dadosComunidades[id];
-    com.nome = nome;
-    com.descricao = descricao;
-    com.categoria = categoria;
-    com.privacidade = privacidade;
-    if (fotoDataURL) com.foto = fotoDataURL;
+    try {
+        const resposta = await fetch(
+            `${API_BASE}/comunidades/${id}`,
+            {
+                method: "PUT",
 
-    const card = document.querySelector(`.cardComunidade[data-id="${id}"]`);
-    if (card) {
-        const topoHTML = com.foto
-            ? `<img src="${com.foto}" alt="foto">`
-            : `<span class="semFoto">🏫</span>`;
-        card.querySelector(".topoCard").innerHTML = topoHTML;
-        card.querySelector(".cabecalhoCard h3").innerText = nome;
-        card.querySelector(".conteudoCard p").innerText = descricao;
-        const spans = card.querySelectorAll(".infoComunidade span");
-        spans[0].innerText = `📁 ${categoria}`;
-        spans[1].innerText = `🌐 ${privacidade}`;
-    }
+                headers: {
+                    "Content-Type": "application/json"
+                },
 
-    if (document.getElementById("paginaComunidade").style.display !== "none") {
-        document.getElementById("tituloComunidade").innerText = nome;
-        document.getElementById("NomeDiferenciado").innerText = nome;
-        document.getElementById("descricaoComunidade").innerText = descricao;
-        const banner = document.getElementById("bannerComunidade");
-        if (com.foto) {
-            banner.innerHTML = `<img src="${com.foto}" alt="banner">`;
-        } else {
-            banner.innerHTML = `<span class="semFotoBanner">🏫</span>`;
+                credentials: "include",
+
+                body: JSON.stringify({
+                    nome,
+                    descricao,
+                    categoria,
+                    privacidade,
+                    foto: fotoDataURL
+                })
+            }
+        );
+
+        const dados = await resposta.json();
+
+        if (!resposta.ok) {
+            throw new Error(
+                dados.erro ||
+                "Não foi possível editar a comunidade."
+            );
         }
+
+        const comunidade = dados.comunidade;
+
+        dadosComunidades[id] = {
+            ...dadosComunidades[id],
+            ...comunidade
+        };
+
+        const card = document.querySelector(
+            `.cardComunidade[data-id="${id}"]`
+        );
+
+        if (card) {
+            const topoHTML = comunidade.foto
+                ? `<img src="${comunidade.foto}" alt="foto">`
+                : `<span class="semFoto">🏫</span>`;
+
+            card.querySelector(".topoCard").innerHTML =
+                topoHTML;
+
+            card.querySelector(
+                ".cabecalhoCard h3"
+            ).innerText = comunidade.nome;
+
+            card.querySelector(
+                ".conteudoCard p"
+            ).innerText = comunidade.descricao;
+
+            const spans = card.querySelectorAll(
+                ".infoComunidade span"
+            );
+
+            spans[0].innerText =
+                `📁 ${comunidade.categoria}`;
+
+            spans[1].innerText =
+                `🌐 ${comunidade.privacidade}`;
+        }
+
+        const paginaComunidade =
+            document.getElementById("paginaComunidade");
+
+        if (paginaComunidade.style.display !== "none") {
+            document.getElementById(
+                "tituloComunidade"
+            ).innerText = comunidade.nome;
+
+            document.getElementById(
+                "NomeDiferenciado"
+            ).innerText = comunidade.nome;
+
+            document.getElementById(
+                "descricaoComunidade"
+            ).innerText = comunidade.descricao;
+
+            const banner =
+                document.getElementById("bannerComunidade");
+
+            banner.innerHTML = comunidade.foto
+                ? `<img src="${comunidade.foto}" alt="banner">`
+                : `<span class="semFotoBanner">🏫</span>`;
+        }
+
+        fecharAba();
+    } catch (erro) {
+        console.error(
+            "Erro ao editar comunidade:",
+            erro
+        );
+
+        alert(erro.message);
     }
-
-    salvarNoStorage();
-
-    fecharAba();
 }
 
 
@@ -343,20 +517,57 @@ function acaoMenuOpcoes(acao) {
     }
 }
 
-function excluirComunidade(id) {
-    const card = document.querySelector(`.cardComunidade[data-id="${id}"]`);
-    if (card) card.remove();
+async function excluirComunidade(id) {
+    try {
+        const resposta = await fetch(
+            `${API_BASE}/comunidades/${id}`,
+            {
+                method: "DELETE",
+                credentials: "include"
+            }
+        );
 
-    delete dadosComunidades[id];
-    delete dadosSalas[id];
+        const dados = await resposta.json();
 
-    salvarNoStorage();
+        if (!resposta.ok) {
+            throw new Error(
+                dados.erro ||
+                "Não foi possível excluir a comunidade."
+            );
+        }
 
-    if (document.getElementById("paginaComunidade").style.display !== "none") {
-        voltarComunidades();
+        const card = document.querySelector(
+            `.cardComunidade[data-id="${id}"]`
+        );
+
+        if (card) {
+            card.remove();
+        }
+
+        delete dadosComunidades[id];
+        delete dadosSalas[id];
+        
+        localStorage.setItem(
+            "joviclass_salas",
+            JSON.stringify(dadosSalas)
+        );
+
+        const paginaComunidade =
+            document.getElementById("paginaComunidade");
+
+        if (paginaComunidade.style.display !== "none") {
+            voltarComunidades();
+        }
+
+        comunidadeAtiva = null;
+    } catch (erro) {
+        console.error(
+            "Erro ao excluir comunidade:",
+            erro
+        );
+
+        alert(erro.message);
     }
-
-    comunidadeAtiva = null;
 }
 
 function abrirModalConvidar(id) {
@@ -921,9 +1132,7 @@ function voltarComunidades() {
 inicializarToggleRegras();
 inicializarModalRegras();
 
-carregarDoStorage();
-Object.values(dadosComunidades).forEach(com => renderizarCard(com));
-
+carregarComunidadesDoFirestore();
 
 
 const EVENTOS = [

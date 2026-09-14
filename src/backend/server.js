@@ -15,6 +15,7 @@ const { salvarPerfilNoFirestore, buscarPerfilNoFirestore } = require("./services
 const { listarMateriasDoUsuario, criarMateriaNoFirestore, atualizarMateriaNoFirestore, excluirMateriaNoFirestore, atualizarCompartilhamentoNoFirestore } = require("./services/materiasFirestore");
 const { listarTarefasDoUsuario, criarTarefaNoFirestore, atualizarTarefaNoFirestore, excluirTarefaNoFirestore } = require("./services/tarefasFirestore");
 const { listarEventosDoUsuario, criarEventoNoFirestore, atualizarEventoNoFirestore, excluirEventoNoFirestore } = require("./services/eventosFirestore");
+const { listarComunidadesDoUsuario, criarComunidadeNoFirestore, atualizarComunidadeNoFirestore, excluirComunidadeNoFirestore } = require("./services/comunidadesFirestore");
 
 const { OAuth2Client } = require("google-auth-library");
 const { GoogleGenAI } = require("@google/genai");
@@ -3117,6 +3118,210 @@ app.delete("/eventos/:id", exigirLogin, async (req, res) => {
         });
     }
 });
+
+// ======================================================
+// COMUNIDADES — LISTAR
+// ======================================================
+
+app.get(
+    "/comunidades",
+    exigirLogin,
+    async (req, res) => {
+        try {
+            const comunidades =
+                await listarComunidadesDoUsuario(
+                    req.session.usuario.id
+                );
+
+            return res.json({
+                sucesso: true,
+                comunidades
+            });
+        } catch (erro) {
+            console.error(
+                "❌ Erro ao listar comunidades:",
+                erro
+            );
+
+            return res.status(500).json({
+                sucesso: false,
+                erro: "Erro interno ao listar comunidades."
+            });
+        }
+    }
+);
+
+// ======================================================
+// COMUNIDADES — CRIAR
+// ======================================================
+
+app.post(
+    "/comunidades",
+    exigirLogin,
+    async (req, res) => {
+        try {
+            const {
+                nome,
+                descricao,
+                categoria,
+                privacidade,
+                foto,
+                regras
+            } = req.body;
+
+            if (!nome || !nome.trim()) {
+                return res.status(400).json({
+                    sucesso: false,
+                    erro: "Informe o nome da comunidade."
+                });
+            }
+
+            if (!descricao || !descricao.trim()) {
+                return res.status(400).json({
+                    sucesso: false,
+                    erro: "Informe a descrição da comunidade."
+                });
+            }
+
+            const comunidade =
+                await criarComunidadeNoFirestore(
+                    req.session.usuario.id,
+                    {
+                        nome: nome.trim(),
+                        descricao: descricao.trim(),
+                        categoria,
+                        privacidade,
+                        foto,
+                        regras
+                    }
+                );
+
+            return res.status(201).json({
+                sucesso: true,
+                comunidade
+            });
+        } catch (erro) {
+            console.error(
+                "❌ Erro ao criar comunidade:",
+                erro
+            );
+
+            return res.status(500).json({
+                sucesso: false,
+                erro: "Erro interno ao criar comunidade."
+            });
+        }
+    }
+);
+
+// ======================================================
+// COMUNIDADES — EDITAR
+// ======================================================
+
+app.put(
+    "/comunidades/:id",
+    exigirLogin,
+    async (req, res) => {
+        try {
+            const {
+                nome,
+                descricao,
+                categoria,
+                privacidade,
+                foto
+            } = req.body;
+
+            if (!nome || !nome.trim()) {
+                return res.status(400).json({
+                    sucesso: false,
+                    erro: "Informe o nome da comunidade."
+                });
+            }
+
+            if (!descricao || !descricao.trim()) {
+                return res.status(400).json({
+                    sucesso: false,
+                    erro: "Informe a descrição da comunidade."
+                });
+            }
+
+            const comunidade =
+                await atualizarComunidadeNoFirestore(
+                    req.session.usuario.id,
+                    req.params.id,
+                    {
+                        nome: nome.trim(),
+                        descricao: descricao.trim(),
+                        categoria,
+                        privacidade,
+                        foto
+                    }
+                );
+
+            if (!comunidade) {
+                return res.status(404).json({
+                    sucesso: false,
+                    erro: "Comunidade não encontrada ou sem permissão."
+                });
+            }
+
+            return res.json({
+                sucesso: true,
+                comunidade
+            });
+        } catch (erro) {
+            console.error(
+                "❌ Erro ao editar comunidade:",
+                erro
+            );
+
+            return res.status(500).json({
+                sucesso: false,
+                erro: "Erro interno ao editar comunidade."
+            });
+        }
+    }
+);
+
+// ======================================================
+// COMUNIDADES — EXCLUIR
+// ======================================================
+
+app.delete(
+    "/comunidades/:id",
+    exigirLogin,
+    async (req, res) => {
+        try {
+            const excluida =
+                await excluirComunidadeNoFirestore(
+                    req.session.usuario.id,
+                    req.params.id
+                );
+
+            if (!excluida) {
+                return res.status(404).json({
+                    sucesso: false,
+                    erro: "Comunidade não encontrada ou sem permissão."
+                });
+            }
+
+            return res.json({
+                sucesso: true
+            });
+        } catch (erro) {
+            console.error(
+                "❌ Erro ao excluir comunidade:",
+                erro
+            );
+
+            return res.status(500).json({
+                sucesso: false,
+                erro: "Erro interno ao excluir comunidade."
+            });
+        }
+    }
+);
+
 
 // ======================================================
 // GEMINI
