@@ -134,13 +134,61 @@ document.addEventListener('click', (e) => {
   }
 });
 
-document.getElementById('dropCompartilhar').addEventListener('click', () => {
+document.getElementById('dropCompartilhar').addEventListener('click', async () => {
   dropdown.classList.remove('visivel');
-  const m = materias.find(x => x.id == dropdownAlvoId);
-  if (!m) return;
-  m.compartilhada = !m.compartilhada;
-  salvarMaterias();
-  mostrarToast(m.compartilhada ? '📤 Pasta compartilhada!' : '🔒 Compartilhamento removido');
+
+  const materia = materias.find(
+    item => item.id == dropdownAlvoId
+  );
+
+  if (!materia) return;
+
+  const novoEstado = !materia.compartilhada;
+  const materiaId = dropdownAlvoId;
+
+  try {
+    const resposta = await fetch(
+      `${API_BASE}/materias/${materiaId}/compartilhamento`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          compartilhada: novoEstado
+        })
+      }
+    );
+
+    const dados = await resposta.json();
+
+    if (!resposta.ok || !dados.sucesso) {
+      throw new Error(
+        dados.erro ||
+        "Não foi possível atualizar o compartilhamento."
+      );
+    }
+
+    materia.compartilhada = dados.compartilhada;
+
+    mostrarToast(
+      materia.compartilhada
+        ? '📤 Pasta compartilhada!'
+        : '🔒 Compartilhamento removido'
+    );
+
+  } catch (erro) {
+    console.error(
+      "Erro ao atualizar compartilhamento:",
+      erro
+    );
+
+    mostrarToast(
+      "❌ Não foi possível atualizar o compartilhamento"
+    );
+  }
+
   dropdownAlvoId = null;
 });
 
@@ -162,15 +210,59 @@ document.getElementById('dropRenomear').addEventListener('click', () => {
   inputNome.focus();
 });
 
-document.getElementById('dropExcluir').addEventListener('click', () => {
+document.getElementById('dropExcluir').addEventListener('click', async () => {
   dropdown.classList.remove('visivel');
-  const m = materias.find(x => x.id == dropdownAlvoId);
-  if (!m) return;
-  if (!confirm(`Excluir a matéria "${m.nome}"? Essa ação não pode ser desfeita.`)) return;
-  materias = materias.filter(x => x.id != dropdownAlvoId);
-  salvarMaterias();
-  renderizarCards();
-  mostrarToast('🗑️ Matéria excluída');
+
+  const materia = materias.find(
+    item => item.id == dropdownAlvoId
+  );
+
+  if (!materia) return;
+
+  const confirmou = confirm(
+    `Excluir a matéria "${materia.nome}"? Essa ação não pode ser desfeita.`
+  );
+
+  if (!confirmou) return;
+
+  const materiaId = dropdownAlvoId;
+
+  try {
+    const resposta = await fetch(
+      `${API_BASE}/materias/${materiaId}`,
+      {
+        method: "DELETE",
+        credentials: "include"
+      }
+    );
+
+    const dados = await resposta.json();
+
+    if (!resposta.ok || !dados.sucesso) {
+      throw new Error(
+        dados.erro ||
+        "Não foi possível excluir a matéria."
+      );
+    }
+
+    materias = materias.filter(
+      item => item.id != materiaId
+    );
+
+    renderizarCards();
+    mostrarToast('🗑️ Matéria excluída');
+
+  } catch (erro) {
+    console.error(
+      "Erro ao excluir matéria:",
+      erro
+    );
+
+    mostrarToast(
+      "❌ Não foi possível excluir a matéria"
+    );
+  }
+
   dropdownAlvoId = null;
 });
 
@@ -202,7 +294,7 @@ overlay.addEventListener('click', (e) => {
   if (e.target === overlay) fechar();
 });
 
-btnCriar.addEventListener('click', () => {
+btnCriar.addEventListener('click', async () => {
   const nome = inputNome.value.trim();
   if (!nome) {
     inputNome.focus();
@@ -210,35 +302,105 @@ btnCriar.addEventListener('click', () => {
   }
 
   if (editandoId !== null) {
-    const m = materias.find(x => x.id == editandoId);
-    if (m) {
-      m.nome = nome;
-      m.cor  = corSelecionada;
-    }
-    mostrarToast('✏️ Matéria renomeada!');
-  } else {
-    materias.push({
-      id: Date.now(),
-      nome,
-      arquivos: 0,
-      compartilhada: false,
-      cor: corSelecionada
-    });
-    mostrarToast('✅ Matéria criada!');
-  }
+  try {
+    const resposta = await fetch(
+      `${API_BASE}/materias/${editandoId}`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          nome,
+          cor: corSelecionada
+        })
+      }
+    );
 
-  salvarMaterias();
+    const dados = await resposta.json();
+
+    if (!resposta.ok || !dados.sucesso) {
+      throw new Error(
+        dados.erro ||
+        "Não foi possível atualizar a matéria."
+      );
+    }
+
+    const indice = materias.findIndex(
+      materia => materia.id == editandoId
+    );
+
+    if (indice !== -1) {
+      materias[indice] = dados.materia;
+    }
+
+    mostrarToast('✏️ Matéria renomeada!');
+
+  } catch (erro) {
+    console.error(
+      "Erro ao atualizar matéria:",
+      erro
+    );
+
+    mostrarToast(
+      "❌ Não foi possível atualizar a matéria"
+    );
+
+    return;
+  }
+} else {
+  try {
+    const resposta = await fetch(
+      `${API_BASE}/materias`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          nome,
+          cor: corSelecionada
+        })
+      }
+    );
+
+    const dados = await resposta.json();
+
+    if (!resposta.ok || !dados.sucesso) {
+      throw new Error(
+        dados.erro ||
+        "Não foi possível criar a matéria."
+      );
+    }
+
+    materias.push(dados.materia);
+
+    mostrarToast('✅ Matéria criada!');
+
+  } catch (erro) {
+    console.error(
+      "Erro ao criar matéria:",
+      erro
+    );
+
+    mostrarToast(
+      "❌ Não foi possível criar a matéria"
+    );
+
+    return;
+  }
+}
+
   renderizarCards();
   fechar();
+
 });
 
 inputNome.addEventListener('keydown', (e) => {
   if (e.key === 'Enter') btnCriar.click();
 });
-
-function salvarMaterias() {
-  localStorage.setItem('materias', JSON.stringify(materias));
-}
 
 function mostrarToast(msg) {
   let toast = document.getElementById('toastGlobal');
@@ -258,8 +420,7 @@ function mostrarToast(msg) {
   toast._t = setTimeout(() => toast.classList.remove('show'), 2500);
 }
 
-renderizarCards();
-
+carregarMaterias();
 
 const EVENTOS = [
   { id: "prova-calculo",  titulo: "Prova de Cálculo I",      tipo: "prova",    materia: "Cálculo I", data: "2024-05-25T08:00" },

@@ -38,7 +38,92 @@ async function criarMateriaNoFirestore(usuarioId, dados) {
     };
 }
 
+async function atualizarMateriaNoFirestore(
+    usuarioId,
+    materiaId,
+    dados
+) {
+    const referencia = db
+        .collection("materias")
+        .doc(String(materiaId));
+
+    const documento = await referencia.get();
+
+    if (
+        !documento.exists ||
+        documento.data().usuarioId !== String(usuarioId)
+    ) {
+        return null;
+    }
+
+    const alteracoes = {
+        nome: dados.nome,
+        cor: dados.cor || "#1466ff",
+        atualizadoEm: FieldValue.serverTimestamp()
+    };
+
+    await referencia.update(alteracoes);
+
+    return {
+        id: documento.id,
+        ...documento.data(),
+        nome: alteracoes.nome,
+        cor: alteracoes.cor
+    };
+}
+
+async function excluirMateriaNoFirestore(
+    usuarioId,
+    materiaId
+) {
+    const referencia = db
+        .collection("materias")
+        .doc(String(materiaId));
+
+    const documento = await referencia.get();
+
+    if (
+        !documento.exists ||
+        documento.data().usuarioId !== String(usuarioId)
+    ) {
+        return false;
+    }
+
+    await referencia.delete();
+
+    return true;
+}
+
+async function atualizarCompartilhamentoNoFirestore(
+    usuarioId,
+    materiaId,
+    compartilhada
+) {
+    const referencia = db
+        .collection("materias")
+        .doc(String(materiaId));
+
+    const documento = await referencia.get();
+
+    if (
+        !documento.exists ||
+        documento.data().usuarioId !== String(usuarioId)
+    ) {
+        return null;
+    }
+
+    await referencia.update({
+        compartilhada: compartilhada === true,
+        atualizadoEm: FieldValue.serverTimestamp()
+    });
+
+    return compartilhada === true;
+}
+
 module.exports = {
     listarMateriasDoUsuario,
-    criarMateriaNoFirestore
+    criarMateriaNoFirestore,
+    atualizarMateriaNoFirestore,
+    excluirMateriaNoFirestore,
+    atualizarCompartilhamentoNoFirestore
 };

@@ -12,7 +12,7 @@ const path = require("path");
 //==========================================
 // const { db } = require("./config/firebase");
 const { salvarPerfilNoFirestore, buscarPerfilNoFirestore } = require("./services/usuariosFirestore");
-const { listarMateriasDoUsuario, criarMateriaNoFirestore } = require("./services/materiasFirestore");
+const { listarMateriasDoUsuario, criarMateriaNoFirestore, atualizarMateriaNoFirestore, excluirMateriaNoFirestore, atualizarCompartilhamentoNoFirestore } = require("./services/materiasFirestore");
 
 const { OAuth2Client } = require("google-auth-library");
 const { GoogleGenAI } = require("@google/genai");
@@ -2711,6 +2711,143 @@ app.post("/materias", exigirLogin, async (req, res) => {
         });
     }
 });
+
+// ======================================================
+// MATÉRIAS — ATUALIZAR
+// ======================================================
+
+app.put("/materias/:id", exigirLogin, async (req, res) => {
+    try {
+        const { nome, cor } = req.body;
+
+        if (!nome || !nome.trim()) {
+            return res.status(400).json({
+                sucesso: false,
+                erro: "Informe o nome da matéria."
+            });
+        }
+
+        const materia =
+            await atualizarMateriaNoFirestore(
+                req.session.usuario.id,
+                req.params.id,
+                {
+                    nome: nome.trim(),
+                    cor
+                }
+            );
+
+        if (!materia) {
+            return res.status(404).json({
+                sucesso: false,
+                erro: "Matéria não encontrada."
+            });
+        }
+
+        return res.json({
+            sucesso: true,
+            materia
+        });
+
+    } catch (erro) {
+        console.error(
+            "❌ Erro ao atualizar matéria:",
+            erro
+        );
+
+        return res.status(500).json({
+            sucesso: false,
+            erro: "Erro interno ao atualizar matéria."
+        });
+    }
+});
+
+// ======================================================
+// MATÉRIAS — EXCLUIR
+// ======================================================
+
+app.delete("/materias/:id", exigirLogin, async (req, res) => {
+    try {
+        const excluida =
+            await excluirMateriaNoFirestore(
+                req.session.usuario.id,
+                req.params.id
+            );
+
+        if (!excluida) {
+            return res.status(404).json({
+                sucesso: false,
+                erro: "Matéria não encontrada."
+            });
+        }
+
+        return res.json({
+            sucesso: true
+        });
+
+    } catch (erro) {
+        console.error(
+            "❌ Erro ao excluir matéria:",
+            erro
+        );
+
+        return res.status(500).json({
+            sucesso: false,
+            erro: "Erro interno ao excluir matéria."
+        });
+    }
+});
+
+// ======================================================
+// MATÉRIAS — COMPARTILHAMENTO
+// ======================================================
+
+app.patch(
+    "/materias/:id/compartilhamento",
+    exigirLogin,
+    async (req, res) => {
+        try {
+            const { compartilhada } = req.body;
+
+            if (typeof compartilhada !== "boolean") {
+                return res.status(400).json({
+                    sucesso: false,
+                    erro: "Informe o estado do compartilhamento."
+                });
+            }
+
+            const resultado =
+                await atualizarCompartilhamentoNoFirestore(
+                    req.session.usuario.id,
+                    req.params.id,
+                    compartilhada
+                );
+
+            if (resultado === null) {
+                return res.status(404).json({
+                    sucesso: false,
+                    erro: "Matéria não encontrada."
+                });
+            }
+
+            return res.json({
+                sucesso: true,
+                compartilhada: resultado
+            });
+
+        } catch (erro) {
+            console.error(
+                "❌ Erro ao atualizar compartilhamento:",
+                erro
+            );
+
+            return res.status(500).json({
+                sucesso: false,
+                erro: "Erro interno ao atualizar compartilhamento."
+            });
+        }
+    }
+);
 
 // ======================================================
 // GEMINI
