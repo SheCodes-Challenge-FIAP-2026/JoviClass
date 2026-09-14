@@ -1,3 +1,5 @@
+const API_BASE = `http://${window.location.hostname}:3000`;
+
 const overlay     = document.getElementById('overlay');
 const fecharModal = document.getElementById('fecharModal');
 const btnCancelar = document.getElementById('btnCancelar');
@@ -10,10 +12,41 @@ const hamburger   = document.getElementById('hamburger');
 const menuLinks   = document.getElementById('menuLinks');
 const seletorCores = document.getElementById('seletorCores');
 
-let materias = JSON.parse(localStorage.getItem('materias') || '[]');
+let materias = [];
 let editandoId = null;
 let dropdownAlvoId = null;
 let corSelecionada = '#1466ff'; 
+
+async function carregarMaterias() {
+  try {
+    const resposta = await fetch(
+      `${API_BASE}/materias`,
+      {
+        method: "GET",
+        credentials: "include"
+      }
+    );
+
+    const dados = await resposta.json();
+
+    if (!resposta.ok || !dados.sucesso) {
+      throw new Error(
+        dados.erro ||
+        "Não foi possível carregar as matérias."
+      );
+    }
+
+    materias = dados.materias;
+
+    renderizarCards();
+
+  } catch (erro) {
+    console.error(
+      "Erro ao carregar matérias:",
+      erro
+    );
+  }
+}
 
 function corFundo(hex) {
   const r = parseInt(hex.slice(1,3), 16);

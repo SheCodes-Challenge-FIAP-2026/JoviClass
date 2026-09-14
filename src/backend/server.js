@@ -7,8 +7,12 @@ const bcrypt = require("bcryptjs");
 const fs = require("fs");
 const path = require("path");
 
-// BANCO DE DADOS ==========================
+//==========================================
+// BANCO DE DADOS 
+//==========================================
 // const { db } = require("./config/firebase");
+const { salvarPerfilNoFirestore, buscarPerfilNoFirestore } = require("./services/usuariosFirestore");
+const { listarMateriasDoUsuario, criarMateriaNoFirestore } = require("./services/materiasFirestore");
 
 const { OAuth2Client } = require("google-auth-library");
 const { GoogleGenAI } = require("@google/genai");
@@ -161,7 +165,7 @@ function montarSessao(usuario) {
 
         email: usuario.email,
 
-        foto: usuario.foto || null,
+        foto: usuario.foto?.startsWith("data:") ? null : usuario.foto || null,
 
         provedor: usuario.provedor,
 
@@ -173,6 +177,23 @@ function montarSessao(usuario) {
         possuiSenha: !!usuario.senha
     };
 }
+
+async function sincronizarPerfil(usuario) {
+    try {
+        await salvarPerfilNoFirestore(usuario);
+
+        console.log(
+            "✅ Perfil sincronizado com o Firestore:",
+            usuario.email
+        );
+    } catch (erro) {
+        console.error(
+            "❌ Não foi possível sincronizar o perfil com o Firestore:",
+            erro.message
+        );
+    }
+}
+
 // ======================================================
 // GMAIL API — ENVIO DE E-MAIL
 // ======================================================
@@ -1295,6 +1316,8 @@ app.post("/auth/cadastro/confirmar", async (req, res) => {
 
         req.session.usuario = montarSessao(novoUsuario);
 
+        await sincronizarPerfil(novoUsuario);
+
         console.log(
             "✅ Cadastro confirmado e conta criada:",
             novoUsuario.email
@@ -1399,6 +1422,8 @@ app.post("/auth/login", async (req, res) => {
         }
 
         req.session.usuario = montarSessao(usuario);
+
+        await sincronizarPerfil(usuario);
 
         console.log(
             "✅ Login realizado:",
@@ -1555,8 +1580,8 @@ app.post("/auth/google", async (req, res) => {
         else {
 
             usuario.googleId = googleId;
-            usuario.nome = nome;
-            usuario.foto = foto;
+            usuario.nome = usuario.nome || nome;
+            usuario.foto = usuario.foto || foto;
             usuario.emailVerificado = emailVerificado;
 
             usuario.provedor =
@@ -1573,6 +1598,8 @@ app.post("/auth/google", async (req, res) => {
         }
 
         req.session.usuario = montarSessao(usuario);
+
+        await sincronizarPerfil(usuario);
 
         console.log(
             "✅ Sessão criada para:",
@@ -1609,7 +1636,7 @@ app.post("/auth/google", async (req, res) => {
 // VERIFICAR SE USUÁRIO ESTÁ LOGADO
 // ======================================================
 
-app.get("/auth/me", (req, res) => {
+app.get("/auth/me", async (req, res) => {
 
     if (
         !req.session ||
@@ -1622,12 +1649,22 @@ app.get("/auth/me", (req, res) => {
         });
     }
 
+    const perfilFirestore =
+    await buscarPerfilNoFirestore(
+        req.session.usuario.id
+    );
+
     return res.json({
 
         autenticado: true,
 
-        usuario: req.session.usuario
+        usuario: {...req.session.usuario, foto: perfilFirestore?.foto || null,
+            instituicao: perfilFirestore?.instituicao || null
+        }
+
     });
+
+    
 });
 
 // ======================================================
@@ -2284,6 +2321,8 @@ app.put("/perfil", exigirLogin, async (req, res) => {
 
         req.session.usuario = montarSessao(usuarios[indice]);
 
+        await sincronizarPerfil(usuarios[indice]);
+
         console.log(
             "✏️ Perfil atualizado:",
             usuarios[indice].email
@@ -2308,6 +2347,104 @@ app.put("/perfil", exigirLogin, async (req, res) => {
             sucesso: false,
 
             erro: "Erro interno ao atualizar perfil."
+        });
+    }
+});
+
+// ======================================================
+// PERFIL — SALVAR INSTITUIÇÃO
+// ======================================================
+
+app.put("/perfil/instituicao", exigirLogin, async (req, res) => {
+    try {
+        const { nome, cidade } = req.body;
+
+        if (!nome || !nome.trim()) {
+            return res.status(400).json({
+                sucesso: false,
+                erro: "Informe o nome da instituição."
+            });
+        }
+
+        const usuarios = lerUsuarios();
+
+        const indice = usuarios.findIndex(
+            usuario =>
+                String(usuario.id) ===
+                String(req.session.usuario.id)
+        );
+
+        if (indice === -1) {
+            return res.status(404).json({
+                sucesso: false,
+                erro: "Usuário não encontrado."
+            });
+        }
+
+        usuarios[indice].instituicao = {
+            nome: nome.trim(),
+            cidade: (cidade || "").trim()
+        };
+
+        salvarUsuarios(usuarios);
+
+        await sincronizarPerfil(usuarios[indice]);
+
+        return res.json({
+            sucesso: true,
+            instituicao: usuarios[indice].instituicao
+        });
+
+    } catch (erro) {
+        console.error(
+            "❌ Erro ao salvar instituição:",
+            erro
+        );
+
+        return res.status(500).json({
+            sucesso: false,
+            erro: "Erro interno ao salvar a instituição."
+        });
+    }
+});
+
+app.delete("/perfil/instituicao", exigirLogin, async (req, res) => {
+    try {
+        const usuarios = lerUsuarios();
+
+        const indice = usuarios.findIndex(
+            usuario =>
+                String(usuario.id) ===
+                String(req.session.usuario.id)
+        );
+
+        if (indice === -1) {
+            return res.status(404).json({
+                sucesso: false,
+                erro: "Usuário não encontrado."
+            });
+        }
+
+        usuarios[indice].instituicao = null;
+
+        salvarUsuarios(usuarios);
+
+        await sincronizarPerfil(usuarios[indice]);
+
+        return res.json({
+            sucesso: true,
+            instituicao: null
+        });
+
+    } catch (erro) {
+        console.error(
+            "❌ Erro ao desvincular instituição:",
+            erro
+        );
+
+        return res.status(500).json({
+            sucesso: false,
+            erro: "Erro interno ao desvincular a instituição."
         });
     }
 });
@@ -2436,7 +2573,7 @@ app.post("/perfil/senha", exigirLogin, async (req, res) => {
 // PERFIL — ATUALIZAR FOTO
 // ======================================================
 
-app.post("/perfil/foto", exigirLogin, (req, res) => {
+app.post("/perfil/foto", exigirLogin, async (req, res) => {
 
     try {
 
@@ -2478,11 +2615,14 @@ app.post("/perfil/foto", exigirLogin, (req, res) => {
 
         req.session.usuario = montarSessao(usuarios[indice]);
 
+        await sincronizarPerfil(usuarios[indice]);
+
         return res.json({
 
             sucesso: true,
 
-            usuario: req.session.usuario
+            usuario: {...req.session.usuario, foto: usuarios[indice].foto}
+
         });
 
     } catch (erro) {
@@ -2497,6 +2637,77 @@ app.post("/perfil/foto", exigirLogin, (req, res) => {
             sucesso: false,
 
             erro: "Erro interno ao atualizar a foto."
+        });
+    }
+});
+
+// ======================================================
+// MATÉRIAS — LISTAR
+// ======================================================
+
+app.get("/materias", exigirLogin, async (req, res) => {
+    try {
+        const materias =
+            await listarMateriasDoUsuario(
+                req.session.usuario.id
+            );
+
+        return res.json({
+            sucesso: true,
+            materias
+        });
+
+    } catch (erro) {
+        console.error(
+            "❌ Erro ao listar matérias:",
+            erro
+        );
+
+        return res.status(500).json({
+            sucesso: false,
+            erro: "Erro interno ao listar matérias."
+        });
+    }
+});
+
+// ======================================================
+// MATÉRIAS — CRIAR
+// ======================================================
+
+app.post("/materias", exigirLogin, async (req, res) => {
+    try {
+        const { nome, cor } = req.body;
+
+        if (!nome || !nome.trim()) {
+            return res.status(400).json({
+                sucesso: false,
+                erro: "Informe o nome da matéria."
+            });
+        }
+
+        const materia =
+            await criarMateriaNoFirestore(
+                req.session.usuario.id,
+                {
+                    nome: nome.trim(),
+                    cor
+                }
+            );
+
+        return res.status(201).json({
+            sucesso: true,
+            materia
+        });
+
+    } catch (erro) {
+        console.error(
+            "❌ Erro ao criar matéria:",
+            erro
+        );
+
+        return res.status(500).json({
+            sucesso: false,
+            erro: "Erro interno ao criar matéria."
         });
     }
 });

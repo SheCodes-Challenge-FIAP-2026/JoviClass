@@ -317,6 +317,7 @@ function mapUsuarioParaPerfil(usuario) {
     curso: usuario.curso || "",
     email: usuario.email || "",
     foto: usuario.foto || "../assets/img/avatar.png",
+    instituicao: usuario.instituicao || null,
     possuiSenha: !!usuario.possuiSenha,
   };
 }
@@ -653,22 +654,13 @@ function iniciarToggleSenha() {
 
 
 /* =========================================================
-   INSTITUIÇÃO DE ENSINO (continua local por enquanto)
+   INSTITUIÇÃO DE ENSINO (vinculada ao Firestore)
 ========================================================= */
 
-const CHAVE_INSTITUICAO = "joviclass_instituicao";
-
 function carregarInstituicao() {
-  try {
-    return JSON.parse(localStorage.getItem(CHAVE_INSTITUICAO)) || null;
-  } catch {
-    return null;
-  }
+  return perfilAtual?.instituicao || null;
 }
 
-function salvarInstituicao(dados) {
-  localStorage.setItem(CHAVE_INSTITUICAO, JSON.stringify(dados));
-}
 
 function atualizarDetalheInstituicao() {
   const detalhe = document.getElementById("detalheInstituicao");
@@ -716,30 +708,89 @@ function iniciarInstituicao() {
   if (btnCancelar) btnCancelar.addEventListener("click", fecharModal);
 
   if (btnDesvincular) {
-    btnDesvincular.addEventListener("click", () => {
-      localStorage.removeItem(CHAVE_INSTITUICAO);
-      atualizarDetalheInstituicao();
-      fecharModal();
-    });
-  }
-
-  form.addEventListener("submit", (e) => {
-    e.preventDefault();
+  btnDesvincular.addEventListener("click", async () => {
     erro.hidden = true;
 
-    const nome = campoNome.value.trim();
-    const cidade = campoCidade.value.trim();
+    try {
+      const resposta = await fetch(
+        `${API_BASE}/perfil/instituicao`,
+        {
+          method: "DELETE",
+          credentials: "include"
+        }
+      );
 
-    if (!nome) {
-      erro.textContent = "Informe o nome da instituição.";
+      const dados = await resposta.json();
+
+      if (!resposta.ok || !dados.sucesso) {
+        throw new Error(
+          dados.erro ||
+          "Não foi possível desvincular a instituição."
+        );
+      }
+
+      perfilAtual.instituicao = null;
+
+      atualizarDetalheInstituicao();
+      fecharModal();
+
+    } catch (erroRequisicao) {
+      erro.textContent = erroRequisicao.message;
       erro.hidden = false;
-      return;
+    }
+  });
+}
+
+  form.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  erro.hidden = true;
+
+  const nome = campoNome.value.trim();
+  const cidade = campoCidade.value.trim();
+
+  if (!nome) {
+    erro.textContent = "Informe o nome da instituição.";
+    erro.hidden = false;
+    return;
+  }
+
+  try {
+    const resposta = await fetch(
+      `${API_BASE}/perfil/instituicao`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          nome,
+          cidade
+        })
+      }
+    );
+
+    const dados = await resposta.json();
+
+    if (!resposta.ok || !dados.sucesso) {
+      throw new Error(
+        dados.erro ||
+        "Não foi possível salvar a instituição."
+      );
     }
 
-    salvarInstituicao({ nome, cidade });
+    perfilAtual.instituicao = dados.instituicao;
+
     atualizarDetalheInstituicao();
     fecharModal();
-  });
+
+  } catch (erroRequisicao) {
+    erro.textContent = erroRequisicao.message;
+    erro.hidden = false;
+  }
+});
+
+
 }
 
 
