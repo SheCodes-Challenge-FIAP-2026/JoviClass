@@ -1552,7 +1552,7 @@ async function prepararConteudoNarrado() {
 }
 
 async function gerarResumoViaIA(texto) {
-  const resposta = await fetch('http://localhost:3000/ia', {
+  const resposta = await fetch(`${API_BASE}/ia`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     credentials: 'include',
@@ -3036,7 +3036,7 @@ async function usarIAViewer(acao, item, index) {
   `;
 
   try {
-    const resposta = await fetch('http://localhost:3000/ia', {
+    const resposta = await fetch(`${API_BASE}/ia`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',

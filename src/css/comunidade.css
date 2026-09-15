@@ -1,305 +1,645 @@
+
+/* ============================================================
+   BASE.CSS
+   Estilos GLOBAIS e compartilhados por TODAS as páginas do app
+   (variáveis, reset, cabeçalho/menu, notificações, hambúrguer,
+   nav inferior mobile).
+
+   COMO USAR:
+   Inclua este arquivo ANTES do CSS específico de cada página:
+
+     <link rel="stylesheet" href="base.css">
+     <link rel="stylesheet" href="pagina-inicio.css">
+
+   Depois de incluir este arquivo, REMOVA de cada CSS de página
+   os blocos que já estão aqui, para não haver mais divergência
+   entre as páginas.
+   ============================================================ */
+
 :root {
-    --bg-color1: #000fb0;
-    --bg-color2: #ffffff;
-    --bg-color3: rgba(255, 255, 255, 0.18);
-    --bg-color4: #1466ff;
-    --bg-color5: #888;
-    --bg-colorFundo: #f0f0f5;
-    --grad-inicio: #0015d6;
-    --grad-fim: #000fb0;
-    --acento-menta: #34d399;
-    --acento-menta-clara: #a7f3d0;
-    --lilas-suave: #eef0ff;
-    --lilas-borda: #e0e4ff;
-    --sombra: 0 6px 18px rgba(0, 15, 176, 0.08);
-    --sombra-forte: 0 10px 30px rgba(0, 15, 176, 0.18);
-    --raio: 18px;
+  --bg-color1: #000fb0;
+  --bg-color2: #ffffff;
+  --bg-color3: rgba(255, 255, 255, 0.18);
+  --bg-color4: #1466ff;
+  --bg-color5: #888;
+  --bg-colorFundo: #f0f0f5;
+  --grad-inicio: #0015d6;
+  --grad-fim: #000fb0;
+  --acento-menta: #34d399;
+  --acento-menta-clara: #a7f3d0;
+  --lilas-suave: #eef0ff;
+  --lilas-borda: #e0e4ff;
+  --sombra: 0 6px 18px rgba(0, 15, 176, 0.08);
+  --sombra-forte: 0 10px 30px rgba(0, 15, 176, 0.18);
+  --raio: 18px;
+
+  --menu-largura: 320px;
+  --nav-mobile-altura: 78px;
+
+  /* Duração/curva padrão para transições — centralizada aqui
+     para ficar fácil de ajustar o "feel" da interface inteira. */
+  --transicao-rapida: 0.2s ease;
+  --transicao-media: 0.3s ease;
 }
 
+/* =========================
+   RESET
+========================= */
 * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: "Manrope", Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Manrope", Arial, sans-serif;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
 }
 
 body {
-    background-color: var(--bg-colorFundo);
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
-    padding-bottom: 78px;
+  background-color: var(--bg-colorFundo);
+  display: flex;
+  flex-direction: column;
+  height: 100dvh; /* altura travada no viewport — quem rola é o .conteudo-principal, não o body */
+  overflow-x: hidden;
+  overflow-y: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 a {
-    text-decoration: none;
+  text-decoration: none;
+  color: inherit;
 }
 
+button {
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+/* Evita o "flash" cinza ao tocar em botões/links no mobile e
+   deixa o feedback de toque consistente com o resto da UI. */
+a,
+button {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Acessibilidade: contorno visível ao navegar por teclado (Tab),
+   sem poluir a interface para quem usa mouse/toque. */
+a:focus-visible,
+button:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--bg-color4);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Respeita quem prefere menos animação no sistema operacional. */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  * {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+/* =========================
+   LOGO
+========================= */
 .logoJovi {
-    display: flex;
-    align-items: center;
-    gap: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 #logo {
-    width: 30px;
-    height: auto;
-    border-radius: 10px;
+  width: 40px;
+  height: auto;
+  border-radius: 10px;
+}
+
+/* =========================
+   MENU / TOPO
+========================= */
+.menu {
+  background: linear-gradient(135deg, var(--grad-inicio) 0%, var(--grad-fim) 100%);
+  color: white;
+  padding: 18px 20px;
+  padding-top: calc(18px + env(safe-area-inset-top));
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  position: sticky;
+  top: 0;
+  z-index: 30;
 }
 
 .menu h2 {
-    font-size: 1.0rem;
-    font-weight: 800;
-    color: var(--bg-color2);
-    margin: 0;
-    letter-spacing: -0.3px;
-}
-
-.menu {
-    background: linear-gradient(135deg, var(--grad-inicio) 0%, var(--grad-fim) 100%);
-    color: white;
-    padding: 18px 20px;
-    display: flex;
-    flex-direction: column;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-    position: sticky;
-    top: 0;
-    z-index: 30;
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--bg-color2);
+  margin: 0;
+  letter-spacing: -0.3px;
 }
 
 .menu-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  /* Referência de posicionamento do painel de notificações
+     (ver .notif-panel). Usar o header inteiro em vez do botão
+     evita que o painel "pule" quando o layout do header muda
+     entre mobile (linha) e desktop (coluna). */
+  position: relative;
 }
 
 .menu-actions {
-    display: flex;
-    align-items: center;
-    gap: 14px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
 }
 
 .icon-btn {
-    position: relative;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background: var(--bg-color3);
-    border: none;
-    color: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
+  position: relative;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--bg-color3);
+  border: none;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background var(--transicao-rapida), transform var(--transicao-rapida);
+}
+
+.icon-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.icon-btn:active {
+  transform: scale(0.92);
 }
 
 .icon-btn svg {
-    width: 20px;
-    height: 20px;
+  width: 20px;
+  height: 20px;
 }
 
 .notif-dot {
-    position: absolute;
-    top: -4px;
-    right: -4px;
-    background: #ff4d6d;
-    color: white;
-    font-size: 10px;
-    font-weight: 800;
-    width: 17px;
-    height: 17px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 2px solid var(--grad-fim);
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: #ff4d6d;
+  color: white;
+  font-size: 10px;
+  font-weight: 800;
+  width: 17px;
+  height: 17px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--grad-fim);
 }
 
-.notif-wrapper {
-    position: relative;
-}
+/* =========================
+   PAINEL DE NOTIFICAÇÕES
+========================= */
+/* .notif-wrapper propositalmente SEM position:relative — o
+   painel se ancora no .menu-header (ver acima), não no botão. */
 
 .notif-panel {
-    position: absolute;
-    top: calc(100% + 12px);
-    right: 0;
-    width: 320px;
-    max-width: 86vw;
-    background: white;
-    border-radius: 16px;
-    box-shadow: var(--sombra-forte);
-    overflow: hidden;
-    z-index: 60;
-    color: #12142b;
+  position: absolute;
+  top: calc(100% + 12px);
+  right: 0;
+  width: 320px;
+  max-width: 86vw;
+  background: white;
+  border-radius: var(--raio);
+  box-shadow: var(--sombra-forte);
+  overflow: hidden;
+  z-index: 60;
+  color: #12142b;
+  animation: notif-entrar var(--transicao-media);
+}
+
+@keyframes notif-entrar {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .notif-panel[hidden] {
-    display: none;
+  display: none;
 }
 
 .notif-panel-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 14px 16px;
-    border-bottom: 1px solid #eef0f5;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-bottom: 1px solid #eef0f5;
 }
 
 .notif-panel-header strong {
-    font-size: 14px;
+  font-size: 14px;
 }
 
 .notif-marcar {
-    background: none;
-    border: none;
-    color: var(--bg-color1);
-    font-size: 11.5px;
-    font-weight: 700;
-    cursor: pointer;
+  background: none;
+  border: none;
+  color: var(--bg-color1);
+  font-size: 11.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity var(--transicao-rapida);
+}
+
+.notif-marcar:hover {
+  opacity: 0.7;
+  text-decoration: underline;
 }
 
 .notif-lista {
-    max-height: 340px;
-    overflow-y: auto;
+  max-height: 340px;
+  overflow-y: auto;
+  scrollbar-width: thin; /* Firefox */
+  scrollbar-color: var(--bg-color5) transparent;
+}
+
+.notif-lista::-webkit-scrollbar {
+  width: 6px;
+}
+
+.notif-lista::-webkit-scrollbar-thumb {
+  background-color: #d8d8e2;
+  border-radius: 10px;
 }
 
 .notif-vazio {
-    padding: 24px 16px;
-    text-align: center;
-    color: var(--bg-color5);
-    font-size: 13px;
+  padding: 24px 16px;
+  text-align: center;
+  color: var(--bg-color5);
+  font-size: 13px;
 }
 
 .notif-item {
-    display: flex;
-    gap: 10px;
-    padding: 12px 16px;
-    border-bottom: 1px solid #f5f5fa;
-    cursor: pointer;
+  display: flex;
+  gap: 10px;
+  padding: 12px 16px;
+  border-bottom: 1px solid #f5f5fa;
+  cursor: pointer;
+  transition: background var(--transicao-rapida);
 }
 
 .notif-item:last-child {
-    border-bottom: none;
+  border-bottom: none;
+}
+
+.notif-item:hover {
+  background: #f0f1fb;
 }
 
 .notif-item.nao-lida {
-    background: #f6f7ff;
+  background: #f6f7ff;
 }
 
 .notif-icone {
-    width: 34px;
-    height: 34px;
-    border-radius: 10px;
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 15px;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
 }
 
-.notif-icone.urgente {
-    background: #ffe1e1;
-}
-
-.notif-icone.breve {
-    background: #ffe9d1;
-}
-
-.notif-icone.normal {
-    background: #dbeaff;
-}
+.notif-icone.urgente { background: #ffe1e1; }
+.notif-icone.breve   { background: #ffe9d1; }
+.notif-icone.normal  { background: #dbeaff; }
 
 .notif-corpo {
-    flex: 1;
-    min-width: 0;
+  flex: 1;
+  min-width: 0;
 }
 
 .notif-titulo {
-    font-size: 13px;
-    font-weight: 700;
-    color: #12142b;
+  font-size: 13px;
+  font-weight: 700;
+  color: #12142b;
 }
 
 .notif-sub {
-    font-size: 11.5px;
-    color: var(--bg-color5);
-    margin-top: 2px;
+  font-size: 11.5px;
+  color: var(--bg-color5);
+  margin-top: 2px;
 }
 
 .notif-prazo {
-    font-size: 11px;
-    font-weight: 800;
-    margin-top: 4px;
-    display: inline-block;
+  font-size: 11px;
+  font-weight: 800;
+  margin-top: 4px;
+  display: inline-block;
 }
 
-.notif-prazo.urgente {
-    color: #e0304a;
-}
+.notif-prazo.urgente { color: #e0304a; }
+.notif-prazo.breve   { color: #d97706; }
+.notif-prazo.normal  { color: var(--bg-color1); }
 
-.notif-prazo.breve {
-    color: #d97706;
-}
-
-.notif-prazo.normal {
-    color: var(--bg-color1);
-}
-
+/* =========================
+   BOTÃO HAMBÚRGUER
+========================= */
 .hamburger {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-    cursor: pointer;
-    padding: 6px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  cursor: pointer;
+  padding: 6px;
+  width: 36px;
+  height: 36px;
 }
 
 .hamburger span {
-    width: 24px;
-    height: 3px;
-    background-color: white;
-    border-radius: 3px;
-    transition: 0.3s;
+  width: 24px;
+  height: 3px;
+  background-color: white;
+  border-radius: 3px;
+  transition: transform var(--transicao-media), opacity var(--transicao-media);
+  transform-origin: center;
 }
 
+/* Se o JS adicionar a classe .aberto no .hamburger quando o
+   menu mobile estiver aberto, os 3 traços viram um "X". Não
+   afeta nada se essa classe nunca for usada. */
+.hamburger.aberto span:nth-child(1) {
+  transform: translateY(8px) rotate(45deg);
+}
+
+.hamburger.aberto span:nth-child(2) {
+  opacity: 0;
+}
+
+.hamburger.aberto span:nth-child(3) {
+  transform: translateY(-8px) rotate(-45deg);
+}
+
+/* =========================
+   LINKS DO MENU
+========================= */
 .menu-links {
-    display: none;
-    flex-direction: column;
-    gap: 10px;
-    margin-top: 20px;
+  display: none;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 20px;
 }
 
 .menu-links.active {
-    display: flex;
+  display: flex;
 }
 
 .menu a {
-    color: #ffffff;
-    text-decoration: none;
-    padding: 13px 18px;
-    border-radius: 12px;
-    font-size: 14px;
-    font-weight: 600;
-    background: var(--bg-color3);
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
-    transition: all 0.25s ease;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
-    text-align: center;
+  color: #ffffff;
+  padding: 13px 18px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  background: var(--bg-color3);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  transition: background var(--transicao-media), transform var(--transicao-media), box-shadow var(--transicao-media);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  text-align: center;
 }
 
 .menu a:hover {
-    background: rgba(255, 255, 255, 0.28);
-    transform: translateX(4px);
+  background: rgba(255, 255, 255, 0.28);
+  transform: translateX(4px);
 }
 
 .menu a.ativo {
-    background: linear-gradient(135deg, var(--bg-color4), #4da3ff);
-    box-shadow: 0 6px 18px rgba(20, 102, 255, 0.4);
+  background: linear-gradient(135deg, var(--bg-color4), #4da3ff);
+  box-shadow: 0 6px 18px rgba(20, 102, 255, 0.4);
 }
+
+/* =========================
+   NAV INFERIOR (MOBILE + DESKTOP)
+========================= */
+.nav-mobile {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: 8px 6px calc(10px + env(safe-area-inset-bottom));
+  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.08);
+  z-index: 999;
+  /* Sem isso, alguns navegadores mobile (principalmente Safari
+     no iOS) fazem o elemento fixo sumir ou piscar durante o
+     scroll, porque não ativam a aceleração por GPU nele. */
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+.nav-mobile a {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--bg-color5);
+  transition: color var(--transicao-rapida);
+}
+
+.nav-mobile a:hover,
+.nav-mobile a.ativo {
+  color: var(--bg-color1);
+}
+
+.nav-icone {
+  font-size: 18px;
+}
+
+.nav-camera {
+  background: var(--bg-color1);
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: -26px;
+  box-shadow: 0 8px 18px rgba(0, 15, 176, 0.4);
+  transition: transform var(--transicao-rapida);
+}
+
+.nav-camera:hover {
+  transform: scale(1.06);
+}
+
+.nav-icone-camera {
+  font-size: 20px;
+}
+
+/* ============================================================
+   RESPONSIVIDADE — PADRÃO ÚNICO PARA TODAS AS PÁGINAS
+   Um único ponto de corte (699px / 700px) e um único
+   comportamento para menu, hambúrguer e nav inferior.
+   ============================================================ */
+
+@media (max-width: 699px) {
+  .menu {
+    width: 100%;
+    padding: 18px;
+    padding-top: calc(18px + env(safe-area-inset-top));
+  }
+
+  #logo {
+    width: 40px;
+  }
+
+  .menu h2 {
+    font-size: 1.5rem;
+  }
+
+  .hamburger {
+    display: flex;
+  }
+
+  .menu-links {
+    display: none;
+    flex-direction: column;
+    width: 100%;
+    margin-top: 20px;
+    gap: 12px;
+  }
+
+  .menu-links.active {
+    display: flex;
+  }
+
+  .menu a {
+    width: 100%;
+    border-radius: 10px;
+    padding: 12px;
+    font-size: 15px;
+  }
+}
+
+@media (min-width: 700px) {
+  body {
+    flex-direction: row;
+  }
+
+  .menu {
+    width: var(--menu-largura);
+    min-height: 100vh;
+    padding: 30px 20px;
+    flex-shrink: 0;
+  }
+
+  .menu-header {
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+
+  #logo {
+    width: 96px;
+  }
+
+  .menu h2 {
+    font-size: 1.9rem;
+    text-align: center;
+  }
+
+  .hamburger {
+    display: none;
+  }
+
+  .menu-links {
+    display: flex !important;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 60px;
+    margin-left: 10px;
+    margin-right: 10px;
+  }
+
+  .menu a {
+    border-radius: 12px;
+    padding: 14px;
+    font-size: 15px;
+  }
+
+  /* A barra inferior fica visível e fixa embaixo tanto no
+     mobile quanto no desktop, ao lado do menu lateral. */
+  .nav-mobile {
+    left: var(--menu-largura);
+  }
+
+  /* No desktop o .menu-header é estreito (largura da sidebar),
+     menor que o painel (320px). Abrir para a direita, saindo
+     por cima do conteúdo, em vez de para a esquerda, evita que
+     o painel estoure pra fora da tela. */
+  .notif-panel {
+    left: 0;
+    right: auto;
+  }
+}
+
+/* Telas bem largas (desktop grande / monitor): menu um pouco
+   mais largo para não ficar apertado ao lado de conteúdos com
+   grid de 4 colunas. */
+@media (min-width: 1440px) {
+  .menu {
+    width: 340px;
+  }
+
+  .nav-mobile {
+    left: 340px;
+  }
+}
+/* ============================================================
+   PAGINA-COMUNIDADE.CSS
+   Estilos específicos da página de Comunidades (lista de
+   comunidades, salas, chat, convites, regras). Inclua DEPOIS
+   do base.css:
+
+     <link rel="stylesheet" href="base.css">
+     <link rel="stylesheet" href="pagina-comunidade.css">
+   ============================================================ */
 
 #comunidade {
     padding: 30px;
+    /* Espaço extra embaixo para o conteúdo não ficar escondido
+       atrás da nav inferior fixa — mesmo ajuste feito no
+       .conteudo-principal da página de calendário. */
+    padding-bottom: calc(30px + var(--nav-mobile-altura));
     flex: 1;
+    /* O body agora tem altura travada no viewport (ver base.css);
+       quem rola é este container, não a página inteira. */
+    overflow-y: auto;
 }
 
 #comunidade h1 {
@@ -327,6 +667,9 @@ a {
     cursor: pointer;
 }
 
+/* =========================
+   OVERLAYS
+========================= */
 #overlay {
     display: none;
     position: fixed;
@@ -348,6 +691,9 @@ a {
     z-index: 1099;
 }
 
+/* =========================
+   FORMULÁRIO NOVA COMUNIDADE
+========================= */
 #formulario {
     display: none;
     position: fixed;
@@ -445,6 +791,9 @@ a {
     font-weight: 600;
 }
 
+/* =========================
+   LISTA DE COMUNIDADES (CARDS)
+========================= */
 #listadeComunidades {
     display: flex;
     flex-wrap: wrap;
@@ -515,7 +864,6 @@ a {
     font-size: 14px;
     color: #777;
 }
-
 
 .btnTresPontosCard,
 .btnTresPontos {
@@ -601,7 +949,9 @@ a {
     color: #c53030;
 }
 
-
+/* =========================
+   MODAL CONVIDAR
+========================= */
 #modalConvidar {
     display: none;
     position: fixed;
@@ -829,6 +1179,9 @@ a {
     background: #fff0f0;
 }
 
+/* =========================
+   PÁGINA INTERNA DA COMUNIDADE
+========================= */
 #paginaComunidade {
     display: none;
     margin-top: 30px;
@@ -880,6 +1233,9 @@ a {
     margin-top: 20px;
 }
 
+/* =========================
+   REGRAS DA COMUNIDADE
+========================= */
 .regrasComunidade {
     background-color: var(--bg-color2);
     border-radius: var(--raio);
@@ -979,7 +1335,6 @@ a {
 /* =========================
    MODAL OBRIGATÓRIO DE ACEITE DAS REGRAS
 ========================= */
-
 #modalRegrasComunidade {
     display: none;
     position: fixed;
@@ -1142,6 +1497,9 @@ a {
     cursor: not-allowed;
 }
 
+/* =========================
+   SALAS E CHAT
+========================= */
 .tituloSalas {
     font-size: 20px;
     font-weight: 700;
@@ -1349,198 +1707,9 @@ a {
     background: #e5e7eb;
 }
 
-@media (max-width: 699px) {
-    .menu {
-        width: 100%;
-        padding: 18px;
-    }
-
-    #logo {
-        width: 40px;
-    }
-
-    .menu h2 {
-        font-size: 1.5rem;
-    }
-
-    .hamburger {
-        display: flex;
-    }
-
-    .menu-links {
-        display: none;
-        flex-direction: column;
-        width: 100%;
-        margin-top: 20px;
-        gap: 12px;
-    }
-
-    .menu-links.active {
-        display: flex;
-    }
-
-    .menu a {
-        width: 100%;
-        border-radius: 10px;
-        padding: 12px;
-        font-size: 15px;
-    }
-
-    .topoComunidade {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 15px;
-    }
-
-    #formulario {
-        width: 95%;
-    }
-
-    #listadeComunidades {
-        flex-direction: column;
-    }
-
-    .cardComunidade {
-        width: 100%;
-    }
-
-    .chatInput {
-        flex-direction: column;
-    }
-
-    .chatInput button {
-        width: 100%;
-    }
-
-    .mensagem {
-        max-width: 100%;
-    }
-
-    #btnNovaComunidade {
-        width: 100%;
-    }
-
-    #menuOpcoes {
-        left: 50% !important;
-        transform: translateX(-50%);
-    }
-
-    .emailRow {
-        flex-direction: column;
-    }
-
-    .emailRow button {
-        width: 100%;
-    }
-
-    .linkConvite {
-        flex-direction: column;
-    }
-
-    #btnCopiarLink {
-        width: 100%;
-    }
-}
-
-@media (min-width: 700px) {
-    body {
-        flex-direction: row;
-    }
-
-    .menu {
-        width: 320px;
-        min-height: 100vh;
-        padding: 30px 20px;
-    }
-
-    .menu-header {
-        flex-direction: column;
-        align-items: center;
-        gap: 12px;
-    }
-
-    #logo {
-        width: 110px;
-    }
-
-    .menu h2 {
-        font-size: 1.9rem;
-        text-align: center;
-    }
-
-    .hamburger {
-        display: none;
-    }
-
-    .menu-links {
-        display: flex !important;
-        flex-direction: column;
-        gap: 12px;
-        margin-top: 120px;
-        margin-right: 30px;
-        margin-left: 30px;
-    }
-
-    .menu a {
-        border-radius: 12px;
-        padding: 14px;
-        font-size: 15px;
-    }
-
-    .nav-mobile {
-        display: none;
-    }
-}
-
-.nav-mobile {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background: white;
-    display: flex;
-    align-items: center;
-    justify-content: space-around;
-    padding: 8px 6px 10px;
-    box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.08);
-    z-index: 40;
-}
-
-.nav-mobile a {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 3px;
-    font-size: 10.5px;
-    font-weight: 700;
-    color: var(--bg-color5);
-}
-
-.nav-mobile a.ativo {
-    color: var(--bg-color1);
-}
-
-.nav-icone {
-    font-size: 18px;
-}
-
-.nav-camera {
-    background: var(--bg-color1);
-    width: 52px;
-    height: 52px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-top: -26px;
-    box-shadow: 0 8px 18px rgba(0, 15, 176, 0.4);
-}
-
-.nav-icone-camera {
-    font-size: 20px;
-}
-
-
+/* =========================
+   COMPARTILHAR PASTA
+========================= */
 .compartilharPastaBox {
     background-color: white;
     padding: 20px;
@@ -1620,4 +1789,64 @@ a {
 
 .toggleSwitch input:checked+.toggleSlider::before {
     transform: translateX(20px);
+}
+
+/* =========================
+   RESPONSIVO (mobile)
+========================= */
+@media (max-width: 699px) {
+    .topoComunidade {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+
+    #formulario {
+        width: 95%;
+    }
+
+    #listadeComunidades {
+        flex-direction: column;
+    }
+
+    .cardComunidade {
+        width: 100%;
+    }
+
+    .chatInput {
+        flex-direction: column;
+    }
+
+    .chatInput button {
+        width: 100%;
+    }
+
+    .mensagem {
+        max-width: 100%;
+    }
+
+    #btnNovaComunidade {
+        width: 100%;
+    }
+
+    #menuOpcoes {
+        left: 50% !important;
+        transform: translateX(-50%);
+    }
+
+    .emailRow {
+        flex-direction: column;
+    }
+
+    .emailRow button {
+        width: 100%;
+    }
+
+    .linkConvite {
+        flex-direction: column;
+    }
+
+    #btnCopiarLink {
+        width: 100%;
+    }
 }
