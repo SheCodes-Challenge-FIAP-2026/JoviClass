@@ -4,9 +4,14 @@ const resultado = document.getElementById("saida");
 const canvas = document.getElementById("canvas");
 
 
+
+
 const CHAVE_TEXTOS = "jovi_textos_salvos";
+const CHAVE_HASHES = "jovi_hashes_salvos"; // adicione esta linha
 let textosSalvos = JSON.parse(localStorage.getItem(CHAVE_TEXTOS) || "[]");
 let ultimoTextoReconhecido = "";
+
+
 
 
 function salvarTextosNoStorage() {
@@ -16,9 +21,17 @@ function salvarTextosNoStorage() {
 
 
 
+
+
+
+
 function normalizarTexto(txt) {
     return txt.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9\s]/g, "").replace(/\s+/g, " ").trim();
 }
+
+
+
+
 
 
 
@@ -33,6 +46,8 @@ function similaridadeTexto(a, b) {
 }
 
 
+
+
 let hashesSalvos = JSON.parse(localStorage.getItem(CHAVE_HASHES) || "[]");
 
 
@@ -41,6 +56,10 @@ let hashesSalvos = JSON.parse(localStorage.getItem(CHAVE_HASHES) || "[]");
 function salvarHashesNoStorage() {
     localStorage.setItem(CHAVE_HASHES, JSON.stringify(hashesSalvos));
 }
+
+
+
+
 
 
 
@@ -64,11 +83,19 @@ function gerarHashSimples(context, width, height) {
 
 
 
+
+
+
+
 function distanciaHamming(a, b) {
     let dif = 0;
     for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) dif++;
     return dif;
 }
+
+
+
+
 
 
 
@@ -81,10 +108,18 @@ function confirmarDuplicidade() {
 
 
 
+
+
+
+
         function limpar() {
             document.getElementById("cancelarDuplicadaBtn").removeEventListener("click", onCancelar);
             document.getElementById("confirmarDuplicadaBtn").removeEventListener("click", onConfirmar);
         }
+
+
+
+
 
 
 
@@ -98,11 +133,19 @@ function confirmarDuplicidade() {
 
 
 
+
+
+
+
         function onConfirmar() {
             overlayDup.classList.remove("show");
             limpar();
             resolve(true);
         }
+
+
+
+
 
 
 
@@ -115,6 +158,10 @@ function confirmarDuplicidade() {
 
 
 
+
+
+
+
 const DB_NAME = "JoviClassDB";
 const DB_VERSION = 1;
 const STORE_NAME = "arquivos";
@@ -123,9 +170,17 @@ let db = null;
 
 
 
+
+
+
+
 function abrirDB() {
     return new Promise((resolve, reject) => {
         const req = indexedDB.open(DB_NAME, DB_VERSION);
+
+
+
+
 
 
 
@@ -138,6 +193,10 @@ function abrirDB() {
 
 
 
+
+
+
+
         req.onsuccess = (e) => {
             db = e.target.result;
             resolve(db);
@@ -146,9 +205,17 @@ function abrirDB() {
 
 
 
+
+
+
+
         req.onerror = () => reject(req.error);
     });
 }
+
+
+
+
 
 
 
@@ -165,7 +232,15 @@ function dbPut(obj) {
 
 
 
+
+
+
+
 abrirDB().catch(erro => console.error("Não foi possível abrir o IndexedDB:", erro));
+
+
+
+
 
 
 
@@ -179,13 +254,25 @@ async function salvarImagemNaMateria(materiaId, dataURL, nomeArquivo) {
 
 
 
+
+
+
+
     if (db) await dbPut({ chaveId, dataURL, mimeType: "image/jpeg" });
+
+
+
+
 
 
 
 
     itens.push({ id, nome: nomeArquivo, tipo: "arquivo", ext: "JPG", mimeType: "image/jpeg", data: new Date().toLocaleDateString("pt-BR") });
     localStorage.setItem(chaveItens, JSON.stringify(itens));
+
+
+
+
 
 
 
@@ -201,6 +288,10 @@ async function salvarImagemNaMateria(materiaId, dataURL, nomeArquivo) {
 
 
 
+
+
+
+
 /* ── Zoom suave ── */
 let trackCamera = null;
 let capacidadesCamera = null;
@@ -208,6 +299,10 @@ let zoomAtual = 1;
 let zoomAlvo = 1;
 let animacaoZoom = null;
 let ultimoZoomAplicado = 0;
+
+
+
+
 
 
 
@@ -221,7 +316,15 @@ function aplicarZoomSuave(timestamp = 0) {
 
 
 
+
+
+
+
     const diferenca = zoomAlvo - zoomAtual;
+
+
+
+
 
 
 
@@ -236,7 +339,15 @@ function aplicarZoomSuave(timestamp = 0) {
 
 
 
+
+
+
+
     zoomAtual += diferenca * 0.12;
+
+
+
+
 
 
 
@@ -249,8 +360,16 @@ function aplicarZoomSuave(timestamp = 0) {
 
 
 
+
+
+
+
     animacaoZoom = requestAnimationFrame(aplicarZoomSuave);
 }
+
+
+
+
 
 
 
@@ -266,6 +385,10 @@ function definirZoomSuave(valor) {
 
 
 
+
+
+
+
 /* ── Câmera ── */
 async function configurarCamera() {
     try {
@@ -277,9 +400,17 @@ async function configurarCamera() {
 
 
 
+
+
+
+
         videoElemento.srcObject = midia;
         trackCamera = midia.getVideoTracks()[0];
         capacidadesCamera = trackCamera.getCapabilities();
+
+
+
+
 
 
 
@@ -295,10 +426,18 @@ async function configurarCamera() {
 
 
 
+
+
+
+
             let minX = 160, maxX = 0, minY = 120, maxY = 0;
             const limiarContraste = 40;
             const margemX = 24;
             const margemY = 18;
+
+
+
+
 
 
 
@@ -315,6 +454,10 @@ async function configurarCamera() {
 
 
 
+
+
+
+
                     if (diffX + diffY > limiarContraste) {
                         if (x < minX) minX = x;
                         if (x > maxX) maxX = x;
@@ -327,6 +470,10 @@ async function configurarCamera() {
 
 
 
+
+
+
+
             const areaConteudo = Math.max(0, maxX - minX) * Math.max(0, maxY - minY);
             const areaRegiaoAnalisada = (160 - margemX * 2) * (120 - margemY * 2);
             return areaConteudo / areaRegiaoAnalisada;
@@ -335,8 +482,16 @@ async function configurarCamera() {
 
 
 
+
+
+
+
         let avisoZoomJaExibido = false;
         let ultimaProporcao = null;
+
+
+
+
 
 
 
@@ -353,9 +508,15 @@ async function configurarCamera() {
 
 
 
+
+
+
+
             const proporcao = calcularAreaDeConteudo(videoElemento);
             const alvoMin = 0.55;
             const alvoMax = 0.85;
+
+
 
 
             if (proporcao >= 0.60 && proporcao <= 0.80) return;
@@ -363,8 +524,16 @@ async function configurarCamera() {
 
 
 
+
+
+
+
             const passo = capacidadesCamera.zoom.step || 0.1;
             let novoZoom = zoomAlvo;
+
+
+
+
 
 
 
@@ -376,9 +545,17 @@ async function configurarCamera() {
 
 
 
+
+
+
+
             const min = capacidadesCamera.zoom.min ?? 1;
             const max = capacidadesCamera.zoom.max ?? 1;
             novoZoom = Math.max(min, Math.min(max, novoZoom));
+
+
+
+
 
 
 
@@ -390,11 +567,19 @@ async function configurarCamera() {
 
 
 
+
+
+
+
             if (ultimaProporcao === null || Math.abs(proporcao - ultimaProporcao) > 0.05) {
                 console.log(`🔎 Zoom auto — proporção: ${proporcao.toFixed(2)} | zoom alvo: ${zoomAlvo.toFixed(2)}`);
                 ultimaProporcao = proporcao;
             }
         }
+
+
+
+
 
 
 
@@ -416,7 +601,15 @@ async function configurarCamera() {
 
 
 
+
+
+
+
 configurarCamera();
+
+
+
+
 
 
 
@@ -430,6 +623,10 @@ function corrigirIluminacao(context, width, height) {
 
 
 
+
+
+
+
     for (let i = 0; i < dados.length; i += 4) {
         const brilho = (dados[i] + dados[i + 1] + dados[i + 2]) / 3;
         if (brilho < min) min = brilho;
@@ -439,7 +636,15 @@ function corrigirIluminacao(context, width, height) {
 
 
 
+
+
+
+
     const alcance = max - min || 1;
+
+
+
+
 
 
 
@@ -451,14 +656,26 @@ function corrigirIluminacao(context, width, height) {
 
 
 
+
+
+
+
     context.putImageData(imgData, 0, 0);
 }
 
 
 
 
+
+
+
+
 botaoScanear.onclick = async () => {
     const flash = document.getElementById("flashCaptura");
+
+
+
+
 
 
 
@@ -474,7 +691,15 @@ botaoScanear.onclick = async () => {
 
 
 
+
+
+
+
     botaoScanear.disabled = true;
+
+
+
+
 
 
 
@@ -482,6 +707,14 @@ botaoScanear.onclick = async () => {
     const context = canvas.getContext("2d");
     canvas.width = videoElemento.videoWidth || 640;
     canvas.height = videoElemento.videoHeight || 480;
+
+
+
+
+
+
+
+
 
 
 
@@ -498,30 +731,48 @@ botaoScanear.onclick = async () => {
 
 
 
+
+
+
+
         const canvasOCR = document.createElement("canvas");
         const escalaOCR = 1.5;
+
+
 
 
         const margemX = canvas.width * 0.10;
         const margemY = canvas.height * 0.15;
 
 
+
+
         const larguraRecorte = canvas.width - (margemX * 2);
         const alturaRecorte = canvas.height - (margemY * 2);
+
+
 
 
         canvasOCR.width = larguraRecorte * escalaOCR;
         canvasOCR.height = alturaRecorte * escalaOCR;
 
 
+
+
         const ctxOCR = canvasOCR.getContext("2d");
+
+
 
 
         ctxOCR.imageSmoothingEnabled = true;
         ctxOCR.imageSmoothingQuality = "high";
 
 
+
+
         ctxOCR.filter = "grayscale(100%)";
+
+
 
 
         ctxOCR.drawImage(
@@ -535,6 +786,8 @@ botaoScanear.onclick = async () => {
             canvasOCR.width,
             canvasOCR.height
         );
+
+
 
 
         const { data: { text } } = await Tesseract.recognize(
@@ -551,7 +804,15 @@ botaoScanear.onclick = async () => {
 
 
 
+
+
+
+
         abrirModalTexto(textoFinal);
+
+
+
+
 
 
 
@@ -562,11 +823,19 @@ botaoScanear.onclick = async () => {
 
 
 
+
+
+
+
             const respIA = await fetch("http://localhost:3000/identificar-imagem", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ imagemBase64 })
             });
+
+
+
+
 
 
 
@@ -593,6 +862,10 @@ botaoScanear.onclick = async () => {
 
 
 
+
+
+
+
 /* ── Modal do texto reconhecido ── */
 function abrirModalTexto(texto) {
     const modal = document.getElementById("modalTexto");
@@ -601,6 +874,10 @@ function abrirModalTexto(texto) {
     campoTexto.textContent = texto?.trim() || "Não foi possível identificar o texto.";
     modal.classList.add("ativo");
 }
+
+
+
+
 
 
 
@@ -614,10 +891,18 @@ function fecharModalTexto() {
 
 
 
+
+
+
+
 function configurarModalTexto() {
     const modal = document.getElementById("modalTexto");
     const btnFechar = document.getElementById("btnFecharTexto");
     const btnFechar2 = document.getElementById("btnFecharTexto2");
+
+
+
+
 
 
 
@@ -627,8 +912,16 @@ function configurarModalTexto() {
 
 
 
+
+
+
+
     if (btnFechar) btnFechar.addEventListener("click", fecharModalTexto);
     if (btnFechar2) btnFechar2.addEventListener("click", fecharModalTexto);
+
+
+
+
 
 
 
@@ -641,7 +934,15 @@ function configurarModalTexto() {
 
 
 
+
+
+
+
 configurarModalTexto();
+
+
+
+
 
 
 
@@ -650,6 +951,10 @@ configurarModalTexto();
 function aplicarZoom(valor) {
     definirZoomSuave(valor);
 }
+
+
+
+
 
 
 
@@ -665,10 +970,18 @@ document.querySelectorAll(".zoom-opt").forEach(btn => {
 
 
 
+
+
+
+
 /* ── Dropdown de matérias (montado dinamicamente a partir do localStorage) ── */
 const logoBtn = document.getElementById("logoBtn");
 const dropdownMenu = document.getElementById("dropdownMenu");
 const confirmBtn = document.getElementById("confirmBtn");
+
+
+
+
 
 
 
@@ -679,25 +992,39 @@ let materiaSelecionadaId = null;
 
 
 
-function renderizarMateriasNoDropdown() {
+const API_BASE = `http://${window.location.hostname}:3000`;
+
+
+async function renderizarMateriasNoDropdown() {
     const materiasContainer = document.getElementById("materiasContainer");
     if (!materiasContainer) return;
 
 
+    let materias = [];
+    try {
+        const resposta = await fetch(`${API_BASE}/materias`, {
+            method: "GET",
+            credentials: "include"
+        });
+        const dados = await resposta.json();
+        if (!resposta.ok || !dados.sucesso) {
+            throw new Error(dados.erro || "Não foi possível carregar as matérias.");
+        }
+        materias = dados.materias;
+    } catch (erro) {
+        console.error("Erro ao carregar matérias no dropdown:", erro);
+        materiasContainer.innerHTML = `<p style="color:#f66; font-size:13px; padding:8px 5px;">Erro ao carregar matérias</p>`;
+        return;
+    }
 
 
-    const materias = JSON.parse(localStorage.getItem("materias") || "[]");
     materiasContainer.innerHTML = "";
-
-
 
 
     if (materias.length === 0) {
         materiasContainer.innerHTML = `<p style="color:#aaa; font-size:13px; padding:8px 5px;">Nenhuma matéria criada ainda</p>`;
         return;
     }
-
-
 
 
     materias.forEach(m => {
@@ -710,6 +1037,10 @@ function renderizarMateriasNoDropdown() {
         materiasContainer.appendChild(item);
     });
 }
+
+
+
+
 
 
 
@@ -727,6 +1058,10 @@ if (logoBtn && dropdownMenu) {
 
 
 
+
+
+
+
     dropdownMenu.addEventListener("click", function (e) {
         const item = e.target.closest(".dropdown-item");
         if (!item) return;
@@ -734,8 +1069,16 @@ if (logoBtn && dropdownMenu) {
 
 
 
+
+
+
+
         // O item "Abrir App" não é uma matéria (não tem data-materia-id) — deixa navegar normalmente
         if (!item.dataset.materiaId) return;
+
+
+
+
 
 
 
@@ -751,10 +1094,18 @@ if (logoBtn && dropdownMenu) {
 
 
 
+
+
+
+
     document.addEventListener("click", function () {
         dropdownMenu.classList.remove("show");
     });
 }
+
+
+
+
 
 
 
@@ -767,9 +1118,17 @@ confirmBtn.addEventListener("click", () => {
 
 
 
+
+
+
+
 document.getElementById("cancelBtn").addEventListener("click", () => {
     document.getElementById("overlay").classList.remove("show");
 });
+
+
+
+
 
 
 
@@ -782,10 +1141,18 @@ document.getElementById("salvarBtn").addEventListener("click", async function ()
 
 
 
+
+
+
+
     const hashAtual = gerarHashSimples(canvas.getContext("2d"), canvas.width, canvas.height);
     const distancias = hashesSalvos.map(h => distanciaHamming(h, hashAtual));
     const LIMIAR_DISTANCIA_HASH = 10;
     const duplicadaPorImagem = distancias.some(d => d < LIMIAR_DISTANCIA_HASH);
+
+
+
+
 
 
 
@@ -797,7 +1164,15 @@ document.getElementById("salvarBtn").addEventListener("click", async function ()
 
 
 
+
+
+
+
     const duplicada = duplicadaPorTexto || duplicadaPorImagem;
+
+
+
+
 
 
 
@@ -810,6 +1185,10 @@ document.getElementById("salvarBtn").addEventListener("click", async function ()
 
 
 
+
+
+
+
     textosSalvos.push(ultimoTextoReconhecido);
     salvarTextosNoStorage();
     hashesSalvos.push(hashAtual);
@@ -818,8 +1197,16 @@ document.getElementById("salvarBtn").addEventListener("click", async function ()
 
 
 
+
+
+
+
     const nome = document.getElementById("nomeArquivo").value.trim() || "AulaX_DataX";
     const salvarNoApp = document.getElementById("salvarApp").checked;
+
+
+
+
 
 
 
@@ -832,9 +1219,17 @@ document.getElementById("salvarBtn").addEventListener("click", async function ()
 
 
 
+
+
+
+
     this.textContent = "✔ Salvo!";
     this.style.background = "#16a34a";
     this.disabled = true;
+
+
+
+
 
 
 
