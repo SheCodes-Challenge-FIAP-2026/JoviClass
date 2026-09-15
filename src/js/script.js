@@ -2063,6 +2063,19 @@ function bloquearAplicacao() {
    LIBERAR APLICAÇÃO
 ========================================================= */
 
+function verificarConvitePendente() {
+    const comunidadeId = sessionStorage.getItem(
+        "joviclass_convite_pendente"
+    );
+
+    if (!comunidadeId) {
+        return;
+    }
+
+    window.location.href =
+        `./src/pages/comunidade.html?convite=${encodeURIComponent(comunidadeId)}`;
+}
+
 function liberarAplicacao() {
 
     const authOverlay =
@@ -2093,6 +2106,9 @@ function liberarAplicacao() {
     */
 
     iniciarBalaoSuporte();
+    
+    verificarConvitePendente();
+
 }
 
 

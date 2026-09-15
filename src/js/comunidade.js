@@ -573,7 +573,7 @@ async function excluirComunidade(id) {
 function abrirModalConvidar(id) {
     comunidadeAtiva = id;
 
-    const link = `https://joviclass.app/convite/${id}`;
+    const link = `${window.location.origin}/src/pages/comunidade.html?convite=${encodeURIComponent(id)}`;
     document.getElementById("inputLinkConvite").value = link;
     document.getElementById("statusCopiar").textContent = "";
     document.getElementById("emailConvite").value = "";
@@ -685,7 +685,7 @@ async function enviarConviteEmail() {
             ...convidados,
             {
                 email: dados.convite.email,
-                status: "pendente"
+                status: dados.convite.status || "membro"
             }
         ];
 
@@ -694,7 +694,8 @@ async function enviarConviteEmail() {
         renderizarConvidados(comunidadeAtiva);
         renderizarConvidadosPasta(comunidadeAtiva);
 
-        alert("Convite enviado!");
+        alert("Membro adicionado!");
+
     } catch (erro) {
         console.error(
             "Erro ao adicionar membro:",
@@ -1197,8 +1198,77 @@ function voltarComunidades() {
 inicializarToggleRegras();
 inicializarModalRegras();
 
-carregarComunidadesDoFirestore();
+async function processarConviteDaURL() {
+    const parametros =
+        new URLSearchParams(window.location.search);
 
+    const comunidadeId = parametros.get("convite");
+
+    if (!comunidadeId) {
+        return true;
+    }
+
+    try {
+        const resposta = await fetch(
+            `${API_BASE}/comunidades/${encodeURIComponent(comunidadeId)}/entrar`,
+            {
+                method: "POST",
+                credentials: "include"
+            }
+        );
+
+        if (resposta.status === 401) {
+            sessionStorage.setItem(
+                "joviclass_convite_pendente",
+                comunidadeId
+            );
+
+            window.location.href = "../../index.html";
+            return false;
+        }
+
+        const dados = await resposta.json();
+
+        if (!resposta.ok) {
+            throw new Error(
+                dados.erro ||
+                "Não foi possível entrar na comunidade."
+            );
+        }
+
+        sessionStorage.removeItem(
+            "joviclass_convite_pendente"
+        );
+
+        window.history.replaceState(
+            {},
+            "",
+            window.location.pathname
+        );
+
+        alert("Você entrou na comunidade!");
+        return true;
+    } catch (erro) {
+        console.error(
+            "Erro ao entrar pelo link:",
+            erro
+        );
+
+        alert(erro.message);
+        return false;
+    }
+}
+
+async function inicializarComunidades() {
+    const continuar =
+        await processarConviteDaURL();
+
+    if (continuar) {
+        await carregarComunidadesDoFirestore();
+    }
+}
+
+inicializarComunidades();
 
 const EVENTOS = [
   { id: "prova-calculo",  titulo: "Prova de Cálculo I",      tipo: "prova",    materia: "Cálculo I", data: "2024-05-25T08:00" },

@@ -16,7 +16,7 @@ const { salvarPerfilNoFirestore, buscarPerfilNoFirestore } = require("./services
 const { listarMateriasDoUsuario, criarMateriaNoFirestore, atualizarMateriaNoFirestore, excluirMateriaNoFirestore, atualizarCompartilhamentoNoFirestore } = require("./services/materiasFirestore");
 const { listarTarefasDoUsuario, criarTarefaNoFirestore, atualizarTarefaNoFirestore, excluirTarefaNoFirestore } = require("./services/tarefasFirestore");
 const { listarEventosDoUsuario, criarEventoNoFirestore, atualizarEventoNoFirestore, excluirEventoNoFirestore } = require("./services/eventosFirestore");
-const { listarComunidadesDoUsuario, criarComunidadeNoFirestore, atualizarComunidadeNoFirestore, excluirComunidadeNoFirestore, criarConviteNaComunidade } = require("./services/comunidadesFirestore");
+const { listarComunidadesDoUsuario, criarComunidadeNoFirestore, atualizarComunidadeNoFirestore, excluirComunidadeNoFirestore, criarConviteNaComunidade, entrarNaComunidadePorLink } = require("./services/comunidadesFirestore");
 const { listarAnotacoesDaMateria, criarAnotacaoNoFirestore, atualizarAnotacaoNoFirestore, excluirAnotacaoNoFirestore } = require("./services/anotacoesFirestore");
 const { listarArquivosDaMateria, salvarArquivoDaMateria, buscarArquivoDaMateria, renomearArquivoDaMateria, excluirArquivoDaMateria } = require("./services/arquivosMateria");
 
@@ -3332,7 +3332,48 @@ app.delete(
 );
 
 // ======================================================
-// COMUNIDADES — CRIAR CONVITE
+// COMUNIDADES — ENTRAR PELO LINK COMPARTILHADO
+// ======================================================
+
+app.post(
+    "/comunidades/:id/entrar",
+    exigirLogin,
+    async (req, res) => {
+        try {
+            const comunidade =
+                await entrarNaComunidadePorLink(
+                    req.session.usuario.id,
+                    req.params.id
+                );
+
+            if (!comunidade) {
+                return res.status(404).json({
+                    sucesso: false,
+                    erro: "Comunidade não encontrada."
+                });
+            }
+
+            return res.json({
+                sucesso: true,
+                comunidade
+            });
+        } catch (erro) {
+            console.error(
+                "❌ Erro ao entrar na comunidade pelo link:",
+                erro
+            );
+
+            return res.status(500).json({
+                sucesso: false,
+                erro: "Erro interno ao entrar na comunidade."
+            });
+        }
+    }
+);
+
+
+// ======================================================
+// COMUNIDADES — ADICIONAR MEMBRO POR E-MAIL
 // ======================================================
 
 app.post(
@@ -3392,6 +3433,13 @@ app.post(
                 return res.status(403).json({
                     sucesso: false,
                     erro: "Somente o criador pode enviar convites."
+                });
+            }
+
+            if (convite.usuarioNaoEncontrado) {
+                return res.status(404).json({
+                    sucesso: false,
+                    erro: "Esse e-mail ainda não possui uma conta no JoviClass."
                 });
             }
 

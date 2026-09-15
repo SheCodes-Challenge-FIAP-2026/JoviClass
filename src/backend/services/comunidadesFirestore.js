@@ -135,33 +135,82 @@ async function criarConviteNaComunidade(
         return null;
     }
 
+    const email = String(emailConvidado)
+        .trim()
+        .toLowerCase();
+
+    const usuariosEncontrados = await db
+        .collection("usuarios")
+        .where("email", "==", email)
+        .limit(1)
+        .get();
+
+    if (usuariosEncontrados.empty) {
+        return {
+            usuarioNaoEncontrado: true
+        };
+    }
+
+    const usuario = usuariosEncontrados.docs[0];
+    const usuarioId = String(usuario.id);
     const comunidade = documento.data();
-    const email = String(emailConvidado).toLowerCase();
 
-    const jaConvidado = (
-        comunidade.emailsConvidados || []
-    ).includes(email);
-
-    if (jaConvidado) {
+    if ((comunidade.membros || []).includes(usuarioId)) {
         return {
             duplicado: true
         };
     }
 
+    const convidadosAtualizados = (
+        comunidade.convidados || []
+    ).filter(
+        convidado =>
+            convidado.email?.toLowerCase() !== email
+    );
+
+    convidadosAtualizados.push({
+        email,
+        usuarioId,
+        status: "membro"
+    });
+
     await referencia.update({
+        membros: FieldValue.arrayUnion(usuarioId),
         emailsConvidados: FieldValue.arrayUnion(email),
-
-        convidados: FieldValue.arrayUnion({
-            email,
-            status: "pendente"
-        }),
-
+        convidados: convidadosAtualizados,
         atualizadoEm: FieldValue.serverTimestamp()
     });
 
     return {
         email,
-        status: "pendente"
+        usuarioId,
+        status: "membro"
+    };
+}
+
+async function entrarNaComunidadePorLink(
+    usuarioId,
+    comunidadeId
+) {
+    const referencia = db
+        .collection("comunidades")
+        .doc(String(comunidadeId));
+
+    const documento = await referencia.get();
+
+    if (!documento.exists) {
+        return null;
+    }
+
+    await referencia.update({
+        membros: FieldValue.arrayUnion(
+            String(usuarioId)
+        ),
+        atualizadoEm: FieldValue.serverTimestamp()
+    });
+
+    return {
+        id: documento.id
     };
 }
 
@@ -171,5 +220,6 @@ module.exports = {
     criarComunidadeNoFirestore,
     atualizarComunidadeNoFirestore,
     excluirComunidadeNoFirestore,
-    criarConviteNaComunidade
+    criarConviteNaComunidade,
+    entrarNaComunidadePorLink
 };
