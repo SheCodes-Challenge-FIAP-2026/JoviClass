@@ -2,24 +2,26 @@
 <html lang="pt-BR">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="shortcut icon" href="../assets/favicon.ico" type="image/x-icon">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400..900&family=Manrope:wght@200..800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../css/expansaoConhecimento.css">
-    <link rel="stylesheet" href="../css/suporte.css">
-    <title>JoviClass - Expansão do Conhecimento</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="shortcut icon" href="../assets/favicon.ico" type="image/x-icon">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400..900&family=Manrope:wght@200..800&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="../css/expansaoConhecimento.css">
+  <link rel="stylesheet" href="../css/suporte.css">
+  <title>JoviClass - Expansão do Conhecimento</title>
 </head>
-<body>
-    <div id="overlay"></div>
 
-    <div id="overlayMenu" onclick="fecharMenuOpcoes()"></div>
+<body>
+  <div id="overlay"></div>
+
+  <div id="overlayMenu" onclick="fecharMenuOpcoes()"></div>
 
   <header class="menu">
     <div class="menu-header">
-      <div class="logoJovi">
+      <div class="logoJovi" onclick="window.location.href='../../index.html'" style="cursor: pointer;">
         <img src="../assets/img/logo.png" alt="Logo JoviClass" id="logo">
         <h2>JoviClass</h2>
       </div>
@@ -28,8 +30,10 @@
         <div class="notif-wrapper">
           <button class="icon-btn" id="notifBtn" aria-label="Notificações" aria-haspopup="true" aria-expanded="false">
             <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 3a6 6 0 0 0-6 6v3.586l-1.707 1.707A1 1 0 0 0 5 16h14a1 1 0 0 0 .707-1.707L18 12.586V9a6 6 0 0 0-6-6Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
-              <path d="M9.5 19a2.5 2.5 0 0 0 5 0" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+              <path
+                d="M12 3a6 6 0 0 0-6 6v3.586l-1.707 1.707A1 1 0 0 0 5 16h14a1 1 0 0 0 .707-1.707L18 12.586V9a6 6 0 0 0-6-6Z"
+                stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" />
+              <path d="M9.5 19a2.5 2.5 0 0 0 5 0" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" />
             </svg>
             <span class="notif-dot" id="notifDot" hidden>0</span>
           </button>
@@ -61,17 +65,20 @@
     </nav>
   </header>
   <main class="content">
- 
+
     <section class="page-intro">
       <h1>Expansão do Conhecimento</h1>
       <p>Fontes confiáveis para ir além da matéria, escolha um tema e explore.</p>
     </section>
- 
+
     <div class="search-bar">
-      <svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.8"/><path d="m20 20-3.2-3.2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      <svg viewBox="0 0 24 24" fill="none">
+        <circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.8" />
+        <path d="m20 20-3.2-3.2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+      </svg>
       <input id="searchInput" type="text" placeholder="Buscar por assunto ou site...">
     </div>
- 
+
     <div class="chip-row" id="chipRow">
       <button class="chip active" data-category="todos">Todos</button>
       <button class="chip" data-category="matematica">Matemática</button>
@@ -80,45 +87,50 @@
       <button class="chip" data-category="tecnologia">Tecnologia</button>
       <button class="chip" data-category="historia">História &amp; Cultura</button>
     </div>
- 
+
     <section class="resources" id="resourceList" aria-live="polite">
     </section>
- 
+
     <p class="empty-state" id="emptyState" hidden>Nenhum resultado por aqui. Tenta outro termo ou categoria.</p>
- 
+
     <section class="community" id="communitySection" hidden>
       <h2>Artigos da comunidade</h2>
       <div id="communityList" class="community-list"></div>
     </section>
- 
+
     <button class="publish-card" id="openPublishModal">
       <div class="publish-icon">
-        <svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        <svg viewBox="0 0 24 24" fill="none">
+          <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+        </svg>
       </div>
       <div class="publish-text">
         <strong>Compartilhar conhecimento</strong>
         <span>Tem algo pra ensinar? Publique um artigo pros colegas.</span>
       </div>
     </button>
- 
+
   </main>
- 
+
   <div class="modal-overlay" id="modalOverlay" hidden>
     <div class="modal-sheet" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
       <div class="modal-handle"></div>
       <div class="modal-header">
         <h2 id="modalTitle">Publicar artigo</h2>
         <button class="icon-btn" id="closeModal" aria-label="Fechar">
-          <svg viewBox="0 0 24 24" fill="none"><path d="m6 6 12 12M18 6 6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          <svg viewBox="0 0 24 24" fill="none">
+            <path d="m6 6 12 12M18 6 6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+          </svg>
         </button>
       </div>
- 
+
       <form id="articleForm">
         <label class="field">
           <span>Título</span>
-          <input type="text" id="articleTitle" placeholder="Ex: Como memorizar fórmulas de física" required maxlength="80">
+          <input type="text" id="articleTitle" placeholder="Ex: Como memorizar fórmulas de física" required
+            maxlength="80">
         </label>
- 
+
         <label class="field">
           <span>Categoria</span>
           <select id="articleCategory" required>
@@ -129,19 +141,20 @@
             <option value="historia">História &amp; Cultura</option>
           </select>
         </label>
- 
+
         <label class="field">
           <span>Conteúdo</span>
-          <textarea id="articleContent" rows="5" placeholder="Escreva aqui o que você quer ensinar..." required maxlength="1200"></textarea>
+          <textarea id="articleContent" rows="5" placeholder="Escreva aqui o que você quer ensinar..." required
+            maxlength="1200"></textarea>
         </label>
- 
+
         <button type="submit" class="btn-primary">Publicar</button>
       </form>
     </div>
   </div>
- 
+
   <div class="toast" id="toast">Artigo publicado!</div>
- 
+
 
   <nav class="nav-mobile">
     <a href="../../index.html" class="ativo">
@@ -165,53 +178,44 @@
     </a>
   </nav>
 
-  <button
-      type="button"
-      id="botaoSuporte"
-      class="botao-suporte"
-      aria-label="Abrir suporte">
+  <button type="button" id="botaoSuporte" class="botao-suporte" aria-label="Abrir suporte">
 
-      <img src="../assets/img/logoSuporte.png" alt="Suporte"/>
+    <img src="../assets/img/logoSuporte.png" alt="Suporte" />
 
   </button>
 
-    <div id="chatbot" class="chatbot">
-        <div class="chatbot-header">
+  <div id="chatbot" class="chatbot">
+    <div class="chatbot-header">
 
-            <div class="chatbot-header-info">
-                <div>
-                    <h3>Suporte JoviClass</h3>
-                    <p>Como podemos ajudar?</p>
-                </div>
-            </div>
-
-            <button
-                type="button"
-                id="fecharChatbot"
-                class="fechar-chatbot"
-                aria-label="Fechar suporte">
-                ×
-            </button>
-
+      <div class="chatbot-header-info">
+        <div>
+          <h3>Suporte JoviClass</h3>
+          <p>Como podemos ajudar?</p>
         </div>
+      </div>
 
-        <div
-            id="conteudoChatbot"
-            class="conteudo-chatbot">
-            <p class="mensagem-bot">
-                Olá! 👋 Como posso ajudar?
-            </p>
-        </div>
+      <button type="button" id="fecharChatbot" class="fechar-chatbot" aria-label="Fechar suporte">
+        ×
+      </button>
+
     </div>
 
-    <!-- =====================================================
+    <div id="conteudoChatbot" class="conteudo-chatbot">
+      <p class="mensagem-bot">
+        Olá! 👋 Como posso ajudar?
+      </p>
+    </div>
+  </div>
+
+  <!-- =====================================================
        JAVASCRIPT DO CHATBOT
        ===================================================== -->
 
-    <script src="../js/suporte.js"></script>
+  <script src="../js/suporte.js"></script>
 
 
-    <script src="../js/expansaoConhecimento.js"></script>
+  <script src="../js/expansaoConhecimento.js"></script>
 
 </body>
+
 </html>

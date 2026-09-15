@@ -1,52 +1,52 @@
 [
-    {
-      "id": "1789158882474",
-      "nome": "Gi",
-      "curso": "",
-      "email": "giscalzone@gmail.com",
-      "senha": "$2b$10$oNSWVRBEPxJhvOM5tZ.0nOgmWyET9cS2uvVzg4JcwhWCiTXZqAfv2",
-      "foto": "https://lh3.googleusercontent.com/a/ACg8ocKOS4eUv3WyMDJYDvWdHHiP9xW0XapabueU_q0RR11k4aZVDw=s96-c",
-      "provedor": "email_google",
-      "emailVerificado": true,
-      "codigoVerificacao": null,
-      "codigoVerificacaoExpira": null,
-      "codigoRecuperacaoSenha": null,
-      "codigoRecuperacaoSenhaExpira": null,
-      "googleId": "115157201591849322744"
-    },
-    {
-      "id": "1789167295767",
-      "nome": "Paloma Dantas",
-      "curso": "Engenharia de Software",
-      "email": "paloma.carmo@yahoo.com",
-      "senha": "$2b$10$7.0BnBJ39ocinBPG9KbR6edimec8C7nSok6KLA4mTdD.0Z9YrjbLG",
-      "foto": null,
-      "provedor": "email",
-      "emailVerificado": true,
-      "codigoVerificacao": null,
-      "codigoVerificacaoExpira": null,
-      "codigoRecuperacaoSenha": null,
-      "codigoRecuperacaoSenhaExpira": null
-    },
-    {
-      "id": "1789170156577",
-      "nome": "Paloma Dantas",
-      "curso": "",
-      "email": "paloma.dantas16@yahoo.com",
-      "senha": "$2b$10$QY9blptd5v8EbD4bDpDkM.Krx7MES801tP8AOEdeErV2mMNwKKEy6",
-      "foto": null,
-      "provedor": "email",
-      "emailVerificado": true,
-      "codigoVerificacao": null,
-      "codigoVerificacaoExpira": null,
-      "codigoRecuperacaoSenha": null,
-      "codigoRecuperacaoSenhaExpira": null
-    },
-    {
-      "id": "1789338468895",
-      "nome": "Nayra Sousa",
-      "curso": "Engenharia de Software - 2° Período",
-      "email": "nayrasdteste@gmail.com",
-      "senha": "$2b$10$jgHoGRdBZdKZVxAwffqZR.Rll9ko60UdlrcJf37CGrToRI9U4iFUO"
-    }
+  {
+    "id": "1789158882474",
+    "nome": "Gi",
+    "curso": "",
+    "email": "giscalzone@gmail.com",
+    "senha": "$2b$10$oNSWVRBEPxJhvOM5tZ.0nOgmWyET9cS2uvVzg4JcwhWCiTXZqAfv2",
+    "foto": "https://lh3.googleusercontent.com/a/ACg8ocKOS4eUv3WyMDJYDvWdHHiP9xW0XapabueU_q0RR11k4aZVDw=s96-c",
+    "provedor": "google",
+    "emailVerificado": true,
+    "codigoVerificacao": null,
+    "codigoVerificacaoExpira": null,
+    "codigoRecuperacaoSenha": null,
+    "codigoRecuperacaoSenhaExpira": null,
+    "googleId": "115157201591849322744"
+  },
+  {
+    "id": "1789167295767",
+    "nome": "Paloma Dantas",
+    "curso": "Engenharia de Software",
+    "email": "paloma.carmo@yahoo.com",
+    "senha": "$2b$10$7.0BnBJ39ocinBPG9KbR6edimec8C7nSok6KLA4mTdD.0Z9YrjbLG",
+    "foto": null,
+    "provedor": "email",
+    "emailVerificado": true,
+    "codigoVerificacao": null,
+    "codigoVerificacaoExpira": null,
+    "codigoRecuperacaoSenha": null,
+    "codigoRecuperacaoSenhaExpira": null
+  },
+  {
+    "id": "1789170156577",
+    "nome": "Paloma Dantas",
+    "curso": "",
+    "email": "paloma.dantas16@yahoo.com",
+    "senha": "$2b$10$QY9blptd5v8EbD4bDpDkM.Krx7MES801tP8AOEdeErV2mMNwKKEy6",
+    "foto": null,
+    "provedor": "email",
+    "emailVerificado": true,
+    "codigoVerificacao": null,
+    "codigoVerificacaoExpira": null,
+    "codigoRecuperacaoSenha": null,
+    "codigoRecuperacaoSenhaExpira": null
+  },
+  {
+    "id": "1789338468895",
+    "nome": "Nayra Sousa",
+    "curso": "Engenharia de Software - 2° Período",
+    "email": "nayrasdteste@gmail.com",
+    "senha": "$2b$10$jgHoGRdBZdKZVxAwffqZR.Rll9ko60UdlrcJf37CGrToRI9U4iFUO"
+  }
 ]

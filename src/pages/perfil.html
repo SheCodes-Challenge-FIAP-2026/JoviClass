@@ -18,7 +18,7 @@
 <body>
   <header class="menu">
     <div class="menu-header">
-      <div class="logoJovi">
+      <div class="logoJovi" onclick="window.location.href='../../index.html'" style="cursor: pointer;">
         <img src="../assets/img/logo.png" alt="Logo JoviClass" id="logo">
         <h2>JoviClass</h2>
       </div>
@@ -27,8 +27,10 @@
         <div class="notif-wrapper">
           <button class="icon-btn" id="notifBtn" aria-label="Notificações" aria-haspopup="true" aria-expanded="false">
             <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 3a6 6 0 0 0-6 6v3.586l-1.707 1.707A1 1 0 0 0 5 16h14a1 1 0 0 0 .707-1.707L18 12.586V9a6 6 0 0 0-6-6Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
-              <path d="M9.5 19a2.5 2.5 0 0 0 5 0" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+              <path
+                d="M12 3a6 6 0 0 0-6 6v3.586l-1.707 1.707A1 1 0 0 0 5 16h14a1 1 0 0 0 .707-1.707L18 12.586V9a6 6 0 0 0-6-6Z"
+                stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" />
+              <path d="M9.5 19a2.5 2.5 0 0 0 5 0" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" />
             </svg>
             <span class="notif-dot" id="notifDot" hidden>0</span>
           </button>
@@ -75,7 +77,8 @@
           <img src="../assets/img/avatar.png" alt="Foto de perfil de Helena" id="perfilFotoImg">
           <button class="perfil-avatar-editar" id="trocarFotoBtn" aria-label="Trocar foto" type="button">
             <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M4 20h16M13.5 6.5l3 3L8.5 17.5H5.5v-3l8-8Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+              <path d="M4 20h16M13.5 6.5l3 3L8.5 17.5H5.5v-3l8-8Z" stroke="currentColor" stroke-width="1.7"
+                stroke-linejoin="round" />
             </svg>
           </button>
           <input type="file" id="inputFoto" accept="image/*" hidden>
@@ -89,18 +92,20 @@
       </div>
 
       <div class="perfil-acoes">
-  <button class="btn-editar-perfil" id="btnEditarPerfil" type="button">Editar perfil</button>
+        <button class="btn-editar-perfil" id="btnEditarPerfil" type="button">Editar perfil</button>
 
-  <div class="conexoes-externas">
-    <button id="btnConectarGoogle" class="btn-conexaoG" type="button" title="Conectar Google" aria-label="Conectar Google">
-      <img src="../assets/img/google-logo.png" alt="Google">
-    </button>
+        <div class="conexoes-externas">
+          <button id="btnConectarGoogle" class="btn-conexaoG" type="button" title="Conectar Google"
+            aria-label="Conectar Google">
+            <img src="../assets/img/google-logo.png" alt="Google">
+          </button>
 
-    <button id="btnConectarNotion" class="btn-conexaoN" type="button" title="Conectar Notion" aria-label="Conectar Notion">
-      <img src="../assets/img/Notion-Logo.png" alt="Notion">
-    </button>
-  </div>
-</div>
+          <button id="btnConectarNotion" class="btn-conexaoN" type="button" title="Conectar Notion"
+            aria-label="Conectar Notion">
+            <img src="../assets/img/Notion-Logo.png" alt="Notion">
+          </button>
+        </div>
+      </div>
     </section>
 
     <h2 class="titulo-secao">Suas estatísticas</h2>
@@ -163,7 +168,7 @@
             <span class="switch-trilho"></span>
           </label>
         </div>
-        
+
         <div class="item item-toggle">
           <div class="item-esq">
             <span class="item-icone azul">✉️</span>
@@ -224,11 +229,14 @@
         <div class="campo" id="blocoSenhaAtual">
           <label for="campoSenhaAtual">Senha atual</label>
           <div class="campo-senha-wrapper">
-            <input type="password" id="campoSenhaAtual" name="senhaAtual" placeholder="Digite sua senha atual" autocomplete="current-password">
+            <input type="password" id="campoSenhaAtual" name="senhaAtual" placeholder="Digite sua senha atual"
+              autocomplete="current-password">
             <button type="button" class="toggle-senha" data-target="campoSenhaAtual" aria-label="Mostrar senha">
-              <svg class="icone-olho" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="20" height="20">
-                <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
-                <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.7"/>
+              <svg class="icone-olho" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="20"
+                height="20">
+                <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z" stroke="currentColor" stroke-width="1.7"
+                  stroke-linejoin="round" />
+                <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.7" />
               </svg>
             </button>
           </div>
@@ -237,11 +245,14 @@
         <div class="campo">
           <label for="campoSenhaNova">Nova senha</label>
           <div class="campo-senha-wrapper">
-            <input type="password" id="campoSenhaNova" name="senhaNova" required placeholder="Mínimo de 6 caracteres" autocomplete="new-password">
+            <input type="password" id="campoSenhaNova" name="senhaNova" required placeholder="Mínimo de 6 caracteres"
+              autocomplete="new-password">
             <button type="button" class="toggle-senha" data-target="campoSenhaNova" aria-label="Mostrar senha">
-              <svg class="icone-olho" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="20" height="20">
-                <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
-                <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.7"/>
+              <svg class="icone-olho" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="20"
+                height="20">
+                <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z" stroke="currentColor" stroke-width="1.7"
+                  stroke-linejoin="round" />
+                <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.7" />
               </svg>
             </button>
           </div>
@@ -250,11 +261,14 @@
         <div class="campo">
           <label for="campoSenhaConfirma">Confirmar nova senha</label>
           <div class="campo-senha-wrapper">
-            <input type="password" id="campoSenhaConfirma" name="senhaConfirma" required placeholder="Repita a nova senha" autocomplete="new-password">
+            <input type="password" id="campoSenhaConfirma" name="senhaConfirma" required
+              placeholder="Repita a nova senha" autocomplete="new-password">
             <button type="button" class="toggle-senha" data-target="campoSenhaConfirma" aria-label="Mostrar senha">
-              <svg class="icone-olho" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="20" height="20">
-                <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
-                <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.7"/>
+              <svg class="icone-olho" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="20"
+                height="20">
+                <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z" stroke="currentColor" stroke-width="1.7"
+                  stroke-linejoin="round" />
+                <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.7" />
               </svg>
             </button>
           </div>
@@ -280,12 +294,14 @@
       <form id="formInstituicao" novalidate>
         <div class="campo">
           <label for="campoInstituicaoNome">Nome da instituição</label>
-          <input type="text" id="campoInstituicaoNome" name="instituicaoNome" required placeholder="Ex: Universidade de São Paulo">
+          <input type="text" id="campoInstituicaoNome" name="instituicaoNome" required
+            placeholder="Ex: Universidade de São Paulo">
         </div>
 
         <div class="campo">
           <label for="campoInstituicaoCidade">Cidade / campus (opcional)</label>
-          <input type="text" id="campoInstituicaoCidade" name="instituicaoCidade" placeholder="Ex: São Paulo - Campus Butantã">
+          <input type="text" id="campoInstituicaoCidade" name="instituicaoCidade"
+            placeholder="Ex: São Paulo - Campus Butantã">
         </div>
 
         <p class="campo-erro" id="erroFormInstituicao" hidden></p>
@@ -348,50 +364,40 @@
     </a>
   </nav>
 
-  <button
-      type="button"
-      id="botaoSuporte"
-      class="botao-suporte"
-      aria-label="Abrir suporte">
+  <button type="button" id="botaoSuporte" class="botao-suporte" aria-label="Abrir suporte">
 
-      <img src="../assets/img/logoSuporte.png" alt="Suporte"/>
+    <img src="../assets/img/logoSuporte.png" alt="Suporte" />
 
   </button>
 
-    <div id="chatbot" class="chatbot">
-        <div class="chatbot-header">
+  <div id="chatbot" class="chatbot">
+    <div class="chatbot-header">
 
-            <div class="chatbot-header-info">
-                <div>
-                    <h3>Suporte JoviClass</h3>
-                    <p>Como podemos ajudar?</p>
-                </div>
-            </div>
-
-            <button
-                type="button"
-                id="fecharChatbot"
-                class="fechar-chatbot"
-                aria-label="Fechar suporte">
-                ×
-            </button>
-
+      <div class="chatbot-header-info">
+        <div>
+          <h3>Suporte JoviClass</h3>
+          <p>Como podemos ajudar?</p>
         </div>
+      </div>
 
-        <div
-            id="conteudoChatbot"
-            class="conteudo-chatbot">
-            <p class="mensagem-bot">
-                Olá! 👋 Como posso ajudar?
-            </p>
-        </div>
+      <button type="button" id="fecharChatbot" class="fechar-chatbot" aria-label="Fechar suporte">
+        ×
+      </button>
+
     </div>
 
-    <!-- =====================================================
+    <div id="conteudoChatbot" class="conteudo-chatbot">
+      <p class="mensagem-bot">
+        Olá! 👋 Como posso ajudar?
+      </p>
+    </div>
+  </div>
+
+  <!-- =====================================================
        JAVASCRIPT DO CHATBOT
        ===================================================== -->
 
-    <script src="../js/suporte.js"></script>
+  <script src="../js/suporte.js"></script>
 
   <script src="../js/perfil.js"></script>
 </body>

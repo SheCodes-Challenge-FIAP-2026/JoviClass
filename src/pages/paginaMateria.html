@@ -9,10 +9,7 @@
   <link rel="stylesheet" href="../css/suporte.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link
-    href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&display=swap"
-    rel="stylesheet"
-  >
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&display=swap" rel="stylesheet">
   <title>JoviClass – Matéria</title>
 </head>
 
@@ -20,13 +17,8 @@
 
   <header class="menu">
     <div class="menu-header">
-      <div class="logoJovi">
-        <img
-          src="../assets/img/logo.png"
-          alt="Logo JoviClass"
-          id="logo"
-        >
-
+      <div class="logoJovi" onclick="window.location.href='../../index.html'" style="cursor: pointer;">
+        <img src="../assets/img/logo.png" alt="Logo JoviClass" id="logo">
         <h2>JoviClass</h2>
       </div>
 
@@ -34,77 +26,42 @@
 
         <div class="notif-wrapper">
 
-          <button
-            class="icon-btn"
-            id="notifBtn"
-            aria-label="Notificações"
-            aria-haspopup="true"
-            aria-expanded="false"
-          >
+          <button class="icon-btn" id="notifBtn" aria-label="Notificações" aria-haspopup="true" aria-expanded="false">
 
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path
                 d="M12 3a6 6 0 0 0-6 6v3.586l-1.707 1.707A1 1 0 0 0 5 16h14a1 1 0 0 0 .707-1.707L18 12.586V9a6 6 0 0 0-6-6Z"
-                stroke="currentColor"
-                stroke-width="1.7"
-                stroke-linejoin="round"
-              />
+                stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" />
 
-              <path
-                d="M9.5 19a2.5 2.5 0 0 0 5 0"
-                stroke="currentColor"
-                stroke-width="1.7"
-                stroke-linecap="round"
-              />
+              <path d="M9.5 19a2.5 2.5 0 0 0 5 0" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" />
             </svg>
 
-            <span
-              class="notif-dot"
-              id="notifDot"
-              hidden
-            >
+            <span class="notif-dot" id="notifDot" hidden>
               0
             </span>
 
           </button>
 
-          <div
-            class="notif-panel"
-            id="notifPanel"
-            hidden
-          >
+          <div class="notif-panel" id="notifPanel" hidden>
 
             <div class="notif-panel-header">
 
               <strong>Notificações</strong>
 
-              <button
-                id="notifMarcarLidas"
-                class="notif-marcar"
-              >
+              <button id="notifMarcarLidas" class="notif-marcar">
                 Marcar todas como lidas
               </button>
 
             </div>
 
-            <div
-              class="notif-lista"
-              id="notifLista"
-            >
+            <div class="notif-lista" id="notifLista">
             </div>
 
           </div>
 
         </div>
 
-        <div
-          class="hamburger"
-          id="hamburger"
-        >
+        <div class="hamburger" id="hamburger">
           <span></span>
           <span></span>
           <span></span>
@@ -114,14 +71,9 @@
 
     </div>
 
-    <nav
-      class="menu-links"
-      id="menuLinks"
-    >
+    <nav class="menu-links" id="menuLinks">
 
-      <a
-        href="../../index.html"
-      >
+      <a href="../../index.html">
         Início
       </a>
 
@@ -165,67 +117,24 @@
 
         <div class="campoBuscar">
 
-          <span
-            class="buscaIcone"
-            aria-hidden="true"
-          >
+          <span class="buscaIcone" aria-hidden="true">
 
-            <svg
-              width="22"
-              height="22"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-            >
-              <circle
-                cx="11"
-                cy="11"
-                r="8"
-              />
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8" />
 
-              <line
-                x1="21"
-                y1="21"
-                x2="16.65"
-                y2="16.65"
-              />
+              <line x1="21" y1="21" x2="16.65" y2="16.65" />
             </svg>
 
           </span>
 
-          <input
-            type="text"
-            id="inputBuscar"
-            placeholder="Buscar arquivos..."
-          >
+          <input type="text" id="inputBuscar" placeholder="Buscar arquivos...">
 
-          <button
-            id="btnBuscar"
-            type="button"
-            aria-label="Buscar"
-          >
+          <button id="btnBuscar" type="button" aria-label="Buscar">
 
-            <svg
-              width="22"
-              height="22"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-            >
-              <circle
-                cx="11"
-                cy="11"
-                r="8"
-              />
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8" />
 
-              <line
-                x1="21"
-                y1="21"
-                x2="16.65"
-                y2="16.65"
-              />
+              <line x1="21" y1="21" x2="16.65" y2="16.65" />
             </svg>
 
           </button>
@@ -242,22 +151,11 @@
 
       <div class="acoesGrid">
 
-        <button
-          class="acaoCard acaoAnotacao"
-          id="btnCriarAnotacao"
-          type="button"
-        >
+        <button class="acaoCard acaoAnotacao" id="btnCriarAnotacao" type="button">
 
           <span class="acaoIcone">
 
-            <svg
-              width="26"
-              height="26"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-            >
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M12 20h9" />
               <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
             </svg>
@@ -277,30 +175,14 @@
 
         </button>
 
-        <button
-          class="acaoCard"
-          id="btnAddArquivo"
-          type="button"
-        >
+        <button class="acaoCard" id="btnAddArquivo" type="button">
 
           <span class="acaoIcone">
 
-            <svg
-              width="26"
-              height="26"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-            >
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
               <polyline points="17 8 12 3 7 8" />
-              <line
-                x1="12"
-                y1="3"
-                x2="12"
-                y2="15"
-              />
+              <line x1="12" y1="3" x2="12" y2="15" />
             </svg>
 
           </span>
@@ -318,17 +200,10 @@
 
         </button>
 
-        <button
-          class="acaoCard"
-          id="importarArquivoDrive"
-          type="button"
-        >
+        <button class="acaoCard" id="importarArquivoDrive" type="button">
 
           <span class="acaoIcone acaoIconeLogo">
-            <img
-              src="../assets/img/google-drive.png"
-              alt="Google Drive"
-            >
+            <img src="../assets/img/google-drive.png" alt="Google Drive">
           </span>
 
           <strong>Google Drive</strong>
@@ -343,18 +218,11 @@
           </span>
 
         </button>
-        <button
-          class="acaoCard"
-          id="importarPaginaNotion"
-          type="button"
-        >
+        <button class="acaoCard" id="importarPaginaNotion" type="button">
 
           <span class="acaoIcone acaoIconeNotion">
 
-            <img
-              src="../assets/img/Notion-Logo.png"
-              alt="Notion"
-            >
+            <img src="../assets/img/Notion-Logo.png" alt="Notion">
 
           </span>
 
@@ -375,15 +243,9 @@
 
     </section>
 
-    <div
-      id="areaConteudoNarrado"
-      class="areaConteudoNarrado"
-    >
+    <div id="areaConteudoNarrado" class="areaConteudoNarrado">
 
-      <div
-        class="narracaoBarra"
-        id="narracaoBarra"
-      >
+      <div class="narracaoBarra" id="narracaoBarra">
 
         <div class="narracaoBarraInfo">
 
@@ -399,11 +261,7 @@
 
         <div class="narracaoBarraBotoes">
 
-          <button
-            class="narracaoBtn"
-            id="btnConteudoNarradoCompleto"
-            type="button"
-          >
+          <button class="narracaoBtn" id="btnConteudoNarradoCompleto" type="button">
 
             <span class="narracaoBtnIcone">
               ▶
@@ -415,11 +273,7 @@
 
           </button>
 
-          <button
-            class="narracaoBtn"
-            id="btnConteudoNarradoResumo"
-            type="button"
-          >
+          <button class="narracaoBtn" id="btnConteudoNarradoResumo" type="button">
 
             <span class="narracaoBtnIcone">
               ▶
@@ -435,10 +289,7 @@
 
       </div>
 
-      <span
-        id="statusConteudoNarrado"
-        class="statusConteudoNarrado"
-      ></span>
+      <span id="statusConteudoNarrado" class="statusConteudoNarrado"></span>
 
     </div>
 
@@ -452,26 +303,16 @@
 
       </div>
 
-      <div
-        class="listaArquivos"
-        id="listaArquivos"
-      ></div>
+      <div class="listaArquivos" id="listaArquivos"></div>
 
-      <p
-        class="semArquivos"
-        id="semArquivos"
-      >
+      <p class="semArquivos" id="semArquivos">
         Ainda não há arquivos.
       </p>
 
     </section>
 
 
-    <div
-      class="areaAnotacao"
-      id="areaAnotacao"
-      style="display: none;"
-    >
+    <div class="areaAnotacao" id="areaAnotacao" style="display: none;">
 
       <div class="anotacaoHeader">
 
@@ -479,44 +320,23 @@
           Nova Anotação
         </h2>
 
-        <button
-          class="btnFecharAnotacao"
-          id="btnFecharAnotacao"
-          type="button"
-        >
+        <button class="btnFecharAnotacao" id="btnFecharAnotacao" type="button">
           ✕
         </button>
 
       </div>
 
-      <input
-        type="text"
-        id="tituloAnotacao"
-        class="inputAnotacao"
-        placeholder="Título da anotação..."
-      >
+      <input type="text" id="tituloAnotacao" class="inputAnotacao" placeholder="Título da anotação...">
 
-      <textarea
-        id="textoAnotacao"
-        class="textareaAnotacao"
-        placeholder="Escreva suas anotações aqui..."
-      ></textarea>
+      <textarea id="textoAnotacao" class="textareaAnotacao" placeholder="Escreva suas anotações aqui..."></textarea>
 
       <div class="acoesAnotacao">
 
-        <button
-          class="btnSecundario"
-          id="btnCancelarAnotacao"
-          type="button"
-        >
+        <button class="btnSecundario" id="btnCancelarAnotacao" type="button">
           Cancelar
         </button>
 
-        <button
-          class="btnPrimario"
-          id="btnSalvarAnotacao"
-          type="button"
-        >
+        <button class="btnPrimario" id="btnSalvarAnotacao" type="button">
           Salvar anotação
         </button>
 
@@ -526,59 +346,24 @@
 
   </main>
 
-  <input
-    type="file"
-    id="inputArquivo"
-    multiple
-    accept="image/*,.pdf,.txt,.doc,.docx"
-    style="display: none;"
-  >
+  <input type="file" id="inputArquivo" multiple accept="image/*,.pdf,.txt,.doc,.docx" style="display: none;">
 
-  <div
-    class="dropdownMenu"
-    id="dropdownArquivo"
-  >
+  <div class="dropdownMenu" id="dropdownArquivo">
 
-    <button
-      class="dropItem"
-      data-acao="abrir"
-      type="button"
-    >
+    <button class="dropItem" data-acao="abrir" type="button">
 
-      <svg
-        width="16"
-        height="16"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-      >
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-        <circle
-          cx="12"
-          cy="12"
-          r="3"
-        />
+        <circle cx="12" cy="12" r="3" />
       </svg>
 
       Abrir
 
     </button>
 
-    <button
-      class="dropItem"
-      data-acao="narrar-completo"
-      type="button"
-    >
+    <button class="dropItem" data-acao="narrar-completo" type="button">
 
-      <svg
-        width="16"
-        height="16"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-      >
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <path d="M11 5 6 9H2v6h4l5 4V5Z" />
         <path d="M15.5 8.5a5 5 0 0 1 0 7" />
         <path d="M18.5 5.5a9 9 0 0 1 0 13" />
@@ -588,20 +373,9 @@
 
     </button>
 
-    <button
-      class="dropItem"
-      data-acao="narrar-resumo"
-      type="button"
-    >
+    <button class="dropItem" data-acao="narrar-resumo" type="button">
 
-      <svg
-        width="16"
-        height="16"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-      >
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <line x1="4" y1="6" x2="20" y2="6" />
         <line x1="4" y1="12" x2="14" y2="12" />
         <line x1="4" y1="18" x2="10" y2="18" />
@@ -610,20 +384,9 @@
       Narrar resumo
 
     </button>
-    <button
-      class="dropItem"
-      data-acao="ia"
-      type="button"
-    >
+    <button class="dropItem" data-acao="ia" type="button">
 
-      <svg
-        width="16"
-        height="16"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-      >
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <path d="M12 2a7 7 0 0 0-7 7c0 2.8 1.6 5.1 4 6.2V18a3 3 0 0 0 6 0v-2.8c2.4-1.1 4-3.4 4-6.2a7 7 0 0 0-7-7Z" />
         <path d="M9 21h6" />
         <path d="M10 9h4" />
@@ -634,48 +397,21 @@
 
     </button>
 
-    <button
-      class="dropItem"
-      data-acao="download"
-      type="button"
-    >
+    <button class="dropItem" data-acao="download" type="button">
 
-      <svg
-        width="16"
-        height="16"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-      >
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
         <polyline points="7 10 12 15 17 10" />
-        <line
-          x1="12"
-          y1="15"
-          x2="12"
-          y2="3"
-        />
+        <line x1="12" y1="15" x2="12" y2="3" />
       </svg>
 
       Baixar
 
     </button>
 
-    <button
-      class="dropItem dropDanger"
-      data-acao="excluir"
-      type="button"
-    >
+    <button class="dropItem dropDanger" data-acao="excluir" type="button">
 
-      <svg
-        width="16"
-        height="16"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-      >
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <polyline points="3 6 5 6 21 6" />
         <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
         <path d="M10 11v6" />
@@ -689,39 +425,21 @@
 
   </div>
 
-  <div
-    class="viewerOverlay"
-    id="viewerOverlay"
-  >
+  <div class="viewerOverlay" id="viewerOverlay">
 
     <div class="viewerModal">
 
 
       <div class="viewerHeader">
 
-        <span
-          class="viewerTitulo"
-          id="viewerTitulo"
-        ></span>
+        <span class="viewerTitulo" id="viewerTitulo"></span>
 
         <div class="viewerHeaderAcoes">
 
 
-          <button
-            class="btnEditarViewer btnSecundario"
-            id="btnEditarViewer"
-            type="button"
-            style="display: none;"
-          >
+          <button class="btnEditarViewer btnSecundario" id="btnEditarViewer" type="button" style="display: none;">
 
-            <svg
-              width="14"
-              height="14"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-            >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
 
               <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
@@ -729,45 +447,17 @@
             Editar
           </button>
 
-          <button
-            class="btnAbrirIAViewer"
-            id="btnAbrirIAViewer"
-            type="button"
-            title="Estudar com a JoviAI"
-          >
+          <button class="btnAbrirIAViewer" id="btnAbrirIAViewer" type="button" title="Estudar com a JoviAI">
             JoviAI
 
           </button>
 
-          <button
-            class="btnFecharViewer"
-            id="btnFecharViewer"
-            type="button"
-            title="Fechar"
-            aria-label="Fechar"
-          >
+          <button class="btnFecharViewer" id="btnFecharViewer" type="button" title="Fechar" aria-label="Fechar">
 
-            <svg
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2.5"
-            >
-              <line
-                x1="18"
-                y1="6"
-                x2="6"
-                y2="18"
-              />
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <line x1="18" y1="6" x2="6" y2="18" />
 
-              <line
-                x1="6"
-                y1="6"
-                x2="18"
-                y2="18"
-              />
+              <line x1="6" y1="6" x2="18" y2="18" />
             </svg>
 
           </button>
@@ -776,18 +466,11 @@
 
       </div>
 
-      <div
-        class="viewerCorpo"
-        id="viewerCorpo"
-      ></div>
+      <div class="viewerCorpo" id="viewerCorpo"></div>
 
-      <div
-        class="viewerIA"
-        id="viewerIA"
-        style="display: none;"
-      >
+      <div class="viewerIA" id="viewerIA" style="display: none;">
 
-      <div class="viewerIAHeader">
+        <div class="viewerIAHeader">
 
           <div class="viewerIAInfo">
 
@@ -818,60 +501,37 @@
 
         <div class="viewerIABotoes">
 
-          <button
-            type="button"
-            class="viewerIAButton"
-            data-ia="resumo"
-          >
+          <button type="button" class="viewerIAButton" data-ia="resumo">
             <span>📚</span>
             <span>Resumir</span>
           </button>
 
 
-          <button
-            type="button"
-            class="viewerIAButton"
-            data-ia="questoes"
-          >
+          <button type="button" class="viewerIAButton" data-ia="questoes">
             <span>📝</span>
             <span>Questões</span>
           </button>
 
 
-          <button
-            type="button"
-            class="viewerIAButton"
-            data-ia="flashcards"
-          >
+          <button type="button" class="viewerIAButton" data-ia="flashcards">
             <span>🧠</span>
             <span>Flashcards</span>
           </button>
 
 
-          <button
-            type="button"
-            class="viewerIAButton"
-            data-ia="simulado"
-          >
+          <button type="button" class="viewerIAButton" data-ia="simulado">
             <span>📋</span>
             <span>Simulado</span>
           </button>
 
 
-          <button
-            type="button"
-            class="viewerIAButton"
-            data-ia="explicar"
-          >
+          <button type="button" class="viewerIAButton" data-ia="explicar">
             <span>👨‍🏫</span>
             <span>Explicar</span>
           </button>
 
         </div>
-        <div
-          id="resultadoIAViewer"
-          class="resultadoIAViewer"
-        ></div>
+        <div id="resultadoIAViewer" class="resultadoIAViewer"></div>
 
       </div>
 
@@ -879,11 +539,7 @@
 
   </div>
 
-  <div
-    class="playerNarracao"
-    id="playerNarracao"
-    aria-hidden="true"
-  >
+  <div class="playerNarracao" id="playerNarracao" aria-hidden="true">
 
     <div class="playerTopo">
 
@@ -895,17 +551,11 @@
 
         <div class="playerTextos">
 
-          <span
-            class="playerTitulo"
-            id="playerTitulo"
-          >
+          <span class="playerTitulo" id="playerTitulo">
             Conteúdo narrado
           </span>
 
-          <span
-            class="playerStatus"
-            id="playerStatus"
-          >
+          <span class="playerStatus" id="playerStatus">
             Preparando...
           </span>
 
@@ -915,41 +565,18 @@
 
       <div class="playerAcoesTopo">
 
-        <button
-          class="playerSalvarMp3"
-          id="btnSalvarNarracaoMp3"
-          type="button"
-          title="Salvar narração em MP3"
-          aria-label="Salvar narração em MP3"
-        >
+        <button class="playerSalvarMp3" id="btnSalvarNarracaoMp3" type="button" title="Salvar narração em MP3"
+          aria-label="Salvar narração em MP3">
 
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-          >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
             <polyline points="7 10 12 15 17 10" />
-            <line
-              x1="12"
-              y1="15"
-              x2="12"
-              y2="3"
-            />
+            <line x1="12" y1="15" x2="12" y2="3" />
           </svg>
 
         </button>
 
-        <button
-          class="playerFechar"
-          id="playerFechar"
-          type="button"
-          title="Fechar"
-          aria-label="Fechar player"
-        >
+        <button class="playerFechar" id="playerFechar" type="button" title="Fechar" aria-label="Fechar player">
           ✕
         </button>
 
@@ -957,17 +584,11 @@
 
     </div>
 
-    <div
-      class="playerBarraWrapper"
-      id="playerBarraWrapper"
-    >
+    <div class="playerBarraWrapper" id="playerBarraWrapper">
 
       <div class="playerBarraFundo">
 
-        <div
-          class="playerBarraProgresso"
-          id="playerBarraProgresso"
-        ></div>
+        <div class="playerBarraProgresso" id="playerBarraProgresso"></div>
 
       </div>
 
@@ -975,65 +596,30 @@
 
     <div class="playerControles">
 
-      <span
-        class="playerParte"
-        id="playerParte"
-      ></span>
+      <span class="playerParte" id="playerParte"></span>
 
       <div class="playerBotoes">
 
-        <button
-          class="playerBtn"
-          id="playerVoltar"
-          type="button"
-          title="Parte anterior"
-          aria-label="Voltar"
-        >
+        <button class="playerBtn" id="playerVoltar" type="button" title="Parte anterior" aria-label="Voltar">
 
-          <svg
-            width="18"
-            height="18"
-            viewBox="0 0 24 24"
-            fill="currentColor"
-          >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
             <path d="M6 6h2v12H6zM20 6L10 12l10 6z" />
           </svg>
 
         </button>
 
-        <button
-          class="playerBtn playerBtnPlay"
-          id="playerPlayPause"
-          type="button"
-          title="Play/Pausa"
-          aria-label="Play ou pausa"
-        >
+        <button class="playerBtn playerBtnPlay" id="playerPlayPause" type="button" title="Play/Pausa"
+          aria-label="Play ou pausa">
 
-          <svg
-            width="22"
-            height="22"
-            viewBox="0 0 24 24"
-            fill="currentColor"
-          >
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
             <path d="M8 5v14l11-7z" />
           </svg>
 
         </button>
 
-        <button
-          class="playerBtn"
-          id="playerAvancar"
-          type="button"
-          title="Próxima parte"
-          aria-label="Avançar"
-        >
+        <button class="playerBtn" id="playerAvancar" type="button" title="Próxima parte" aria-label="Avançar">
 
-          <svg
-            width="18"
-            height="18"
-            viewBox="0 0 24 24"
-            fill="currentColor"
-          >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
             <path d="M16 6h2v12h-2zM4 6l10 6-10 6z" />
           </svg>
 
@@ -1041,13 +627,8 @@
 
       </div>
 
-      <button
-        class="playerVelocidade"
-        id="playerVelocidade"
-        type="button"
-        title="Velocidade de reprodução"
-        aria-label="Alterar velocidade de reprodução"
-      >
+      <button class="playerVelocidade" id="playerVelocidade" type="button" title="Velocidade de reprodução"
+        aria-label="Alterar velocidade de reprodução">
         1x
       </button>
 
@@ -1057,10 +638,7 @@
 
   <nav class="nav-mobile">
 
-    <a
-      href="../../index.html"
-      class="ativo"
-    >
+    <a href="../../index.html" class="ativo">
       <span class="nav-icone">
         🏠︎
       </span>
@@ -1083,10 +661,7 @@
 
     </a>
 
-    <a
-      href="../pages/camera.html"
-      class="nav-camera"
-    >
+    <a href="../pages/camera.html" class="nav-camera">
       <span class="nav-icone-camera">
         📷
       </span>
@@ -1114,50 +689,40 @@
 
   </nav>
 
-  <button
-      type="button"
-      id="botaoSuporte"
-      class="botao-suporte"
-      aria-label="Abrir suporte">
+  <button type="button" id="botaoSuporte" class="botao-suporte" aria-label="Abrir suporte">
 
-      <img src="../assets/img/logoSuporte.png" alt="Suporte"/>
+    <img src="../assets/img/logoSuporte.png" alt="Suporte" />
 
   </button>
 
-    <div id="chatbot" class="chatbot">
-        <div class="chatbot-header">
+  <div id="chatbot" class="chatbot">
+    <div class="chatbot-header">
 
-            <div class="chatbot-header-info">
-                <div>
-                    <h3>Suporte JoviClass</h3>
-                    <p>Como podemos ajudar?</p>
-                </div>
-            </div>
-
-            <button
-                type="button"
-                id="fecharChatbot"
-                class="fechar-chatbot"
-                aria-label="Fechar suporte">
-                ×
-            </button>
-
+      <div class="chatbot-header-info">
+        <div>
+          <h3>Suporte JoviClass</h3>
+          <p>Como podemos ajudar?</p>
         </div>
+      </div>
 
-        <div
-            id="conteudoChatbot"
-            class="conteudo-chatbot">
-            <p class="mensagem-bot">
-                Olá! 👋 Como posso ajudar?
-            </p>
-        </div>
+      <button type="button" id="fecharChatbot" class="fechar-chatbot" aria-label="Fechar suporte">
+        ×
+      </button>
+
     </div>
 
-    <!-- =====================================================
+    <div id="conteudoChatbot" class="conteudo-chatbot">
+      <p class="mensagem-bot">
+        Olá! 👋 Como posso ajudar?
+      </p>
+    </div>
+  </div>
+
+  <!-- =====================================================
        JAVASCRIPT DO CHATBOT
        ===================================================== -->
 
-    <script src="../js/suporte.js"></script>
+  <script src="../js/suporte.js"></script>
 
   <!-- Codificador MP3 (JS puro), usado para salvar a narração em áudio -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/lamejs/1.2.1/lame.min.js"></script>
