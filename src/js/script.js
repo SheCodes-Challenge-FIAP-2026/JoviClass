@@ -1936,6 +1936,435 @@ async function handleGoogleLogin(response) {
    VERIFICAR AUTENTICAÇÃO
 ========================================================= */
 
+async function carregarResumoReal() {
+    try {
+        const [
+            respostaMaterias,
+            respostaTarefas
+        ] = await Promise.all([
+            fetch(`${API_BASE}/materias`, {
+                credentials: "include"
+            }),
+
+            fetch(`${API_BASE}/tarefas`, {
+                credentials: "include"
+            })
+        ]);
+
+        if (
+            !respostaMaterias.ok ||
+            !respostaTarefas.ok
+        ) {
+            throw new Error(
+                "Não foi possível carregar o resumo."
+            );
+        }
+
+        const dadosMaterias =
+            await respostaMaterias.json();
+
+        const dadosTarefas =
+            await respostaTarefas.json();
+
+        const materias =
+            dadosMaterias.materias || [];
+
+        const tarefas =
+            dadosTarefas.tarefas || [];
+
+        const tarefasConcluidas =
+            tarefas.filter(
+                tarefa => tarefa.concluida === true
+            ).length;
+
+        const totalArquivos =
+            materias.reduce(
+                (total, materia) =>
+                    total + Number(materia.arquivos || 0),
+                0
+            );
+
+        const respostasAnotacoes =
+            await Promise.all(
+                materias.map(materia =>
+                    fetch(
+                        `${API_BASE}/materias/${materia.id}/anotacoes`,
+                        {
+                            credentials: "include"
+                        }
+                    )
+                )
+            );
+
+        let totalAnotacoes = 0;
+
+        for (const resposta of respostasAnotacoes) {
+            if (!resposta.ok) {
+                continue;
+            }
+
+            const dados = await resposta.json();
+
+            totalAnotacoes +=
+                (dados.anotacoes || []).length;
+        }
+
+        const porcentagem = tarefas.length
+            ? Math.round(
+                tarefasConcluidas /
+                tarefas.length *
+                100
+            )
+            : 0;
+
+        document.getElementById(
+            "statTarefas"
+        ).textContent = tarefasConcluidas;
+
+        document.getElementById(
+            "statMaterias"
+        ).textContent = materias.length;
+
+        document.getElementById(
+            "statAnotacoes"
+        ).textContent = totalAnotacoes;
+
+        document.getElementById(
+            "resumoMaterias"
+        ).textContent = materias.length;
+
+        document.getElementById(
+            "resumoArquivos"
+        ).textContent = totalArquivos;
+
+        document.getElementById(
+            "resumoAnotacoes"
+        ).textContent = totalAnotacoes;
+
+        document.getElementById(
+            "resumoTarefas"
+        ).textContent = tarefas.length;
+
+        document.getElementById(
+            "progressoPorcentagem"
+        ).textContent = `${porcentagem}%`;
+
+        document.getElementById(
+            "progressoAnel"
+        ).style.setProperty(
+            "--valor",
+            porcentagem
+        );
+
+        const barras = document.querySelectorAll(
+            ".progresso-barrinhas span"
+        );
+
+        const quantidadeAtiva = Math.round(
+            porcentagem / 100 * barras.length
+        );
+
+        barras.forEach((barra, indice) => {
+            barra.classList.toggle(
+                "ativa",
+                indice < quantidadeAtiva
+            );
+
+            barra.classList.remove("meio");
+        });
+    } catch (erro) {
+        console.error(
+            "Erro ao carregar resumo:",
+            erro
+        );
+    }
+}
+
+function escaparHTMLInicio(valor) {
+    return String(valor || "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+}
+
+function converterDataFirestore(valor) {
+    if (!valor) {
+        return 0;
+    }
+
+    if (typeof valor === "string") {
+        return new Date(valor).getTime();
+    }
+
+    const segundos =
+        valor._seconds ?? valor.seconds;
+
+    return segundos
+        ? Number(segundos) * 1000
+        : 0;
+}
+
+async function carregarListasInicio() {
+    try {
+        const [
+            respostaEventos,
+            respostaMaterias
+        ] = await Promise.all([
+            fetch(`${API_BASE}/eventos`, {
+                credentials: "include"
+            }),
+
+            fetch(`${API_BASE}/materias`, {
+                credentials: "include"
+            })
+        ]);
+
+        if (
+            !respostaEventos.ok ||
+            !respostaMaterias.ok
+        ) {
+            throw new Error(
+                "Não foi possível carregar os dados."
+            );
+        }
+
+        const dadosEventos =
+            await respostaEventos.json();
+
+        const dadosMaterias =
+            await respostaMaterias.json();
+
+        const eventos = dadosEventos.eventos || [];
+        const materias = dadosMaterias.materias || [];
+
+        renderizarProximasProvas(eventos);
+        await renderizarUltimosArquivos(materias);
+    } catch (erro) {
+        console.error(
+            "Erro ao carregar listas da página inicial:",
+            erro
+        );
+    }
+}
+
+function renderizarProximasProvas(eventos) {
+    const secao = document.getElementById(
+        "secaoProximasProvas"
+    );
+
+    if (!secao) {
+        return;
+    }
+
+    secao.querySelectorAll(".item").forEach(
+        item => item.remove()
+    );
+
+    const link = secao.querySelector(".ver-todos");
+
+    const hoje = new Date();
+    hoje.setHours(0, 0, 0, 0);
+
+    const provas = eventos
+        .filter(evento => {
+            const categoria =
+                String(evento.categoria || "")
+                    .toLowerCase();
+
+            const data = new Date(
+                `${evento.data}T00:00:00`
+            );
+
+            return (
+                categoria.includes("prova") &&
+                data >= hoje
+            );
+        })
+        .sort(
+            (a, b) =>
+                new Date(`${a.data}T00:00:00`) -
+                new Date(`${b.data}T00:00:00`)
+        )
+        .slice(0, 3);
+
+    if (!provas.length) {
+        link.insertAdjacentHTML(
+            "beforebegin",
+            `
+                <div class="item">
+                    <div class="detalhe">
+                        Nenhuma prova agendada.
+                    </div>
+                </div>
+            `
+        );
+
+        return;
+    }
+
+    provas.forEach(prova => {
+        const data = new Date(
+            `${prova.data}T00:00:00`
+        );
+
+        const diferenca = Math.ceil(
+            (data - hoje) / 86400000
+        );
+
+        const textoDias =
+            diferenca === 0
+                ? "Hoje"
+                : diferenca === 1
+                    ? "1 dia"
+                    : `${diferenca} dias`;
+
+        const html = `
+            <div class="item">
+                <div class="item-esq">
+                    <span class="item-icone roxo">
+                        📝
+                    </span>
+
+                    <div>
+                        <div class="nome">
+                            ${escaparHTMLInicio(prova.titulo)}
+                        </div>
+
+                        <div class="detalhe">
+                            ${data.toLocaleDateString("pt-BR")}
+                        </div>
+                    </div>
+                </div>
+
+                <span class="badge">
+                    ${textoDias}
+                </span>
+            </div>
+        `;
+
+        link.insertAdjacentHTML(
+            "beforebegin",
+            html
+        );
+    });
+}
+
+async function renderizarUltimosArquivos(materias) {
+    const secao = document.getElementById(
+        "secaoUltimosArquivos"
+    );
+
+    if (!secao) {
+        return;
+    }
+
+    secao.querySelectorAll(".item").forEach(
+        item => item.remove()
+    );
+
+    const link = secao.querySelector(".ver-todos");
+
+    const respostas = await Promise.all(
+        materias.map(async materia => {
+            const resposta = await fetch(
+                `${API_BASE}/materias/${materia.id}/arquivos`,
+                {
+                    credentials: "include"
+                }
+            );
+
+            if (!resposta.ok) {
+                return [];
+            }
+
+            const dados = await resposta.json();
+
+            return (dados.arquivos || []).map(
+                arquivo => ({
+                    ...arquivo,
+                    materiaId: materia.id,
+                    materiaNome: materia.nome
+                })
+            );
+        })
+    );
+
+    const arquivos = respostas
+        .flat()
+        .sort(
+            (a, b) =>
+                converterDataFirestore(b.criadoEm) -
+                converterDataFirestore(a.criadoEm)
+        )
+        .slice(0, 3);
+
+    if (!arquivos.length) {
+        link.insertAdjacentHTML(
+            "beforebegin",
+            `
+                <div class="item">
+                    <div class="detalhe">
+                        Nenhum arquivo adicionado.
+                    </div>
+                </div>
+            `
+        );
+
+        return;
+    }
+
+    arquivos.forEach(arquivo => {
+        const dataEmMilissegundos =
+            converterDataFirestore(arquivo.criadoEm);
+
+        const data = dataEmMilissegundos
+            ? new Date(dataEmMilissegundos)
+                .toLocaleDateString(
+                    "pt-BR",
+                    {
+                        day: "2-digit",
+                        month: "2-digit"
+                    }
+                )
+            : "";
+
+        const paginaMateria =
+            `./src/pages/paginaMateria.html?id=${encodeURIComponent(arquivo.materiaId)}&nome=${encodeURIComponent(arquivo.materiaNome)}`;
+
+        const html = `
+            <a class="item" href="${paginaMateria}">
+                <div class="item-esq">
+                    <span class="item-icone laranja">
+                        📄
+                    </span>
+
+                    <div>
+                        <div class="nome">
+                            ${escaparHTMLInicio(arquivo.nome)}
+                        </div>
+
+                        <div class="detalhe">
+                            ${escaparHTMLInicio(arquivo.materiaNome)}
+                            ${data ? ` · ${data}` : ""}
+                        </div>
+                    </div>
+                </div>
+
+                <span class="chevron">
+                    ›
+                </span>
+            </a>
+        `;
+
+        link.insertAdjacentHTML(
+            "beforebegin",
+            html
+        );
+    });
+}
+
 async function verificarAutenticacao() {
 
     try {
@@ -2106,8 +2535,12 @@ function liberarAplicacao() {
     */
 
     iniciarBalaoSuporte();
-    
+
     verificarConvitePendente();
+
+    carregarResumoReal();
+
+    carregarListasInicio();
 
 }
 

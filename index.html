@@ -518,7 +518,7 @@
 
     <section class="progresso-card">
 
-      <div class="progresso-anel" style="--valor: 78">
+      <div id="progressoAnel" class="progresso-anel" style="--valor: 0">
 
         <svg viewBox="0 0 120 120">
 
@@ -528,8 +528,8 @@
 
         </svg>
 
-        <div class="anel-texto">
-          78%
+        <div class="anel-texto" id="progressoPorcentagem">
+          0%
         </div>
 
       </div>
@@ -538,7 +538,7 @@
       <div class="progresso-info">
 
         <span class="progresso-label">
-          ✦ Seu progresso hoje
+          ✦ Seu progresso nas tarefas
         </span>
 
 
@@ -624,8 +624,8 @@
           Matérias
         </span>
 
-        <p>
-          6
+        <p id="resumoMaterias">
+          0
         </p>
 
       </div>
@@ -637,8 +637,8 @@
           Arquivos
         </span>
 
-        <p>
-          24
+        <p id="resumoArquivos">
+          0
         </p>
 
       </div>
@@ -650,8 +650,8 @@
           Anotações
         </span>
 
-        <p>
-          136
+        <p id="resumoAnotacoes">
+          0
         </p>
 
       </div>
@@ -663,8 +663,8 @@
           Tarefas
         </span>
 
-        <p>
-          8
+        <p id="resumoTarefas">
+          0
         </p>
 
       </div>
@@ -750,7 +750,7 @@
 
       <!-- PRÓXIMAS PROVAS -->
 
-      <div class="secao">
+      <div class="secao" id="secaoProximasProvas">
 
         <div class="secao-header">
 
@@ -869,7 +869,7 @@
 
       <!-- ÚLTIMOS ARQUIVOS -->
 
-      <div class="secao">
+      <div class="secao" id="secaoUltimosArquivos">
 
         <div class="secao-header">
 
