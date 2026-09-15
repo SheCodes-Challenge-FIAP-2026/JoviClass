@@ -17,9 +17,9 @@
   {
     "id": "1789167295767",
     "nome": "Paloma Dantas",
-    "curso": "",
+    "curso": "Engenharia de Software",
     "email": "paloma.carmo@yahoo.com",
-    "senha": "$2b$10$Jbv6/2cymQSmVsKiGZEd2.Jgrx7ZslJN0CQPbDCALZlFq21iXmIlK",
+    "senha": "$2b$10$7.0BnBJ39ocinBPG9KbR6edimec8C7nSok6KLA4mTdD.0Z9YrjbLG",
     "foto": null,
     "provedor": "email",
     "emailVerificado": true,
