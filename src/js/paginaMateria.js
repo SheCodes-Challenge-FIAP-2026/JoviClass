@@ -115,7 +115,11 @@ const chave = `arquivos_${materiaId}`;
 
 let itens = JSON
   .parse(localStorage.getItem(chave) || '[]')
-  .filter(item => item.tipo !== 'anotacao');
+  .filter(item =>
+    item.tipo === 'arquivo' &&
+    !item.nuvem &&
+    item.data !== 'Salvo na nuvem'
+  );
 
 async function carregarAnotacoesDoFirestore() {
   const resposta = await fetch(
@@ -143,6 +147,70 @@ async function carregarAnotacoesDoFirestore() {
   }));
 
   itens.push(...anotacoes);
+}
+
+async function carregarArquivosDoFirestore() {
+  const resposta = await fetch(
+    `${API_BASE}/materias/${materiaId}/arquivos`,
+    {
+      credentials: 'include'
+    }
+  );
+
+  const dados = await resposta.json();
+
+  if (!resposta.ok) {
+    throw new Error(
+      dados.erro ||
+      'Não foi possível carregar os arquivos.'
+    );
+  }
+
+  const arquivosDaNuvem = dados.arquivos.map(
+    arquivo => ({
+      id: arquivo.id,
+      nome: arquivo.nome,
+      tipo: 'arquivo',
+      ext: arquivo.nome.includes('.')
+        ? arquivo.nome.split('.').pop().toUpperCase()
+        : 'ARQUIVO',
+      mimeType: arquivo.tipo,
+      tamanho: arquivo.tamanho,
+      nuvem: true,
+      data: 'Salvo na nuvem'
+    })
+  );
+
+  itens = itens.filter(
+    item => item.tipo !== 'arquivo' || !item.nuvem
+  );
+
+  itens.push(...arquivosDaNuvem);
+}
+
+async function excluirArquivoArmazenado(item) {
+  if (item.nuvem) {
+    const resposta = await fetch(
+      `${API_BASE}/materias/${materiaId}/arquivos/${item.id}`,
+      {
+        method: 'DELETE',
+        credentials: 'include'
+      }
+    );
+
+    const dados = await resposta.json();
+
+    if (!resposta.ok) {
+      throw new Error(
+        dados.erro ||
+        'Não foi possível excluir o arquivo.'
+      );
+    }
+
+    return;
+  }
+
+  await dbDelete(`${materiaId}_${item.id}`);
 }
 
 let dropdownAlvoIndex = null;
@@ -2035,9 +2103,11 @@ function abrirEdicaoArquivo(index) {
       }
 
       try {
-        await dbDelete(`${materiaId}_${itemAtual.id}`);
+        await excluirArquivoArmazenado(itemAtual);
       } catch (erro) {
         console.warn('Erro ao excluir arquivo do armazenamento:', erro);
+        mostrarToast('⚠️ Não foi possível excluir o arquivo.');
+        return;
       }
 
       const origemResumoDoItem = `resumo_${itemAtual.id}`;
@@ -2136,35 +2206,60 @@ inputArquivo.addEventListener('change', async () => {
 
   try {
     for (const file of files) {
-      const ext = file.name.split('.').pop().toUpperCase();
-      const id = Date.now() + Math.random();
+      if (file.size > 10 * 1024 * 1024) {
+        throw new Error(
+          `O arquivo "${file.name}" ultrapassa 10 MB.`
+        );
+      }
 
-      const dataURL = await lerArquivoComoDataURL(file);
+      const formulario = new FormData();
 
-      await dbPut({
-        chaveId: `${materiaId}_${id}`,
-        dataURL,
-        mimeType: file.type
-      });
+      formulario.append('arquivo', file);
+
+      const resposta = await fetch(
+        `${API_BASE}/materias/${materiaId}/arquivos`,
+        {
+          method: 'POST',
+          credentials: 'include',
+          body: formulario
+        }
+      );
+
+      const dados = await resposta.json();
+
+      if (!resposta.ok) {
+        throw new Error(
+          dados.erro ||
+          `Não foi possível enviar "${file.name}".`
+        );
+      }
+
+      const extensao = file.name
+        .split('.')
+        .pop()
+        .toUpperCase();
 
       itens.push({
-        id,
-        nome: file.name,
+        id: dados.arquivo.id,
+        nome: dados.arquivo.nome,
         tipo: 'arquivo',
-        ext,
-        mimeType: file.type,
-        data: new Date().toLocaleDateString('pt-BR')
+        ext: extensao,
+        mimeType: dados.arquivo.tipo,
+        tamanho: dados.arquivo.tamanho,
+        nuvem: true,
+        data: 'Salvo na nuvem'
       });
     }
 
     salvar();
     renderizar();
 
-    mostrarToast(`📎 ${files.length} arquivo(s) adicionado(s)`);
-
+    mostrarToast(
+      `📎 ${files.length} arquivo(s) enviado(s)`
+    );
   } catch (erro) {
     console.error('Erro ao adicionar arquivo:', erro);
-    mostrarToast('⚠️ Não foi possível adicionar o arquivo.');
+    mostrarToast(`⚠️ ${erro.message}`);
   }
 
   inputArquivo.value = '';
@@ -2200,7 +2295,7 @@ dropdownArquivo.querySelectorAll('.dropItem').forEach(btn => {
       }
 
       if (item.tipo === 'arquivo') {
-        await dbDelete(`${materiaId}_${item.id}`);
+        await excluirArquivoArmazenado(item);
       }
 
       if (item.tipo === 'anotacao') {
@@ -2496,7 +2591,9 @@ btnSalvarAnotacao.addEventListener('click', async () => {
 
 function salvar() {
   const arquivosLocais = itens.filter(
-  item => item.tipo === 'arquivo'
+  item =>
+    item.tipo === 'arquivo' &&
+    !item.nuvem
   );
 
   localStorage.setItem(
@@ -3338,6 +3435,7 @@ async function inicializarPaginaMateria() {
   try {
     await abrirDB();
     await carregarAnotacoesDoFirestore();
+    await carregarArquivosDoFirestore();
 
     renderizarIconePlayPause();
     aplicarVelocidadeBotao();
