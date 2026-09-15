@@ -169,6 +169,47 @@ async function buscarArquivoDaMateria(
     };
 }
 
+async function renomearArquivoDaMateria(
+    usuarioId,
+    materiaId,
+    arquivoId,
+    novoNome
+) {
+    const materia = await buscarMateriaDoUsuario(
+        usuarioId,
+        materiaId
+    );
+
+    if (!materia) {
+        return null;
+    }
+
+    const referencia = materia
+        .collection("arquivos")
+        .doc(String(arquivoId));
+
+    const documento = await referencia.get();
+
+    if (!documento.exists) {
+        return null;
+    }
+
+    await referencia.update({
+        nome: String(novoNome).trim(),
+        atualizadoEm: FieldValue.serverTimestamp()
+    });
+
+    await materia.update({
+        atualizadoEm: FieldValue.serverTimestamp()
+    });
+
+    return {
+        id: documento.id,
+        ...documento.data(),
+        nome: String(novoNome).trim()
+    };
+}
+
 async function excluirArquivoDaMateria(
     usuarioId,
     materiaId,
@@ -214,5 +255,6 @@ module.exports = {
     listarArquivosDaMateria,
     salvarArquivoDaMateria,
     buscarArquivoDaMateria,
+    renomearArquivoDaMateria,
     excluirArquivoDaMateria
 };

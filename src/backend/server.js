@@ -18,7 +18,7 @@ const { listarTarefasDoUsuario, criarTarefaNoFirestore, atualizarTarefaNoFiresto
 const { listarEventosDoUsuario, criarEventoNoFirestore, atualizarEventoNoFirestore, excluirEventoNoFirestore } = require("./services/eventosFirestore");
 const { listarComunidadesDoUsuario, criarComunidadeNoFirestore, atualizarComunidadeNoFirestore, excluirComunidadeNoFirestore, criarConviteNaComunidade } = require("./services/comunidadesFirestore");
 const { listarAnotacoesDaMateria, criarAnotacaoNoFirestore, atualizarAnotacaoNoFirestore, excluirAnotacaoNoFirestore } = require("./services/anotacoesFirestore");
-const { listarArquivosDaMateria, salvarArquivoDaMateria, buscarArquivoDaMateria, excluirArquivoDaMateria } = require("./services/arquivosMateria");
+const { listarArquivosDaMateria, salvarArquivoDaMateria, buscarArquivoDaMateria, renomearArquivoDaMateria, excluirArquivoDaMateria } = require("./services/arquivosMateria");
 
 const { OAuth2Client } = require("google-auth-library");
 const { GoogleGenAI } = require("@google/genai");
@@ -3696,6 +3696,49 @@ app.get(
                     erro: "Erro ao abrir arquivo."
                 });
             }
+        }
+    }
+);
+
+app.put(
+    "/materias/:materiaId/arquivos/:arquivoId",
+    exigirLogin,
+    async (req, res) => {
+        try {
+            const nome = String(req.body.nome || "").trim();
+
+            if (!nome) {
+                return res.status(400).json({
+                    sucesso: false,
+                    erro: "Informe o novo nome do arquivo."
+                });
+            }
+
+            const arquivo = await renomearArquivoDaMateria(
+                req.session.usuario.id,
+                req.params.materiaId,
+                req.params.arquivoId,
+                nome
+            );
+
+            if (!arquivo) {
+                return res.status(404).json({
+                    sucesso: false,
+                    erro: "Arquivo não encontrado."
+                });
+            }
+
+            return res.json({
+                sucesso: true,
+                arquivo
+            });
+        } catch (erro) {
+            console.error("❌ Erro ao renomear arquivo:", erro);
+
+            return res.status(500).json({
+                sucesso: false,
+                erro: "Erro interno ao renomear o arquivo."
+            });
         }
     }
 );

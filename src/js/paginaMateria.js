@@ -101,6 +101,42 @@ function dbGet(chaveId) {
   });
 }
 
+function converterBlobParaDataURL(blob) {
+  return new Promise((resolve, reject) => {
+    const leitor = new FileReader();
+
+    leitor.onload = () => resolve(leitor.result);
+    leitor.onerror = () => reject(leitor.error);
+
+    leitor.readAsDataURL(blob);
+  });
+}
+
+async function obterArquivoArmazenado(item) {
+  if (!item.nuvem) {
+    return await dbGet(`${materiaId}_${item.id}`);
+  }
+
+  const resposta = await fetch(
+    `${API_BASE}/materias/${materiaId}/arquivos/${item.id}`,
+    {
+      credentials: 'include'
+    }
+  );
+
+  if (!resposta.ok) {
+    throw new Error('Não foi possível carregar o arquivo da nuvem.');
+  }
+
+  const blob = await resposta.blob();
+  const dataURL = await converterBlobParaDataURL(blob);
+
+  return {
+    dataURL,
+    mimeType: blob.type || item.mimeType
+  };
+}
+
 function dbDelete(chaveId) {
   return new Promise((resolve, reject) => {
     const tx = db.transaction(STORE_NAME, 'readwrite');
@@ -1417,7 +1453,7 @@ async function processarItemNarracao(item, indice, total) {
   }
 
   if (item.tipo === 'arquivo') {
-    const registro = await dbGet(`${materiaId}_${item.id}`);
+    const registro = await obterArquivoArmazenado(item);
 
     if (!registro) {
       console.warn(`Arquivo não encontrado: ${item.nome}`);
@@ -1776,7 +1812,7 @@ async function abrirViewer(idx) {
     }
 
   } else {
-    const registro = await dbGet(`${materiaId}_${item.id}`);
+    const registro = await obterArquivoArmazenado(item);
 
     if (!registro) {
       viewerCorpo.innerHTML = `
@@ -2053,22 +2089,48 @@ function abrirEdicaoArquivo(index) {
   });
 
   caixa.querySelector('#btnSalvarNomeEdicaoArquivo')
-    .addEventListener('click', () => {
-      const novoNome = inputNome.value.trim();
+  .addEventListener('click', async () => {
+    const novoNome = inputNome.value.trim();
 
-      if (!novoNome) {
-        inputNome.classList.add('erro');
-        inputNome.focus();
-        return;
-      }
+    if (!novoNome) {
+      inputNome.classList.add('erro');
+      inputNome.focus();
+      return;
+    }
 
-      inputNome.classList.remove('erro');
+    inputNome.classList.remove('erro');
 
-      const itemAtual = itens[index];
+    const itemAtual = itens[index];
 
-      if (!itemAtual) {
-        fecharModalEdicaoArquivo();
-        return;
+    if (!itemAtual) {
+      fecharModalEdicaoArquivo();
+      return;
+    }
+
+    try {
+      if (itemAtual.nuvem) {
+        const resposta = await fetch(
+          `${API_BASE}/materias/${materiaId}/arquivos/${itemAtual.id}`,
+          {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            credentials: 'include',
+            body: JSON.stringify({
+              nome: novoNome
+            })
+          }
+        );
+
+        const dados = await resposta.json();
+
+        if (!resposta.ok) {
+          throw new Error(
+            dados.erro ||
+            'Não foi possível renomear o arquivo.'
+          );
+        }
       }
 
       itemAtual.nome = novoNome;
@@ -2083,7 +2145,15 @@ function abrirEdicaoArquivo(index) {
       if (viewerOverlay.classList.contains('aberto')) {
         abrirViewer(index);
       }
-    });
+    } catch (erro) {
+      console.error('Erro ao renomear arquivo:', erro);
+
+      mostrarToast(
+        '⚠️ Não foi possível renomear o arquivo.'
+      );
+    }
+  });
+
 
   caixa.querySelector('#btnExcluirImagemEdicaoArquivo')
     .addEventListener('click', async () => {
@@ -2426,7 +2496,7 @@ dropdownArquivo.querySelectorAll('.dropItem').forEach(btn => {
       baixar(URL.createObjectURL(blob), item.nome + '.txt');
 
     } else {
-      const registro = await dbGet(`${materiaId}_${item.id}`);
+      const registro = await obterArquivoArmazenado(item);
 
       if (registro) {
         baixar(registro.dataURL, item.nome);
