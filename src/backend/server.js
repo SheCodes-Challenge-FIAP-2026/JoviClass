@@ -16,10 +16,9 @@ const { salvarPerfilNoFirestore, buscarPerfilNoFirestore } = require("./services
 const { listarMateriasDoUsuario, criarMateriaNoFirestore, atualizarMateriaNoFirestore, excluirMateriaNoFirestore, atualizarCompartilhamentoNoFirestore } = require("./services/materiasFirestore");
 const { listarTarefasDoUsuario, criarTarefaNoFirestore, atualizarTarefaNoFirestore, excluirTarefaNoFirestore } = require("./services/tarefasFirestore");
 const { listarEventosDoUsuario, criarEventoNoFirestore, atualizarEventoNoFirestore, excluirEventoNoFirestore } = require("./services/eventosFirestore");
-const { listarComunidadesDoUsuario, criarComunidadeNoFirestore, atualizarComunidadeNoFirestore, excluirComunidadeNoFirestore, criarConviteNaComunidade, entrarNaComunidadePorLink } = require("./services/comunidadesFirestore");
+const { listarComunidadesDoUsuario, criarComunidadeNoFirestore, atualizarComunidadeNoFirestore, excluirComunidadeNoFirestore, entrarNaComunidadePorLink, listarMembrosDaComunidade, removerMembroDaComunidade, sairDaComunidade, nomearAdministrador, removerAdministrador } = require("./services/comunidadesFirestore");
 const { listarAnotacoesDaMateria, criarAnotacaoNoFirestore, atualizarAnotacaoNoFirestore, excluirAnotacaoNoFirestore } = require("./services/anotacoesFirestore");
 const { listarArquivosDaMateria, salvarArquivoDaMateria, buscarArquivoDaMateria, renomearArquivoDaMateria, excluirArquivoDaMateria } = require("./services/arquivosMateria");
-
 const { OAuth2Client } = require("google-auth-library");
 const { GoogleGenAI } = require("@google/genai");
 
@@ -3371,98 +3370,202 @@ app.post(
     }
 );
 
-
 // ======================================================
-// COMUNIDADES — ADICIONAR MEMBRO POR E-MAIL
+// COMUNIDADES — LISTAR MEMBROS
 // ======================================================
 
-app.post(
-    "/comunidades/:id/convites",
+app.get(
+    "/comunidades/:id/membros",
     exigirLogin,
     async (req, res) => {
         try {
-            const email = String(
-                req.body.email || ""
-            )
-                .trim()
-                .toLowerCase();
-
-            if (!email || !email.includes("@")) {
-                return res.status(400).json({
-                    sucesso: false,
-                    erro: "Informe um e-mail válido."
-                });
-            }
-
-            if (
-                email ===
-                String(req.session.usuario.email)
-                    .trim()
-                    .toLowerCase()
-            ) {
-                return res.status(400).json({
-                    sucesso: false,
-                    erro: "Você já é o criador desta comunidade."
-                });
-            }
-
-            const usuarios = lerUsuarios();
-
-            const usuarioConvidado = usuarios.find(
-                usuario =>
-                    String(usuario.email || "")
-                        .trim()
-                        .toLowerCase() === email
-            );
-
-            if (!usuarioConvidado) {
-                return res.status(404).json({
-                    sucesso: false,
-                    erro: "Esse e-mail ainda não possui uma conta no JoviClass."
-                });
-            }
-
-            const convite =
-                await criarConviteNaComunidade(
+            const membros =
+                await listarMembrosDaComunidade(
                     req.session.usuario.id,
-                    req.params.id,
-                    email
+                    req.params.id
                 );
 
-            if (!convite) {
+            if (!membros) {
                 return res.status(403).json({
                     sucesso: false,
-                    erro: "Somente o criador pode enviar convites."
+                    erro: "Comunidade não encontrada ou sem permissão."
                 });
             }
 
-            if (convite.usuarioNaoEncontrado) {
-                return res.status(404).json({
-                    sucesso: false,
-                    erro: "Esse e-mail ainda não possui uma conta no JoviClass."
-                });
-            }
-
-            if (convite.duplicado) {
-                return res.status(409).json({
-                    sucesso: false,
-                    erro: "Esse usuário já foi convidado."
-                });
-            }
-
-            return res.status(201).json({
+            return res.json({
                 sucesso: true,
-                convite
+                membros
             });
         } catch (erro) {
             console.error(
-                "❌ Erro ao criar convite:",
+                "❌ Erro ao listar membros:",
                 erro
             );
 
             return res.status(500).json({
                 sucesso: false,
-                erro: "Erro interno ao criar convite."
+                erro: "Erro interno ao listar membros."
+            });
+        }
+    }
+);
+
+
+
+// ======================================================
+// COMUNIDADES — REMOVER MEMBRO
+// ======================================================
+
+app.delete(
+    "/comunidades/:id/membros/:membroId",
+    exigirLogin,
+    async (req, res) => {
+        try {
+            const removido =
+                await removerMembroDaComunidade(
+                    req.session.usuario.id,
+                    req.params.id,
+                    req.params.membroId
+                );
+
+            if (!removido) {
+                return res.status(403).json({
+                    sucesso: false,
+                    erro: "Você não pode remover esse membro."
+                });
+            }
+
+            return res.json({
+                sucesso: true
+            });
+        } catch (erro) {
+            console.error(
+                "❌ Erro ao remover membro:",
+                erro
+            );
+
+            return res.status(500).json({
+                sucesso: false,
+                erro: "Erro interno ao remover membro."
+            });
+        }
+    }
+);
+
+// ======================================================
+// COMUNIDADES — SAIR DA COMUNIDADE
+// ======================================================
+
+app.delete(
+    "/comunidades/:id/sair",
+    exigirLogin,
+    async (req, res) => {
+        try {
+            const saiu =
+                await sairDaComunidade(
+                    req.session.usuario.id,
+                    req.params.id
+                );
+
+            if (!saiu) {
+                return res.status(403).json({
+                    sucesso: false,
+                    erro: "O criador não pode sair da própria comunidade."
+                });
+            }
+
+            return res.json({
+                sucesso: true
+            });
+        } catch (erro) {
+            console.error(
+                "❌ Erro ao sair da comunidade:",
+                erro
+            );
+
+            return res.status(500).json({
+                sucesso: false,
+                erro: "Erro interno ao sair da comunidade."
+            });
+        }
+    }
+);
+
+// ======================================================
+// COMUNIDADES — NOMEAR ADMINISTRADOR
+// ======================================================
+
+app.put(
+    "/comunidades/:id/membros/:membroId/administrador",
+    exigirLogin,
+    async (req, res) => {
+        try {
+            const nomeado =
+                await nomearAdministrador(
+                    req.session.usuario.id,
+                    req.params.id,
+                    req.params.membroId
+                );
+
+            if (!nomeado) {
+                return res.status(403).json({
+                    sucesso: false,
+                    erro: "Somente o criador pode nomear administradores."
+                });
+            }
+
+            return res.json({
+                sucesso: true
+            });
+        } catch (erro) {
+            console.error(
+                "❌ Erro ao nomear administrador:",
+                erro
+            );
+
+            return res.status(500).json({
+                sucesso: false,
+                erro: "Erro interno ao nomear administrador."
+            });
+        }
+    }
+);
+
+// ======================================================
+// COMUNIDADES — REMOVER ADMINISTRADOR
+// ======================================================
+
+app.delete(
+    "/comunidades/:id/membros/:membroId/administrador",
+    exigirLogin,
+    async (req, res) => {
+        try {
+            const removido =
+                await removerAdministrador(
+                    req.session.usuario.id,
+                    req.params.id,
+                    req.params.membroId
+                );
+
+            if (!removido) {
+                return res.status(403).json({
+                    sucesso: false,
+                    erro: "Somente o criador pode remover administradores."
+                });
+            }
+
+            return res.json({
+                sucesso: true
+            });
+        } catch (erro) {
+            console.error(
+                "❌ Erro ao remover administrador:",
+                erro
+            );
+
+            return res.status(500).json({
+                sucesso: false,
+                erro: "Erro interno ao remover administrador."
             });
         }
     }

@@ -112,37 +112,52 @@
         </div>
 
         <div id="menuOpcoes">
-            <button onclick="acaoMenuOpcoes('convidar')">🔗 Convidar membros</button>
-            <button onclick="acaoMenuOpcoes('editar')">✏️ Editar comunidade</button>
-            <button onclick="acaoMenuOpcoes('excluir')" class="btnExcluir">🗑️ Excluir comunidade</button>
+            <button type="button" onclick="acaoMenuOpcoes('membros')">
+                👥 Gerenciar membros
+            </button>
+            <button type="button" id="btnEditarComunidade" onclick="acaoMenuOpcoes('editar')">
+                ✏️ Editar comunidade
+            </button>
+            <button type="button" id="btnSairComunidade" onclick="acaoMenuOpcoes('sair')">
+                🚪 Sair da comunidade
+            </button>
+            <button type="button" id="btnExcluirComunidade" onclick="acaoMenuOpcoes('excluir')" class="btnExcluir">
+                🗑️ Excluir comunidade
+            </button>
         </div>
 
         <div id="modalConvidar">
             <div id="conteudoConvidar">
                 <button type="button" onclick="fecharModalConvidar()" id="fecharConvidar">✕</button>
-                <h2>Convidar para a Comunidade</h2>
-                <p class="subtituloConvidar">Compartilhe o link abaixo para convidar outros estudantes.</p>
 
-                <div class="linkConvite">
-                    <input type="text" id="inputLinkConvite" readonly>
-                    <button type="button" onclick="copiarLink()" id="btnCopiarLink">Copiar</button>
+                <h2>Gestão de membros</h2>
+
+                <div id="areaAdicionarMembro">
+                    <p class="subtituloConvidar">
+                        Compartilhe o link para outra pessoa entrar na comunidade.
+                    </p>
+
+                    <div class="linkConvite">
+                        <input type="text" id="inputLinkConvite" readonly>
+                        <button type="button" onclick="copiarLink()" id="btnCopiarLink">Copiar</button>
+                    </div>
+
+                    <div id="statusCopiar"></div>
+
+                    <div class="divisorConvidar">
+                        <span>ou adicione por e-mail</span>
+                    </div>
+
+                    <label for="emailConvite">E-mail do estudante:</label>
+                    <div class="emailRow">
+                        <input type="email" id="emailConvite" placeholder="exemplo@email.com">
+                        <button type="button" onclick="adicionarMembroEmail()">Adicionar</button>
+                    </div>
                 </div>
 
-                <div id="statusCopiar"></div>
-
-                <div class="divisorConvidar">
-                    <span>ou convide por e-mail</span>
-                </div>
-
-                <label for="emailConvite">E-mail do estudante:</label>
-                <div class="emailRow">
-                    <input type="email" id="emailConvite" placeholder="exemplo@email.com">
-                    <button type="button" onclick="enviarConviteEmail()">Enviar convite</button>
-                </div>
-
-                <div id="listaConvidados">
-                    <p class="labelConvidados">Convites enviados:</p>
-                    <div id="convidadosItens"></div>
+                <div id="listaMembros">
+                    <p class="labelConvidados">Membros da comunidade:</p>
+                    <div id="membrosItens"></div>
                 </div>
             </div>
         </div>

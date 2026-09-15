@@ -56,6 +56,7 @@ const dadosSalas = {};
 const dadosComunidades = {};
 
 let comunidadeAtiva = null;
+let usuarioAtual = null;
 
 function salvarNoStorage() {
     try {
@@ -67,7 +68,6 @@ function salvarNoStorage() {
                 descricao: com.descricao,
                 categoria: com.categoria,
                 privacidade: com.privacidade,
-                convidados: com.convidados,
                 regras: com.regras || REGRAS_PADRAO
             };
         });
@@ -466,6 +466,7 @@ async function salvarEdicao(id) {
 function abrirMenuOpcoesCard(event, id) {
     event.stopPropagation();
     comunidadeAtiva = id;
+    configurarMenuPermissoes();
 
     const menu = document.getElementById("menuOpcoes");
     const overlay = document.getElementById("overlayMenu");
@@ -481,6 +482,7 @@ function abrirMenuOpcoesCard(event, id) {
 
 function abrirMenuOpcoesPagina(event) {
     event.stopPropagation();
+    configurarMenuPermissoes();
 
     const menu = document.getElementById("menuOpcoes");
     const overlay = document.getElementById("overlayMenu");
@@ -499,19 +501,67 @@ function fecharMenuOpcoes() {
     document.getElementById("overlayMenu").style.display = "none";
 }
 
+function usuarioEhCriador(comunidade) {
+    return !!usuarioAtual &&
+        String(comunidade.criadorId) === String(usuarioAtual.id);
+}
+
+function usuarioEhAdministrador(comunidade) {
+    if (!usuarioAtual || !comunidade) return false;
+
+    const administradores = comunidade.administradores || [
+        String(comunidade.criadorId)
+    ];
+
+    return administradores
+        .map(String)
+        .includes(String(usuarioAtual.id));
+}
+
+function configurarMenuPermissoes() {
+    const comunidade = dadosComunidades[comunidadeAtiva];
+    if (!comunidade) return;
+
+    const criador = usuarioEhCriador(comunidade);
+    const administrador = usuarioEhAdministrador(comunidade);
+
+    const btnEditar = document.getElementById("btnEditarComunidade");
+    const btnExcluir = document.getElementById("btnExcluirComunidade");
+    const btnSair = document.getElementById("btnSairComunidade");
+
+    if (btnEditar) {
+        btnEditar.style.display = administrador ? "block" : "none";
+    }
+
+    if (btnExcluir) {
+        btnExcluir.style.display = criador ? "block" : "none";
+    }
+
+    if (btnSair) {
+        btnSair.style.display = criador ? "none" : "block";
+    }
+}
+
 function acaoMenuOpcoes(acao) {
     fecharMenuOpcoes();
 
     if (!comunidadeAtiva) return;
-    const com = dadosComunidades[comunidadeAtiva];
-    if (!com) return;
 
-    if (acao === "convidar") {
-        abrirModalConvidar(comunidadeAtiva);
+    const comunidade = dadosComunidades[comunidadeAtiva];
+    if (!comunidade) return;
+
+    if (acao === "membros") {
+        abrirModalMembros(comunidadeAtiva);
     } else if (acao === "editar") {
         abrirFormularioEdicao(comunidadeAtiva);
+    } else if (acao === "sair") {
+        sairDaComunidade(comunidadeAtiva);
     } else if (acao === "excluir") {
-        if (confirm(`Tem certeza que deseja excluir a comunidade "${com.nome}"?`)) {
+        if (
+            confirm(
+                `Tem certeza que deseja excluir a comunidade "${comunidade.nome}"?`
+            )
+        ) {
             excluirComunidade(comunidadeAtiva);
         }
     }
@@ -570,18 +620,36 @@ async function excluirComunidade(id) {
     }
 }
 
-function abrirModalConvidar(id) {
+async function abrirModalMembros(id) {
     comunidadeAtiva = id;
 
-    const link = `${window.location.origin}/src/pages/comunidade.html?convite=${encodeURIComponent(id)}`;
-    document.getElementById("inputLinkConvite").value = link;
-    document.getElementById("statusCopiar").textContent = "";
-    document.getElementById("emailConvite").value = "";
+    const comunidade = dadosComunidades[id];
+    if (!comunidade) return;
 
-    renderizarConvidados(id);
+    const link = `${window.location.origin}/src/pages/comunidade.html?convite=${encodeURIComponent(id)}`;
+    const inputLink = document.getElementById("inputLinkConvite");
+    const status = document.getElementById("statusCopiar");
+    const emailInput = document.getElementById("emailConvite");
+    const areaAdicionar = document.getElementById("areaAdicionarMembro");
+
+    if (inputLink) inputLink.value = link;
+    if (status) status.textContent = "";
+    if (emailInput) emailInput.value = "";
+
+    if (areaAdicionar) {
+        areaAdicionar.style.display = usuarioEhAdministrador(comunidade)
+            ? "block"
+            : "none";
+    }
 
     document.getElementById("modalConvidar").style.display = "flex";
     document.getElementById("overlay").style.display = "block";
+
+    await carregarMembros(id);
+}
+
+function abrirModalConvidar(id) {
+    abrirModalMembros(id);
 }
 
 function fecharModalConvidar() {
@@ -618,7 +686,7 @@ function mostrarStatusCopiar(msg) {
     setTimeout(() => { status.textContent = ""; }, 3000);
 }
 
-async function enviarConviteEmail() {
+async function adicionarMembroEmail() {
     const emailInput =
         document.getElementById("emailConvite");
 
@@ -635,28 +703,9 @@ async function enviarConviteEmail() {
         return;
     }
 
-    const comunidade =
-        dadosComunidades[comunidadeAtiva];
-
-    if (!comunidade) {
-        return;
-    }
-
-    const convidados = comunidade.convidados || [];
-
-    if (
-        convidados.some(
-            convidado =>
-                convidado.email.toLowerCase() === email
-        )
-    ) {
-        alert("Esse usuário já faz parte da comunidade.");
-        return;
-    }
-
     try {
         const resposta = await fetch(
-            `${API_BASE}/comunidades/${comunidadeAtiva}/convites`,
+            `${API_BASE}/comunidades/${comunidadeAtiva}/membros`,
             {
                 method: "POST",
 
@@ -681,18 +730,10 @@ async function enviarConviteEmail() {
             );
         }
 
-        comunidade.convidados = [
-            ...convidados,
-            {
-                email: dados.convite.email,
-                status: dados.convite.status || "membro"
-            }
-        ];
-
         emailInput.value = "";
 
-        renderizarConvidados(comunidadeAtiva);
-        renderizarConvidadosPasta(comunidadeAtiva);
+        await carregarMembros(comunidadeAtiva);
+        await carregarComunidadesDoFirestore();
 
         alert("Membro adicionado!");
 
@@ -706,42 +747,210 @@ async function enviarConviteEmail() {
     }
 }
 
-function renderizarConvidados(id) {
-    const com = dadosComunidades[id];
-    const container = document.getElementById("convidadosItens");
+async function carregarMembros(id) {
+    const container = document.getElementById("membrosItens");
+    if (!container) return;
+
+    container.innerHTML = "<p>Carregando membros...</p>";
+
+    try {
+        const resposta = await fetch(
+            `${API_BASE}/comunidades/${encodeURIComponent(id)}/membros`,
+            {
+                credentials: "include"
+            }
+        );
+
+        const dados = await resposta.json();
+
+        if (!resposta.ok) {
+            throw new Error(
+                dados.erro ||
+                "Não foi possível carregar os membros."
+            );
+        }
+
+        renderizarMembros(dados.membros || []);
+    } catch (erro) {
+        console.error("Erro ao carregar membros:", erro);
+        container.innerHTML = `<p>${erro.message}</p>`;
+    }
+}
+
+function renderizarMembros(membros) {
+    const container = document.getElementById("membrosItens");
+    const comunidade = dadosComunidades[comunidadeAtiva];
+
+    if (!container || !comunidade) return;
+
     container.innerHTML = "";
 
-    if (!com || com.convidados.length === 0) {
-        document.getElementById("listaConvidados").style.display = "none";
+    if (membros.length === 0) {
+        container.innerHTML = "<p>Nenhum membro encontrado.</p>";
         return;
     }
 
-    document.getElementById("listaConvidados").style.display = "block";
+    const usuarioCriador = usuarioEhCriador(comunidade);
+    const usuarioAdministrador = usuarioEhAdministrador(comunidade);
 
-    com.convidados.forEach((c, idx) => {
+    membros.forEach(membro => {
         const item = document.createElement("div");
         item.classList.add("convidadoItem");
-        item.innerHTML = `
-            <div class="convidadoEmail">
-                <span class="iconEmail">✉️</span>
-                <span>${c.email}</span>
-            </div>
-            <div class="convidadoAcoes">
-                <span class="badgePendente">
-                    ${c.status === "aceito" ? "Membro" : "Pendente"}
-                </span>
-                <button class="btnRemoverConvite" onclick="removerConvite('${id}', ${idx})" title="Remover convite">✕</button>
-            </div>
-        `;
+
+        const info = document.createElement("div");
+        info.classList.add("convidadoEmail");
+
+        const icone = document.createElement("span");
+        icone.classList.add("iconEmail");
+        icone.textContent = membro.foto ? "👤" : "👤";
+
+        const identificacao = document.createElement("div");
+        const nome = document.createElement("strong");
+        const email = document.createElement("div");
+
+        nome.textContent = membro.nome || "Usuário";
+        email.textContent = membro.email || "";
+
+        identificacao.appendChild(nome);
+        identificacao.appendChild(email);
+        info.appendChild(icone);
+        info.appendChild(identificacao);
+
+        const acoes = document.createElement("div");
+        acoes.classList.add("convidadoAcoes");
+
+        const cargo = document.createElement("span");
+        cargo.classList.add("badgePendente");
+        cargo.textContent = membro.criador
+            ? "Criador"
+            : membro.administrador
+                ? "Administrador"
+                : "Membro";
+
+        acoes.appendChild(cargo);
+
+        if (usuarioCriador && !membro.criador) {
+            const btnAdministrador = document.createElement("button");
+            btnAdministrador.type = "button";
+            btnAdministrador.classList.add("btnRemoverConvite");
+            btnAdministrador.textContent = membro.administrador ? "− Admin" : "+ Admin";
+            btnAdministrador.onclick = () =>
+                alterarAdministrador(membro.id, !membro.administrador);
+            acoes.appendChild(btnAdministrador);
+        }
+
+        const podeRemover =
+            !membro.criador &&
+            (
+                usuarioCriador ||
+                (usuarioAdministrador && !membro.administrador)
+            );
+
+        if (podeRemover) {
+            const btnRemover = document.createElement("button");
+            btnRemover.type = "button";
+            btnRemover.classList.add("btnRemoverConvite");
+            btnRemover.textContent = "✕";
+            btnRemover.title = "Remover membro";
+            btnRemover.onclick = () => removerMembro(membro.id, membro.nome);
+            acoes.appendChild(btnRemover);
+        }
+
+        item.appendChild(info);
+        item.appendChild(acoes);
         container.appendChild(item);
     });
 }
 
-function removerConvite(id, idx) {
-    dadosComunidades[id].convidados.splice(idx, 1);
-    salvarNoStorage();
-    renderizarConvidados(id);
-    renderizarConvidadosPasta(id);
+async function removerMembro(membroId, nome) {
+    if (!confirm(`Remover ${nome || "este membro"} da comunidade?`)) {
+        return;
+    }
+
+    try {
+        const resposta = await fetch(
+            `${API_BASE}/comunidades/${comunidadeAtiva}/membros/${encodeURIComponent(membroId)}`,
+            {
+                method: "DELETE",
+                credentials: "include"
+            }
+        );
+
+        const dados = await resposta.json();
+
+        if (!resposta.ok) {
+            throw new Error(dados.erro || "Não foi possível remover o membro.");
+        }
+
+        await carregarMembros(comunidadeAtiva);
+        await carregarComunidadesDoFirestore();
+    } catch (erro) {
+        console.error("Erro ao remover membro:", erro);
+        alert(erro.message);
+    }
+}
+
+async function alterarAdministrador(membroId, tornarAdministrador) {
+    try {
+        const resposta = await fetch(
+            `${API_BASE}/comunidades/${comunidadeAtiva}/membros/${encodeURIComponent(membroId)}/administrador`,
+            {
+                method: tornarAdministrador ? "PUT" : "DELETE",
+                credentials: "include"
+            }
+        );
+
+        const dados = await resposta.json();
+
+        if (!resposta.ok) {
+            throw new Error(
+                dados.erro ||
+                "Não foi possível alterar o administrador."
+            );
+        }
+
+        await carregarComunidadesDoFirestore();
+        await carregarMembros(comunidadeAtiva);
+    } catch (erro) {
+        console.error("Erro ao alterar administrador:", erro);
+        alert(erro.message);
+    }
+}
+
+async function sairDaComunidade(id) {
+    const comunidade = dadosComunidades[id];
+
+    if (!comunidade) return;
+
+    if (!confirm(`Deseja sair da comunidade "${comunidade.nome}"?`)) {
+        return;
+    }
+
+    try {
+        const resposta = await fetch(
+            `${API_BASE}/comunidades/${id}/sair`,
+            {
+                method: "DELETE",
+                credentials: "include"
+            }
+        );
+
+        const dados = await resposta.json();
+
+        if (!resposta.ok) {
+            throw new Error(
+                dados.erro ||
+                "Não foi possível sair da comunidade."
+            );
+        }
+
+        fecharModalConvidar();
+        voltarComunidades();
+        await carregarComunidadesDoFirestore();
+    } catch (erro) {
+        console.error("Erro ao sair da comunidade:", erro);
+        alert(erro.message);
+    }
 }
 
 
@@ -803,61 +1012,15 @@ function mostrarStatusCopiarPasta(msg) {
 }
 
 function enviarConvitePastaEmail(comId) {
-    const emailInput = document.getElementById("emailConvitePasta");
-    const email = emailInput.value.trim();
-
-    if (!email || !email.includes("@")) {
-        alert("Digite um e-mail válido.");
-        return;
-    }
-
-    const com = dadosComunidades[comId];
-    if (!com) return;
-
-    if (com.convidados.find(c => c.email === email)) {
-        alert("Este e-mail já recebeu um convite.");
-        return;
-    }
-
-    com.convidados.push({ email, status: "pendente" });
-    emailInput.value = "";
-
-    salvarNoStorage();
-    renderizarConvidadosPasta(comId);
-    renderizarConvidados(comId); 
+    alert("A gestão da pasta compartilhada será configurada separadamente.");
 }
 
 function renderizarConvidadosPasta(comId) {
-    const com = dadosComunidades[comId];
     const container = document.getElementById("convidadosItensPasta");
-    if (!container) return; 
+    const lista = document.getElementById("listaConvidadosPasta");
 
-    container.innerHTML = "";
-
-    if (!com || com.convidados.length === 0) {
-        document.getElementById("listaConvidadosPasta").style.display = "none";
-        return;
-    }
-
-    document.getElementById("listaConvidadosPasta").style.display = "block";
-
-    com.convidados.forEach((c, idx) => {
-        const item = document.createElement("div");
-        item.classList.add("convidadoItem");
-        item.innerHTML = `
-            <div class="convidadoEmail">
-                <span class="iconEmail">✉️</span>
-                <span>${c.email}</span>
-            </div>
-            <div class="convidadoAcoes">
-                <span class="badgePendente">
-                    ${c.status === "aceito" ? "Membro" : "Pendente"}
-                </span>
-                <button class="btnRemoverConvite" onclick="removerConvite('${comId}', ${idx})" title="Remover convite">✕</button>
-            </div>
-        `;
-        container.appendChild(item);
-    });
+    if (container) container.innerHTML = "";
+    if (lista) lista.style.display = "none";
 }
 
 /* =========================================================
@@ -1259,7 +1422,34 @@ async function processarConviteDaURL() {
     }
 }
 
+async function carregarUsuarioAtual() {
+    try {
+        const resposta = await fetch(
+            `${API_BASE}/auth/me`,
+            {
+                credentials: "include"
+            }
+        );
+
+        const dados = await resposta.json();
+
+        if (!resposta.ok || !dados.autenticado) {
+            usuarioAtual = null;
+            return false;
+        }
+
+        usuarioAtual = dados.usuario;
+        return true;
+    } catch (erro) {
+        console.error("Erro ao carregar usuário atual:", erro);
+        usuarioAtual = null;
+        return false;
+    }
+}
+
 async function inicializarComunidades() {
+    await carregarUsuarioAtual();
+
     const continuar =
         await processarConviteDaURL();
 
