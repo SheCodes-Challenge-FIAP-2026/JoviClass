@@ -45,6 +45,19 @@ document.addEventListener('DOMContentLoaded', function () {
         return `${ano}-${String(mes + 1).padStart(2, '0')}-${String(dia).padStart(2, '0')}`;
     }
 
+    // Mantém as fontes de eventos (eventos locais, tarefas com data e eventos do
+    // Google) sincronizadas em caches globais e atualiza o painel/alertas de
+    // notificação sempre que qualquer uma dessas fontes muda.
+    function sincronizarNotificacoes() {
+        window.tarefasCache = tarefas;
+        window.eventosLocaisCache = eventosLocais;
+        window.eventosDasTarefasCache = eventosDasTarefas;
+        window.eventosGoogleCache = eventosGoogle;
+
+        if (typeof renderizarPainel === 'function') renderizarPainel();
+        if (typeof verificarAlertasDoSistema === 'function') verificarAlertasDoSistema();
+    }
+
     async function buscarEventosGoogle() {
         try {
             const resp = await fetch(`${API_BASE}/api/calendar/eventos`, { credentials: 'include' });
@@ -247,6 +260,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             calendario(dataAtual);
             renderizarProximosEventos();
+            sincronizarNotificacoes();
 
             if (diaSelecionado) {
                 renderizarEventosDoFormulario(
@@ -430,6 +444,7 @@ btnAddEvento.addEventListener("click", function () {
 
         calendario(dataAtual);
         renderizarProximosEventos();
+        sincronizarNotificacoes();
         fecharFormularioEvento();
     } catch (erro) {
         console.error("Erro ao salvar evento:", erro);
@@ -524,7 +539,7 @@ btnAddEvento.addEventListener("click", function () {
         ]);
         calendario(dataAtual);
         renderizarProximosEventos();
-        if (typeof renderizarPainel === 'function') renderizarPainel();
+        sincronizarNotificacoes();
     }
 
     atualizarCalendario();
@@ -631,6 +646,7 @@ btnAddEvento.addEventListener("click", function () {
         renderizarEntregas();
         renderizarChecklist();
         calendario(dataAtual);
+        sincronizarNotificacoes();
         fecharFormularioEntrega();
     } catch (erro) {
         console.error('Erro ao salvar entrega:', erro);
@@ -822,6 +838,7 @@ async function salvarTarefa() {
         renderizarChecklist();
         renderizarEntregas();
         calendario(dataAtual);
+        sincronizarNotificacoes();
         fecharFormularioTarefa();
     } catch (erro) {
         console.error('Erro ao salvar tarefa:', erro);
@@ -873,6 +890,7 @@ async function salvarTarefa() {
 
         renderizarChecklist();
         renderizarEntregas();
+        sincronizarNotificacoes();
     } catch (erro) {
         console.error(
             'Erro ao atualizar tarefa:',
@@ -928,6 +946,7 @@ async function salvarTarefa() {
         renderizarChecklist();
         renderizarEntregas();
         calendario(dataAtual);
+        sincronizarNotificacoes();
     } catch (erro) {
         console.error('Erro ao excluir tarefa:', erro);
 
@@ -1060,6 +1079,7 @@ async function salvarTarefa() {
         renderizarChecklist();
         renderizarEntregas();
         calendario(dataAtual);
+        sincronizarNotificacoes();
     } catch (erro) {
         console.error('Erro ao carregar tarefas:', erro);
     }
@@ -1072,18 +1092,27 @@ async function salvarTarefa() {
 
 });
 
-const EVENTOS = [
-  { id: "prova-calculo",  titulo: "Prova de Cálculo I",      tipo: "prova",    materia: "Cálculo I", data: "2024-05-25T08:00" },
-  { id: "prova-fisica",   titulo: "Prova de Física II",      tipo: "prova",    materia: "Física II",  data: "2024-06-02T08:00" },
-  { id: "trabalho-eco",   titulo: "Entrega do trabalho de Economia", tipo: "trabalho", materia: "Economia", data: "2024-06-05T23:59" },
-  { id: "reuniao-grupo",  titulo: "Reunião do grupo de estudos", tipo: "reuniao", materia: "Cálculo I", data: "2024-05-20T19:00" },
-];
+// ==========================================================================
+// Sistema de notificações
+//
+// As notificações são geradas a partir dos dados REAIS do usuário (eventos
+// criados no calendário, tarefas/entregas com data e eventos do Google
+// Agenda), que ficam disponíveis nos caches globais atualizados por
+// sincronizarNotificacoes() dentro do DOMContentLoaded acima:
+//   window.eventosLocaisCache, window.eventosDasTarefasCache,
+//   window.eventosGoogleCache, window.tarefasCache
+// ==========================================================================
 
 const ICONE_TIPO = {
-  prova: "📝",
-  trabalho: "📁",
-  reuniao: "🗓️",
+  evento: "🗓️",
+  tarefa: "✅",
   google: "🗓️",
+};
+
+const TIPO_LABEL = {
+  evento: "Evento",
+  tarefa: "Tarefa",
+  google: "Google Agenda",
 };
 
 const LIMIARES_ALERTA = {
@@ -1132,18 +1161,50 @@ function calcularStatus(evento) {
   return { diffMs, diffHoras, diffDias, urgencia, prazoTexto };
 }
 
+// Junta as três fontes reais de eventos em um formato único para notificação.
+// Tarefas já concluídas são descartadas, pois não fazem mais sentido alertar.
+function obterTodosEventosNotificaveis() {
+  const tarefasConcluidasIds = new Set(
+    (window.tarefasCache || [])
+      .filter((t) => t.concluida)
+      .map((t) => String(t.id))
+  );
+
+  const eventosLocaisFormatados = (window.eventosLocaisCache || [])
+    .filter((ev) => ev.data)
+    .map((ev) => ({
+      id: `evento-${ev.id}`,
+      titulo: ev.titulo,
+      tipo: "evento",
+      materia: ev.categoria || "",
+      data: ev.data,
+    }));
+
+  const tarefasFormatadas = (window.eventosDasTarefasCache || [])
+    .filter((ev) => ev.data && !tarefasConcluidasIds.has(String(ev.tarefaId)))
+    .map((ev) => ({
+      id: `tarefa-${ev.id}`,
+      titulo: ev.titulo,
+      tipo: "tarefa",
+      materia: ev.categoria || "",
+      data: ev.data,
+    }));
+
+  const eventosGoogleFormatados = (window.eventosGoogleCache || [])
+    .filter((ev) => ev.data)
+    .map((ev) => ({
+      id: ev.id,
+      titulo: ev.titulo,
+      tipo: "google",
+      materia: "",
+      data: ev.data,
+    }));
+
+  return [...eventosLocaisFormatados, ...tarefasFormatadas, ...eventosGoogleFormatados];
+}
+
 function gerarNotificacoes() {
-  const eventosGoogleFormatados = (window.eventosGoogleCache || []).map((ev) => ({
-    id: ev.id,
-    titulo: ev.titulo,
-    tipo: "google",
-    materia: "",
-    data: ev.data,
-  }));
-
-  const todosEventos = [...EVENTOS, ...eventosGoogleFormatados];
-
-  return todosEventos
+  return obterTodosEventosNotificaveis()
     .map((evento) => {
       const status = calcularStatus(evento);
       if (!status || status.diffMs > LIMIARES_ALERTA.aviso7dias) return null;
@@ -1152,8 +1213,6 @@ function gerarNotificacoes() {
     .filter(Boolean)
     .sort((a, b) => a.diffMs - b.diffMs);
 }
-
-const TIPO_LABEL = { prova: "Prova", trabalho: "Trabalho", reuniao: "Reunião", google: "Google Agenda" };
 
 function renderizarPainel() {
   const lista = document.getElementById("notifLista");
@@ -1197,13 +1256,16 @@ function renderizarPainel() {
   });
 }
 
-function dispararNotificacaoDoNavegador(evento, status) {
+function dispararNotificacaoDoNavegador(evento, status, motivo) {
   if (!("Notification" in window) || Notification.permission !== "granted") return;
 
-  const chaveDisparo = `${evento.id}-${status.urgencia}`;
-  if (disparadas.has(chaveDisparo)) return;  
+  // "motivo" (1hora / 1dia) garante que o aviso de 1 dia antes e o de 1 hora
+  // antes disparem de forma independente, já que ambos caem na mesma
+  // "urgencia" (urgente) dentro de calcularStatus().
+  const chaveDisparo = `${evento.id}-${motivo}`;
+  if (disparadas.has(chaveDisparo)) return;
 
-  new Notification(`${TIPO_LABEL[evento.tipo]}: ${evento.titulo}`, {
+  new Notification(`${TIPO_LABEL[evento.tipo] || "Evento"}: ${evento.titulo}`, {
     body: `Vence ${status.prazoTexto}.`,
     icon: "./src/assets/img/logo.png",
   });
@@ -1213,11 +1275,14 @@ function dispararNotificacaoDoNavegador(evento, status) {
 }
 
 function verificarAlertasDoSistema() {
-  EVENTOS.forEach((evento) => {
+  obterTodosEventosNotificaveis().forEach((evento) => {
     const status = calcularStatus(evento);
     if (!status) return;
-    if (status.diffMs <= LIMIARES_ALERTA.aviso1hora || status.diffMs <= LIMIARES_ALERTA.aviso1dia) {
-      dispararNotificacaoDoNavegador(evento, status);
+
+    if (status.diffMs <= LIMIARES_ALERTA.aviso1hora) {
+      dispararNotificacaoDoNavegador(evento, status, "1hora");
+    } else if (status.diffMs <= LIMIARES_ALERTA.aviso1dia) {
+      dispararNotificacaoDoNavegador(evento, status, "1dia");
     }
   });
 }

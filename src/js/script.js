@@ -67,50 +67,27 @@ if (okBtn) {
 
 
 /* =========================================================
-   EVENTOS
+   NOTIFICAÇÕES — DADOS REAIS
+   (eventos do calendário, tarefas/entregas com data e
+   eventos do Google Agenda, buscados da API)
 ========================================================= */
 
-const EVENTOS = [
-    {
-        id: "prova-calculo",
-        titulo: "Prova de Cálculo I",
-        tipo: "prova",
-        materia: "Cálculo I",
-        data: "2024-05-25T08:00"
-    },
-    {
-        id: "prova-fisica",
-        titulo: "Prova de Física II",
-        tipo: "prova",
-        materia: "Física II",
-        data: "2024-06-02T08:00"
-    },
-    {
-        id: "trabalho-eco",
-        titulo: "Entrega do trabalho de Economia",
-        tipo: "trabalho",
-        materia: "Economia",
-        data: "2024-06-05T23:59"
-    },
-    {
-        id: "reuniao-grupo",
-        titulo: "Reunião do grupo de estudos",
-        tipo: "reuniao",
-        materia: "Cálculo I",
-        data: "2024-05-20T19:00"
-    }
-];
+function criarDataLocal(dataTexto) {
+    if (!dataTexto) return null;
+    const [ano, mes, dia] = dataTexto.split('-').map(Number);
+    return new Date(ano, mes - 1, dia);
+}
 
 const ICONE_TIPO = {
-    prova: "📝",
-    trabalho: "📁",
-    reuniao: "🗓️"
+    evento: "🗓️",
+    tarefa: "✅",
+    google: "🗓️"
 };
 
 const TIPO_LABEL = {
-    prova: "Prova",
-    trabalho: "Trabalho",
-    reuniao: "Reunião"
+    evento: "Evento",
+    tarefa: "Tarefa",
+    google: "Google Agenda"
 };
 
 
@@ -202,11 +179,131 @@ function calcularStatus(evento) {
 
 
 /* =========================================================
+   JUNTAR AS FONTES REAIS DE EVENTOS/TAREFAS
+========================================================= */
+
+/*
+    window.eventosLocaisCache, window.tarefasCache e
+    window.eventosGoogleCache são preenchidos por
+    carregarDadosNotificacoes(), depois do login.
+    Tarefas já concluídas são descartadas.
+*/
+
+function obterTodosEventosNotificaveis() {
+
+    const eventosLocaisFormatados = (window.eventosLocaisCache || [])
+        .filter((ev) => ev.data)
+        .map((ev) => ({
+            id: `evento-${ev.id}`,
+            titulo: ev.titulo,
+            tipo: "evento",
+            materia: ev.categoria || "",
+            data: ev.data
+        }));
+
+    const tarefasFormatadas = (window.tarefasCache || [])
+        .filter((t) => t.data && !t.concluida)
+        .map((t) => ({
+            id: `tarefa-${t.id}`,
+            titulo: t.texto,
+            tipo: "tarefa",
+            materia: t.materia || "",
+            data: criarDataLocal(t.data)
+        }));
+
+    const eventosGoogleFormatados = (window.eventosGoogleCache || [])
+        .filter((ev) => ev.data)
+        .map((ev) => ({
+            id: ev.id,
+            titulo: ev.titulo,
+            tipo: "google",
+            materia: "",
+            data: ev.data
+        }));
+
+    return [
+        ...eventosLocaisFormatados,
+        ...tarefasFormatadas,
+        ...eventosGoogleFormatados
+    ];
+}
+
+
+/* =========================================================
+   BUSCAR OS DADOS REAIS NA API
+========================================================= */
+
+async function carregarDadosNotificacoes() {
+
+    try {
+
+        const [
+            respostaEventos,
+            respostaTarefas,
+            respostaGoogle
+        ] = await Promise.all([
+            fetch(`${API_BASE}/eventos`, { credentials: "include" }),
+            fetch(`${API_BASE}/tarefas`, { credentials: "include" }),
+            fetch(`${API_BASE}/api/calendar/eventos`, { credentials: "include" })
+        ]);
+
+        const dadosEventos = respostaEventos.ok
+            ? await respostaEventos.json()
+            : { eventos: [] };
+
+        const dadosTarefas = respostaTarefas.ok
+            ? await respostaTarefas.json()
+            : { tarefas: [] };
+
+        window.eventosLocaisCache = (dadosEventos.eventos || []).map(
+            (evento) => ({
+                ...evento,
+                data: criarDataLocal(evento.data)
+            })
+        );
+
+        window.tarefasCache = dadosTarefas.tarefas || [];
+
+        if (respostaGoogle.ok) {
+
+            const dadosGoogle = await respostaGoogle.json();
+
+            window.eventosGoogleCache = dadosGoogle
+                .map((ev) => {
+                    const inicio = ev.start?.dateTime || ev.start?.date;
+                    if (!inicio) return null;
+
+                    return {
+                        id: `google-${ev.id}`,
+                        titulo: ev.summary || "(Sem título)",
+                        data: new Date(inicio)
+                    };
+                })
+                .filter(Boolean);
+
+        } else {
+            // 401/403 = conta do Google não conectada; não é um erro.
+            window.eventosGoogleCache = [];
+        }
+
+    } catch (erro) {
+        console.error("Erro ao carregar dados para notificações:", erro);
+        window.eventosLocaisCache = window.eventosLocaisCache || [];
+        window.tarefasCache = window.tarefasCache || [];
+        window.eventosGoogleCache = window.eventosGoogleCache || [];
+    }
+
+    renderizarPainel();
+    verificarAlertasDoSistema();
+}
+
+
+/* =========================================================
    GERAR NOTIFICAÇÕES
 ========================================================= */
 
 function gerarNotificacoes() {
-    return EVENTOS
+    return obterTodosEventosNotificaveis()
         .map((evento) => {
             const status = calcularStatus(evento);
 
@@ -321,7 +418,8 @@ function renderizarPainel() {
 
 function dispararNotificacaoDoNavegador(
     evento,
-    status
+    status,
+    motivo
 ) {
     if (
         !("Notification" in window) ||
@@ -330,15 +428,22 @@ function dispararNotificacaoDoNavegador(
         return;
     }
 
+    /*
+        "motivo" (1hora / 1dia) garante que o aviso de 1 dia
+        antes e o de 1 hora antes disparem de forma
+        independente, já que os dois caem na mesma
+        "urgencia" (urgente) dentro de calcularStatus().
+    */
+
     const chaveDisparo =
-        `${evento.id}-${status.urgencia}`;
+        `${evento.id}-${motivo}`;
 
     if (disparadas.has(chaveDisparo)) {
         return;
     }
 
     new Notification(
-        `${TIPO_LABEL[evento.tipo]}: ${evento.titulo}`,
+        `${TIPO_LABEL[evento.tipo] || "Evento"}: ${evento.titulo}`,
         {
             body: `Vence ${status.prazoTexto}.`,
             icon: "./src/assets/img/logo.png"
@@ -360,7 +465,7 @@ function dispararNotificacaoDoNavegador(
 
 function verificarAlertasDoSistema() {
 
-    EVENTOS.forEach((evento) => {
+    obterTodosEventosNotificaveis().forEach((evento) => {
 
         const status = calcularStatus(evento);
 
@@ -368,14 +473,10 @@ function verificarAlertasDoSistema() {
             return;
         }
 
-        if (
-            status.diffMs <= LIMIARES_ALERTA.aviso1hora ||
-            status.diffMs <= LIMIARES_ALERTA.aviso1dia
-        ) {
-            dispararNotificacaoDoNavegador(
-                evento,
-                status
-            );
+        if (status.diffMs <= LIMIARES_ALERTA.aviso1hora) {
+            dispararNotificacaoDoNavegador(evento, status, "1hora");
+        } else if (status.diffMs <= LIMIARES_ALERTA.aviso1dia) {
+            dispararNotificacaoDoNavegador(evento, status, "1dia");
         }
 
     });
@@ -398,9 +499,10 @@ function iniciarSistemaDeNotificacoes() {
         document.getElementById("notifMarcarLidas");
 
 
+    // Sem sessão ainda os caches estão vazios: painel some
+    // vazio até carregarDadosNotificacoes() rodar dentro de
+    // liberarAplicacao(), depois do login confirmado.
     renderizarPainel();
-
-    verificarAlertasDoSistema();
 
 
     /* -----------------------------------------------------
@@ -483,14 +585,11 @@ function iniciarSistemaDeNotificacoes() {
 
     /* -----------------------------------------------------
        ATUALIZA A CADA 5 MINUTOS
+       (busca dados novos, não só re-renderiza o cache velho)
     ----------------------------------------------------- */
 
     setInterval(() => {
-
-        renderizarPainel();
-
-        verificarAlertasDoSistema();
-
+        carregarDadosNotificacoes();
     }, 5 * 60 * 1000);
 }
 
@@ -2541,6 +2640,13 @@ function liberarAplicacao() {
     carregarResumoReal();
 
     carregarListasInicio();
+
+    /*
+        Só busca os dados de notificação (eventos, tarefas
+        e Google Agenda) DEPOIS de confirmar que existe
+        sessão — antes disso essas rotas responderiam 401.
+    */
+    carregarDadosNotificacoes();
 
 }
 

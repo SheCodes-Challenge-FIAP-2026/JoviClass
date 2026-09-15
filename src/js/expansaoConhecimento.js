@@ -251,11 +251,22 @@ function showToast(message) {
 renderResources();
 renderCommunityArticles();
 
+/* =========================================================
+   NOTIFICAÇÕES DE PROVAS, TRABALHOS E REUNIÕES
+
+   OBS: os dados de EVENTOS abaixo são estáticos apenas para
+   fins de demonstração/teste. Substitua por dados vindos do
+   backend quando a funcionalidade de eventos for integrada.
+   As datas foram ajustadas para ficarem próximas da data
+   atual, já que datas no passado nunca disparam notificação
+   (calcularStatus retorna null quando o evento já passou).
+========================================================= */
+
 const EVENTOS = [
-  { id: "prova-calculo",  titulo: "Prova de Cálculo I",      tipo: "prova",    materia: "Cálculo I", data: "2024-05-25T08:00" },
-  { id: "prova-fisica",   titulo: "Prova de Física II",      tipo: "prova",    materia: "Física II",  data: "2024-06-02T08:00" },
-  { id: "trabalho-eco",   titulo: "Entrega do trabalho de Economia", tipo: "trabalho", materia: "Economia", data: "2024-06-05T23:59" },
-  { id: "reuniao-grupo",  titulo: "Reunião do grupo de estudos", tipo: "reuniao", materia: "Cálculo I", data: "2024-05-20T19:00" },
+  { id: "prova-calculo",  titulo: "Prova de Cálculo I",      tipo: "prova",    materia: "Cálculo I", data: "2026-09-22T08:00" },
+  { id: "prova-fisica",   titulo: "Prova de Física II",      tipo: "prova",    materia: "Física II",  data: "2026-09-30T08:00" },
+  { id: "trabalho-eco",   titulo: "Entrega do trabalho de Economia", tipo: "trabalho", materia: "Economia", data: "2026-10-03T23:59" },
+  { id: "reuniao-grupo",  titulo: "Reunião do grupo de estudos", tipo: "reuniao", materia: "Cálculo I", data: "2026-09-16T19:00" },
 ];
 
 const ICONE_TIPO = {
@@ -365,10 +376,18 @@ function renderizarPainel() {
   });
 }
 
-function dispararNotificacaoDoNavegador(evento, status) {
+// CORRIGIDO: a chave de controle de disparo agora usa o
+// "marco" (1dia / 1hora) recebido explicitamente, em vez de
+// status.urgencia. Antes, como diffHoras <= 24 já deixava a
+// urgência em "urgente" tanto na marca de 1 dia quanto na de
+// 1 hora, a chave `${evento.id}-urgente` ficava igual para
+// as duas e o segundo aviso (1 hora antes) nunca era
+// disparado, pois já constava como "disparado" desde o dia
+// anterior.
+function dispararNotificacaoDoNavegador(evento, status, marco) {
   if (!("Notification" in window) || Notification.permission !== "granted") return;
 
-  const chaveDisparo = `${evento.id}-${status.urgencia}`;
+  const chaveDisparo = `${evento.id}-${marco}`;
   if (disparadas.has(chaveDisparo)) return; 
 
   new Notification(`${TIPO_LABEL[evento.tipo]}: ${evento.titulo}`, {
@@ -380,12 +399,20 @@ function dispararNotificacaoDoNavegador(evento, status) {
   salvarSet(CHAVE_DISPARADAS, disparadas);
 }
 
+// CORRIGIDO: agora verifica os dois limiares separadamente
+// (com else if, para não disparar os dois na mesma checagem)
+// e passa o marco correspondente, garantindo que o aviso de
+// "1 dia antes" e o de "1 hora antes" disparem cada um na
+// sua vez.
 function verificarAlertasDoSistema() {
   EVENTOS.forEach((evento) => {
     const status = calcularStatus(evento);
     if (!status) return;
-    if (status.diffMs <= LIMIARES_ALERTA.aviso1hora || status.diffMs <= LIMIARES_ALERTA.aviso1dia) {
-      dispararNotificacaoDoNavegador(evento, status);
+
+    if (status.diffMs <= LIMIARES_ALERTA.aviso1hora) {
+      dispararNotificacaoDoNavegador(evento, status, "1hora");
+    } else if (status.diffMs <= LIMIARES_ALERTA.aviso1dia) {
+      dispararNotificacaoDoNavegador(evento, status, "1dia");
     }
   });
 }
