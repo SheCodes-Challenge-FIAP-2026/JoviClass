@@ -795,69 +795,81 @@ function iniciarInstituicao() {
 
 
 /* =========================================================
-   ESTATÍSTICAS DO PERFIL (Matérias e Tarefas feitas)
-   Lidas direto do localStorage, que é onde materias.js e
-   calendario.js salvam os dados reais do usuário.
+   ESTATÍSTICAS DO PERFIL (Matérias e Tarefas Feitas)
 ========================================================= */
 
-const CHAVE_MATERIAS_BASE = "materias";        // mesmo prefixo usado em materias.js
-const CHAVE_TAREFAS_BASE = "joviclass_tarefas"; // mesmo prefixo usado em calendario.js
-
-function chaveMateriasDoUsuario() {
-  return `${CHAVE_MATERIAS_BASE}_${perfilAtual ? perfilAtual.id : ""}`;
-}
-
-function chaveTarefasDoUsuario() {
-  return `${CHAVE_TAREFAS_BASE}_${perfilAtual ? perfilAtual.id : ""}`;
-}
-
-function carregarMateriasDoUsuario() {
+async function atualizarEstatisticasDoPerfil() {
   try {
-    return JSON.parse(localStorage.getItem(chaveMateriasDoUsuario())) || [];
-  } catch {
-    return [];
-  }
-}
+    const [
+      respostaMaterias,
+      respostaTarefas
+    ] = await Promise.all([
+      fetch(`${API_BASE}/materias`, {
+        credentials: "include"
+      }),
 
-function carregarTarefasDoUsuario() {
-  try {
-    return JSON.parse(localStorage.getItem(chaveTarefasDoUsuario())) || [];
-  } catch {
-    return [];
-  }
-}
+      fetch(`${API_BASE}/tarefas`, {
+        credentials: "include"
+      })
+    ]);
 
-function atualizarEstatisticasDoPerfil() {
-  const statMaterias = document.getElementById("statMaterias");
-  const statTarefasFeitas = document.getElementById("statTarefasFeitas");
+    if (
+      !respostaMaterias.ok ||
+      !respostaTarefas.ok
+    ) {
+      throw new Error(
+        "Não foi possível carregar as estatísticas."
+      );
+    }
 
-  if (statMaterias) {
-    statMaterias.textContent = carregarMateriasDoUsuario().length;
-  }
+    const dadosMaterias =
+      await respostaMaterias.json();
 
-  if (statTarefasFeitas) {
-    const tarefas = carregarTarefasDoUsuario();
-    const concluidas = tarefas.filter((t) => t.concluida).length;
-    statTarefasFeitas.textContent = concluidas;
+    const dadosTarefas =
+      await respostaTarefas.json();
+
+    const materias =
+      dadosMaterias.materias || [];
+
+    const tarefas =
+      dadosTarefas.tarefas || [];
+
+    const concluidas = tarefas.filter(
+      tarefa => tarefa.concluida === true
+    ).length;
+
+    const statMaterias =
+      document.getElementById("statMaterias");
+
+    const statTarefasFeitas =
+      document.getElementById("statTarefasFeitas");
+
+    if (statMaterias) {
+      statMaterias.textContent = materias.length;
+    }
+
+    if (statTarefasFeitas) {
+      statTarefasFeitas.textContent = concluidas;
+    }
+  } catch (erro) {
+    console.error(
+      "Erro ao carregar estatísticas do perfil:",
+      erro
+    );
   }
 }
 
 function iniciarEstatisticasDoPerfil() {
   atualizarEstatisticasDoPerfil();
 
-  // Se o usuário criar uma matéria ou concluir uma tarefa em
-  // outra aba, esta aba do perfil atualiza os números sozinha.
-  window.addEventListener("storage", (e) => {
-    if (e.key === chaveMateriasDoUsuario() || e.key === chaveTarefasDoUsuario()) {
-      atualizarEstatisticasDoPerfil();
+  document.addEventListener(
+    "visibilitychange",
+    () => {
+      if (!document.hidden) {
+        atualizarEstatisticasDoPerfil();
+      }
     }
-  });
-
-  // Cobre o caso comum: usuário vai pra aba de Matérias/Tarefas,
-  // cria algo, e volta pra essa mesma aba do perfil.
-  document.addEventListener("visibilitychange", () => {
-    if (!document.hidden) atualizarEstatisticasDoPerfil();
-  });
+  );
 }
 
 
