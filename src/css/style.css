@@ -1,3 +1,20 @@
+/* ============================================================
+   BASE.CSS
+   Estilos GLOBAIS e compartilhados por TODAS as páginas do app
+   (variáveis, reset, cabeçalho/menu, notificações, hambúrguer,
+   nav inferior mobile).
+
+   COMO USAR:
+   Inclua este arquivo ANTES do CSS específico de cada página:
+
+     <link rel="stylesheet" href="base.css">
+     <link rel="stylesheet" href="pagina-inicio.css">
+
+   Depois de incluir este arquivo, REMOVA de cada CSS de página
+   os blocos que já estão aqui, para não haver mais divergência
+   entre as páginas.
+   ============================================================ */
+
 :root {
   --bg-color1: #000fb0;
   --bg-color2: #ffffff;
@@ -14,6 +31,14 @@
   --sombra: 0 6px 18px rgba(0, 15, 176, 0.08);
   --sombra-forte: 0 10px 30px rgba(0, 15, 176, 0.18);
   --raio: 18px;
+
+  --menu-largura: 320px;
+  --nav-mobile-altura: 78px;
+
+  /* Duração/curva padrão para transições — centralizada aqui
+     para ficar fácil de ajustar o "feel" da interface inteira. */
+  --transicao-rapida: 0.2s ease;
+  --transicao-media: 0.3s ease;
 }
 
 /* =========================
@@ -26,18 +51,67 @@
   font-family: "Manrope", Arial, sans-serif;
 }
 
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+}
+
 body {
   background-color: var(--bg-colorFundo);
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
-  padding-bottom: 78px; 
+  height: 100dvh;
+  /* altura travada no viewport — quem rola é o .conteudo-principal, não o body */
+  overflow-x: hidden;
+  overflow-y: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 a {
   text-decoration: none;
+  color: inherit;
 }
 
+button {
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+/* Evita o "flash" cinza ao tocar em botões/links no mobile e
+   deixa o feedback de toque consistente com o resto da UI. */
+a,
+button {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Acessibilidade: contorno visível ao navegar por teclado (Tab),
+   sem poluir a interface para quem usa mouse/toque. */
+a:focus-visible,
+button:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--bg-color4);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Respeita quem prefere menos animação no sistema operacional. */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  * {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+/* =========================
+   LOGO
+========================= */
 .logoJovi {
   display: flex;
   align-items: center;
@@ -50,18 +124,14 @@ a {
   border-radius: 10px;
 }
 
-.menu h2 {
-  font-size: 1.5rem;
-  font-weight: 800;
-  color: var(--bg-color2);
-  margin: 0;
-  letter-spacing: -0.3px;
-}
-
+/* =========================
+   MENU / TOPO
+========================= */
 .menu {
   background: linear-gradient(135deg, var(--grad-inicio) 0%, var(--grad-fim) 100%);
   color: white;
   padding: 18px 20px;
+  padding-top: calc(18px + env(safe-area-inset-top));
   display: flex;
   flex-direction: column;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
@@ -70,10 +140,24 @@ a {
   z-index: 30;
 }
 
+.menu h2 {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--bg-color2);
+  margin: 0;
+  letter-spacing: -0.3px;
+}
+
 .menu-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 12px;
+  /* Referência de posicionamento do painel de notificações
+     (ver .notif-panel). Usar o header inteiro em vez do botão
+     evita que o painel "pule" quando o layout do header muda
+     entre mobile (linha) e desktop (coluna). */
+  position: relative;
 }
 
 .menu-actions {
@@ -93,7 +177,16 @@ a {
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
+  flex-shrink: 0;
+  transition: background var(--transicao-rapida), transform var(--transicao-rapida);
+}
+
+.icon-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.icon-btn:active {
+  transform: scale(0.92);
 }
 
 .icon-btn svg {
@@ -118,9 +211,11 @@ a {
   border: 2px solid var(--grad-fim);
 }
 
-.notif-wrapper {
-  position: relative;
-}
+/* =========================
+   PAINEL DE NOTIFICAÇÕES
+========================= */
+/* .notif-wrapper propositalmente SEM position:relative — o
+   painel se ancora no .menu-header (ver acima), não no botão. */
 
 .notif-panel {
   position: absolute;
@@ -129,11 +224,24 @@ a {
   width: 320px;
   max-width: 86vw;
   background: white;
-  border-radius: 16px;
+  border-radius: var(--raio);
   box-shadow: var(--sombra-forte);
   overflow: hidden;
   z-index: 60;
   color: #12142b;
+  animation: notif-entrar var(--transicao-media);
+}
+
+@keyframes notif-entrar {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .notif-panel[hidden] {
@@ -159,11 +267,29 @@ a {
   font-size: 11.5px;
   font-weight: 700;
   cursor: pointer;
+  transition: opacity var(--transicao-rapida);
+}
+
+.notif-marcar:hover {
+  opacity: 0.7;
+  text-decoration: underline;
 }
 
 .notif-lista {
   max-height: 340px;
   overflow-y: auto;
+  scrollbar-width: thin;
+  /* Firefox */
+  scrollbar-color: var(--bg-color5) transparent;
+}
+
+.notif-lista::-webkit-scrollbar {
+  width: 6px;
+}
+
+.notif-lista::-webkit-scrollbar-thumb {
+  background-color: #d8d8e2;
+  border-radius: 10px;
 }
 
 .notif-vazio {
@@ -179,10 +305,15 @@ a {
   padding: 12px 16px;
   border-bottom: 1px solid #f5f5fa;
   cursor: pointer;
+  transition: background var(--transicao-rapida);
 }
 
 .notif-item:last-child {
   border-bottom: none;
+}
+
+.notif-item:hover {
+  background: #f0f1fb;
 }
 
 .notif-item.nao-lida {
@@ -200,9 +331,17 @@ a {
   font-size: 15px;
 }
 
-.notif-icone.urgente { background: #ffe1e1; }
-.notif-icone.breve { background: #ffe9d1; }
-.notif-icone.normal { background: #dbeaff; }
+.notif-icone.urgente {
+  background: #ffe1e1;
+}
+
+.notif-icone.breve {
+  background: #ffe9d1;
+}
+
+.notif-icone.normal {
+  background: #dbeaff;
+}
 
 .notif-corpo {
   flex: 1;
@@ -228,16 +367,30 @@ a {
   display: inline-block;
 }
 
-.notif-prazo.urgente { color: #e0304a; }
-.notif-prazo.breve { color: #d97706; }
-.notif-prazo.normal { color: var(--bg-color1); }
+.notif-prazo.urgente {
+  color: #e0304a;
+}
 
+.notif-prazo.breve {
+  color: #d97706;
+}
+
+.notif-prazo.normal {
+  color: var(--bg-color1);
+}
+
+/* =========================
+   BOTÃO HAMBÚRGUER
+========================= */
 .hamburger {
   display: flex;
   flex-direction: column;
+  justify-content: center;
   gap: 5px;
   cursor: pointer;
   padding: 6px;
+  width: 36px;
+  height: 36px;
 }
 
 .hamburger span {
@@ -245,9 +398,28 @@ a {
   height: 3px;
   background-color: white;
   border-radius: 3px;
-  transition: 0.3s;
+  transition: transform var(--transicao-media), opacity var(--transicao-media);
+  transform-origin: center;
 }
 
+/* Se o JS adicionar a classe .aberto no .hamburger quando o
+   menu mobile estiver aberto, os 3 traços viram um "X". Não
+   afeta nada se essa classe nunca for usada. */
+.hamburger.aberto span:nth-child(1) {
+  transform: translateY(8px) rotate(45deg);
+}
+
+.hamburger.aberto span:nth-child(2) {
+  opacity: 0;
+}
+
+.hamburger.aberto span:nth-child(3) {
+  transform: translateY(-8px) rotate(-45deg);
+}
+
+/* =========================
+   LINKS DO MENU
+========================= */
 .menu-links {
   display: none;
   flex-direction: column;
@@ -261,7 +433,6 @@ a {
 
 .menu a {
   color: #ffffff;
-  text-decoration: none;
   padding: 13px 18px;
   border-radius: 12px;
   font-size: 14px;
@@ -269,7 +440,7 @@ a {
   background: var(--bg-color3);
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
-  transition: all 0.25s ease;
+  transition: background var(--transicao-media), transform var(--transicao-media), box-shadow var(--transicao-media);
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
   text-align: center;
 }
@@ -284,416 +455,9 @@ a {
   box-shadow: 0 6px 18px rgba(20, 102, 255, 0.4);
 }
 
-.conteudo {
-  flex: 1;
-  padding: 22px 18px 40px;
-  max-width: 1100px;
-  margin: 0 auto;
-  width: 100%;
-}
-
-.saudacao h1 {
-  font-size: 1.7rem;
-  font-weight: 800;
-  color: #12142b;
-  margin-bottom: 2px;
-}
-
-
-.saudacao p {
-  color: var(--bg-color5);
-  font-size: 14px;
-  margin-bottom: 20px;
-}
-
-.titulo-secao {
-  font-size: 1.05rem;
-  color: #12142b;
-  margin: 22px 0 12px;
-  font-weight: 800;
-}
-
-.secao-header {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-}
-
-.secao-header .titulo-secao {
-  margin-bottom: 12px;
-}
-
-.progresso-card {
-  background: linear-gradient(135deg, var(--grad-inicio), var(--bg-color4) 120%);
-  border-radius: 22px;
-  padding: 24px;
-  display: flex;
-  align-items: center;
-  gap: 22px;
-  color: white;
-  box-shadow: var(--sombra-forte);
-  flex-wrap: wrap;
-}
-
-.progresso-anel {
-  position: relative;
-  width: 108px;
-  height: 108px;
-  flex-shrink: 0;
-}
-
-.progresso-anel svg {
-  width: 100%;
-  height: 100%;
-  transform: rotate(-90deg);
-}
-
-.anel-fundo {
-  fill: none;
-  stroke: rgba(255, 255, 255, 0.22);
-  stroke-width: 10;
-}
-
-.anel-valor {
-  fill: none;
-  stroke: var(--acento-menta-clara);
-  stroke-width: 10;
-  stroke-linecap: round;
-  stroke-dasharray: 326.7;
-  stroke-dashoffset: calc(326.7 - (326.7 * var(--valor)) / 100);
-}
-
-.anel-texto {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.5rem;
-  font-weight: 800;
-}
-
-.progresso-info {
-  flex: 1;
-  min-width: 210px;
-}
-
-.progresso-label {
-  font-size: 13px;
-  font-weight: 700;
-  opacity: 0.9;
-}
-
-.progresso-barrinhas {
-  display: flex;
-  gap: 5px;
-  margin: 12px 0 16px;
-  flex-wrap: wrap;
-}
-
-.progresso-barrinhas span {
-  width: 20px;
-  height: 7px;
-  border-radius: 4px;
-  background: rgba(255, 255, 255, 0.25);
-}
-
-.progresso-barrinhas span.ativa {
-  background: var(--acento-menta);
-}
-
-.progresso-barrinhas span.meio {
-  background: var(--acento-menta-clara);
-}
-
-.progresso-stats {
-  display: flex;
-  gap: 22px;
-  flex-wrap: wrap;
-}
-
-.stat {
-  display: flex;
-  flex-direction: column;
-}
-
-.stat strong {
-  font-size: 1.2rem;
-  font-weight: 800;
-}
-
-.stat span {
-  font-size: 11.5px;
-  opacity: 0.85;
-}
-
-.cards {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 14px;
-}
-
-.card {
-  background: var(--bg-color2);
-  padding: 18px;
-  border-radius: var(--raio);
-  text-align: center;
-  box-shadow: var(--sombra);
-}
-
-.card span {
-  font-size: 12px;
-  color: var(--bg-color5);
-  font-weight: 600;
-}
-
-.card p {
-  font-size: 1.7rem;
-  font-weight: 800;
-  color: var(--bg-color1);
-  margin-top: 6px;
-}
-
-.acesso-rapido {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 12px;
-}
-
-.acesso-item {
-  background: var(--bg-color2);
-  border-radius: 16px;
-  padding: 16px 8px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  box-shadow: var(--sombra);
-  color: #333;
-  font-size: 12.5px;
-  font-weight: 700;
-  transition: transform 0.2s ease;
-}
-
-.acesso-item:hover {
-  transform: translateY(-3px);
-}
-
-.acesso-icone {
-  width: 42px;
-  height: 42px;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 20px;
-}
-
-.acesso-icone.roxo { background: #ede6ff; }
-.acesso-icone.azul { background: #dbeaff; }
-.acesso-icone.laranja { background: #ffe9d1; }
-.acesso-icone.verde { background: #d9f7e6; }
-
-.secoes {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  margin-top: 22px;
-}
-
-.secao {
-  background: var(--bg-color2);
-  border-radius: var(--raio);
-  padding: 18px;
-  box-shadow: var(--sombra);
-}
-
-.secao h3 {
-  font-size: 1rem;
-  color: #12142b;
-  font-weight: 800;
-}
-
-.item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 12px 0;
-  border-bottom: 1px solid #f0f0f5;
-  font-size: 14px;
-  gap: 10px;
-}
-
-.item:last-of-type {
-  border-bottom: none;
-}
-
-.item-esq {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  min-width: 0;
-}
-
-.item-icone {
-  width: 38px;
-  height: 38px;
-  border-radius: 10px;
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 13px;
-  font-weight: 800;
-  color: var(--bg-color1);
-}
-
-.item-icone.roxo { background: #ede6ff; }
-.item-icone.azul { background: #dbeaff; }
-.item-icone.verde { background: #d9f7e6; }
-.item-icone.laranja { background: #ffe9d1; }
-
-.item .nome {
-  font-weight: 700;
-  color: #333;
-}
-
-.item .detalhe {
-  font-size: 12px;
-  color: var(--bg-color5);
-}
-
-.mini-barra {
-  width: 130px;
-  max-width: 40vw;
-  height: 5px;
-  background: #eef0f5;
-  border-radius: 4px;
-  margin-top: 6px;
-  overflow: hidden;
-}
-
-.mini-barra span {
-  display: block;
-  height: 100%;
-  background: linear-gradient(90deg, var(--bg-color4), var(--acento-menta));
-  border-radius: 4px;
-}
-
-.badge {
-  background-color: var(--lilas-suave);
-  color: var(--bg-color1);
-  padding: 5px 12px;
-  border-radius: 999px;
-  font-size: 12px;
-  font-weight: 700;
-  white-space: nowrap;
-}
-
-.chevron {
-  color: var(--bg-color5);
-  font-size: 18px;
-}
-
-.ver-todos {
-  display: inline-block;
-  margin-top: 12px;
-  color: var(--bg-color1);
-  font-size: 13px;
-  font-weight: 700;
-}
-
-.sugestao-card {
-  margin-top: 22px;
-  background: var(--lilas-suave);
-  border: 1px solid var(--lilas-borda);
-  border-radius: var(--raio);
-  padding: 22px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-}
-
-.sugestao-eyebrow {
-  font-size: 13px;
-  font-weight: 800;
-  color: var(--bg-color1);
-}
-
-.sugestao-texto p {
-  margin: 8px 0 14px;
-  color: #444;
-  font-size: 14px;
-  max-width: 40ch;
-}
-
-.btn-revisao {
-  display: inline-block;
-  background: var(--bg-color1);
-  color: white;
-  padding: 11px 18px;
-  border-radius: 12px;
-  font-size: 13.5px;
-  font-weight: 700;
-}
-
-.overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(10, 12, 40, 0.45);
-  display: none;
-  align-items: center;
-  justify-content: center;
-  z-index: 100;
-  padding: 20px;
-}
-
-.overlay.show {
-  display: flex;
-}
-
-.overlay-box {
-  background: white;
-  border-radius: 16px;
-  padding: 22px;
-  max-width: 320px;
-  width: 100%;
-  text-align: center;
-  box-shadow: var(--sombra-forte);
-}
-
-.overlay-box p {
-  font-weight: 700;
-  color: #12142b;
-  margin-bottom: 16px;
-}
-
-.overlay-botoes {
-  display: flex;
-  gap: 10px;
-}
-
-.btn-primario, .btn-secundario {
-  flex: 1;
-  padding: 10px;
-  border-radius: 10px;
-  border: none;
-  font-weight: 700;
-  cursor: pointer;
-  font-size: 13.5px;
-}
-
-.btn-primario {
-  background: var(--bg-color1);
-  color: white;
-}
-
-.btn-secundario {
-  background: #eef0f5;
-  color: #444;
-}
-
+/* =========================
+   NAV INFERIOR (MOBILE + DESKTOP)
+========================= */
 .nav-mobile {
   position: fixed;
   bottom: 0;
@@ -703,9 +467,15 @@ a {
   display: flex;
   align-items: center;
   justify-content: space-around;
-  padding: 8px 6px 10px;
+  padding: 8px 6px calc(10px + env(safe-area-inset-bottom));
   box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.08);
-  z-index: 40;
+  z-index: 999;
+  /* Sem isso, alguns navegadores mobile (principalmente Safari
+     no iOS) fazem o elemento fixo sumir ou piscar durante o
+     scroll, porque não ativam a aceleração por GPU nele. */
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+  will-change: transform;
 }
 
 .nav-mobile a {
@@ -716,8 +486,10 @@ a {
   font-size: 10.5px;
   font-weight: 700;
   color: var(--bg-color5);
+  transition: color var(--transicao-rapida);
 }
 
+.nav-mobile a:hover,
 .nav-mobile a.ativo {
   color: var(--bg-color1);
 }
@@ -736,44 +508,87 @@ a {
   justify-content: center;
   margin-top: -26px;
   box-shadow: 0 8px 18px rgba(0, 15, 176, 0.4);
+  transition: transform var(--transicao-rapida);
+}
+
+.nav-camera:hover {
+  transform: scale(1.06);
 }
 
 .nav-icone-camera {
   font-size: 20px;
 }
 
-@media (min-width: 900px) {
+/* ============================================================
+   RESPONSIVIDADE — PADRÃO ÚNICO PARA TODAS AS PÁGINAS
+   Um único ponto de corte (699px / 700px) e um único
+   comportamento para menu, hambúrguer e nav inferior.
+   ============================================================ */
+
+@media (max-width: 699px) {
+  .menu {
+    width: 100%;
+    padding: 18px;
+    padding-top: calc(18px + env(safe-area-inset-top));
+  }
+
+  #logo {
+    width: 40px;
+  }
+
+  .menu h2 {
+    font-size: 1.5rem;
+  }
+
+  .hamburger {
+    display: flex;
+  }
+
+  .menu-links {
+    display: none;
+    flex-direction: column;
+    width: 100%;
+    margin-top: 20px;
+    gap: 12px;
+  }
+
+  .menu-links.active {
+    display: flex;
+  }
+
+  .menu a {
+    width: 100%;
+    border-radius: 10px;
+    padding: 12px;
+    font-size: 15px;
+  }
+}
+
+@media (min-width: 700px) {
   body {
     flex-direction: row;
-    padding-bottom: 0;
   }
 
   .menu {
-    width: 280px;
+    width: var(--menu-largura);
     min-height: 100vh;
-    padding: 30px 22px;
-    position: sticky;
-    top: 0;
+    padding: 30px 20px;
+    flex-shrink: 0;
   }
 
   .menu-header {
     flex-direction: column;
     align-items: center;
-    gap: 14px;
+    gap: 12px;
   }
 
   #logo {
-    width: 64px;
+    width: 96px;
   }
 
   .menu h2 {
-    font-size: 1.5rem;
+    font-size: 1.9rem;
     text-align: center;
-  }
-
-  .menu-actions {
-    flex-direction: column-reverse;
-    gap: 10px;
   }
 
   .hamburger {
@@ -783,10 +598,737 @@ a {
   .menu-links {
     display: flex !important;
     flex-direction: column;
-    gap: 10px;
-    margin-top: 40px;
-    width: 100%;
+    gap: 12px;
+    margin-top: 60px;
+    margin-left: 10px;
+    margin-right: 10px;
   }
+
+  .menu a {
+    border-radius: 12px;
+    padding: 14px;
+    font-size: 15px;
+  }
+
+  /* A barra inferior fica visível e fixa embaixo tanto no
+     mobile quanto no desktop, ao lado do menu lateral. */
+  .nav-mobile {
+    left: var(--menu-largura);
+  }
+
+  /* No desktop o .menu-header é estreito (largura da sidebar),
+     menor que o painel (320px). Abrir para a direita, saindo
+     por cima do conteúdo, em vez de para a esquerda, evita que
+     o painel estoure pra fora da tela. */
+  .notif-panel {
+    left: 0;
+    right: auto;
+  }
+}
+
+/* Telas bem largas (desktop grande / monitor): menu um pouco
+   mais largo para não ficar apertado ao lado de conteúdos com
+   grid de 4 colunas. */
+@media (min-width: 1440px) {
+  .menu {
+    width: 340px;
+  }
+
+  .nav-mobile {
+    left: 340px;
+  }
+}
+/* ============================================================
+   STYLE.CSS
+   ------------------------------------------------------------
+   CSS específico desta página.
+   
+   IMPORTANTE:
+   O base.css deve ser carregado ANTES deste arquivo:
+   
+   <link rel="stylesheet" href="base.css">
+   <link rel="stylesheet" href="style.css">
+   
+   O base.css já possui:
+   - variáveis
+   - reset
+   - logo
+   - menu
+   - notificações
+   - hambúrguer
+   - links do menu
+   - nav inferior
+   - responsividade global
+   ============================================================ */
+
+
+/* =========================================================
+   CONTEÚDO PRINCIPAL
+========================================================= */
+
+.conteudo {
+  flex: 1;
+  min-height: 0;
+
+  padding: 22px 18px 110px;
+
+  max-width: 1100px;
+  margin: 0 auto;
+
+  width: 100%;
+
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  -webkit-overflow-scrolling: touch;
+}
+
+
+/* =========================================================
+   SAUDAÇÃO
+========================================================= */
+
+.saudacao h1 {
+  font-size: 1.7rem;
+  font-weight: 800;
+  color: #12142b;
+  margin-bottom: 2px;
+}
+
+.saudacao p {
+  color: var(--bg-color5);
+  font-size: 14px;
+  margin-bottom: 20px;
+}
+
+
+/* =========================================================
+   TÍTULOS DAS SEÇÕES
+========================================================= */
+
+.titulo-secao {
+  font-size: 1.05rem;
+  color: #12142b;
+  margin: 22px 0 12px;
+  font-weight: 800;
+}
+
+.secao-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.secao-header .titulo-secao {
+  margin-bottom: 12px;
+}
+
+
+/* =========================================================
+   CARD DE PROGRESSO
+========================================================= */
+
+.progresso-card {
+  background: linear-gradient(135deg,
+      var(--grad-inicio),
+      var(--bg-color4) 120%);
+
+  border-radius: 22px;
+
+  padding: 24px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 22px;
+
+  color: white;
+
+  box-shadow: var(--sombra-forte);
+
+  flex-wrap: wrap;
+}
+
+.progresso-anel {
+  position: relative;
+
+  width: 108px;
+  height: 108px;
+
+  flex-shrink: 0;
+}
+
+.progresso-anel svg {
+  width: 100%;
+  height: 100%;
+
+  transform: rotate(-90deg);
+}
+
+.anel-fundo {
+  fill: none;
+
+  stroke: rgba(255, 255, 255, 0.22);
+
+  stroke-width: 10;
+}
+
+.anel-valor {
+  fill: none;
+
+  stroke: var(--acento-menta-clara);
+
+  stroke-width: 10;
+
+  stroke-linecap: round;
+
+  stroke-dasharray: 326.7;
+
+  stroke-dashoffset:
+    calc(326.7 - (326.7 * var(--valor)) / 100);
+}
+
+.anel-texto {
+  position: absolute;
+
+  inset: 0;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  font-size: 1.5rem;
+
+  font-weight: 800;
+}
+
+.progresso-info {
+  flex: 1;
+
+  min-width: 210px;
+}
+
+.progresso-label {
+  font-size: 13px;
+
+  font-weight: 700;
+
+  opacity: 0.9;
+}
+
+.progresso-barrinhas {
+  display: flex;
+
+  gap: 5px;
+
+  margin: 12px 0 16px;
+
+  flex-wrap: wrap;
+}
+
+.progresso-barrinhas span {
+  width: 20px;
+
+  height: 7px;
+
+  border-radius: 4px;
+
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.progresso-barrinhas span.ativa {
+  background: var(--acento-menta);
+}
+
+.progresso-barrinhas span.meio {
+  background: var(--acento-menta-clara);
+}
+
+.progresso-stats {
+  display: flex;
+
+  gap: 22px;
+
+  flex-wrap: wrap;
+}
+
+.stat {
+  display: flex;
+
+  flex-direction: column;
+}
+
+.stat strong {
+  font-size: 1.2rem;
+
+  font-weight: 800;
+}
+
+.stat span {
+  font-size: 11.5px;
+
+  opacity: 0.85;
+}
+
+
+/* =========================================================
+   CARDS
+========================================================= */
+
+.cards {
+  display: grid;
+
+  grid-template-columns: 1fr 1fr;
+
+  gap: 14px;
+}
+
+.card {
+  background: var(--bg-color2);
+
+  padding: 18px;
+
+  border-radius: var(--raio);
+
+  text-align: center;
+
+  box-shadow: var(--sombra);
+}
+
+.card span {
+  font-size: 12px;
+
+  color: var(--bg-color5);
+
+  font-weight: 600;
+}
+
+.card p {
+  font-size: 1.7rem;
+
+  font-weight: 800;
+
+  color: var(--bg-color1);
+
+  margin-top: 6px;
+}
+
+
+/* =========================================================
+   ACESSO RÁPIDO
+========================================================= */
+
+.acesso-rapido {
+  display: grid;
+
+  grid-template-columns: repeat(4, 1fr);
+
+  gap: 12px;
+}
+
+.acesso-item {
+  background: var(--bg-color2);
+
+  border-radius: 16px;
+
+  padding: 16px 8px;
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+
+  gap: 8px;
+
+  box-shadow: var(--sombra);
+
+  color: #333;
+
+  font-size: 12.5px;
+
+  font-weight: 700;
+
+  transition: transform 0.2s ease;
+}
+
+.acesso-item:hover {
+  transform: translateY(-3px);
+}
+
+.acesso-icone {
+  width: 42px;
+
+  height: 42px;
+
+  border-radius: 12px;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  font-size: 20px;
+}
+
+.acesso-icone.roxo {
+  background: #ede6ff;
+}
+
+.acesso-icone.azul {
+  background: #dbeaff;
+}
+
+.acesso-icone.laranja {
+  background: #ffe9d1;
+}
+
+.acesso-icone.verde {
+  background: #d9f7e6;
+}
+
+
+/* =========================================================
+   SEÇÕES
+========================================================= */
+
+.secoes {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 16px;
+
+  margin-top: 22px;
+}
+
+.secao {
+  background: var(--bg-color2);
+
+  border-radius: var(--raio);
+
+  padding: 18px;
+
+  box-shadow: var(--sombra);
+}
+
+.secao h3 {
+  font-size: 1rem;
+
+  color: #12142b;
+
+  font-weight: 800;
+}
+
+
+/* =========================================================
+   ITENS
+========================================================= */
+
+.item {
+  display: flex;
+
+  justify-content: space-between;
+
+  align-items: center;
+
+  padding: 12px 0;
+
+  border-bottom: 1px solid #f0f0f5;
+
+  font-size: 14px;
+
+  gap: 10px;
+}
+
+.item:last-of-type {
+  border-bottom: none;
+}
+
+.item-esq {
+  display: flex;
+
+  align-items: center;
+
+  gap: 12px;
+
+  min-width: 0;
+}
+
+.item-icone {
+  width: 38px;
+
+  height: 38px;
+
+  border-radius: 10px;
+
+  flex-shrink: 0;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  font-size: 13px;
+
+  font-weight: 800;
+
+  color: var(--bg-color1);
+}
+
+.item-icone.roxo {
+  background: #ede6ff;
+}
+
+.item-icone.azul {
+  background: #dbeaff;
+}
+
+.item-icone.verde {
+  background: #d9f7e6;
+}
+
+.item-icone.laranja {
+  background: #ffe9d1;
+}
+
+.item .nome {
+  font-weight: 700;
+
+  color: #333;
+}
+
+.item .detalhe {
+  font-size: 12px;
+
+  color: var(--bg-color5);
+}
+
+
+/* =========================================================
+   MINI BARRA
+========================================================= */
+
+.mini-barra {
+  width: 130px;
+
+  max-width: 40vw;
+
+  height: 5px;
+
+  background: #eef0f5;
+
+  border-radius: 4px;
+
+  margin-top: 6px;
+
+  overflow: hidden;
+}
+
+.mini-barra span {
+  display: block;
+
+  height: 100%;
+
+  background:
+    linear-gradient(90deg,
+      var(--bg-color4),
+      var(--acento-menta));
+
+  border-radius: 4px;
+}
+
+
+/* =========================================================
+   BADGES / LINKS
+========================================================= */
+
+.badge {
+  background-color: var(--lilas-suave);
+
+  color: var(--bg-color1);
+
+  padding: 5px 12px;
+
+  border-radius: 999px;
+
+  font-size: 12px;
+
+  font-weight: 700;
+
+  white-space: nowrap;
+}
+
+.chevron {
+  color: var(--bg-color5);
+
+  font-size: 18px;
+}
+
+.ver-todos {
+  display: inline-block;
+
+  margin-top: 12px;
+
+  color: var(--bg-color1);
+
+  font-size: 13px;
+
+  font-weight: 700;
+}
+
+
+/* =========================================================
+   SUGESTÃO
+========================================================= */
+
+.sugestao-card {
+  margin-top: 22px;
+
+  background: var(--lilas-suave);
+
+  border: 1px solid var(--lilas-borda);
+
+  border-radius: var(--raio);
+
+  padding: 22px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+
+  gap: 16px;
+}
+
+.sugestao-eyebrow {
+  font-size: 13px;
+
+  font-weight: 800;
+
+  color: var(--bg-color1);
+}
+
+.sugestao-texto p {
+  margin: 8px 0 14px;
+
+  color: #444;
+
+  font-size: 14px;
+
+  max-width: 40ch;
+}
+
+.btn-revisao {
+  display: inline-block;
+
+  background: var(--bg-color1);
+
+  color: white;
+
+  padding: 11px 18px;
+
+  border-radius: 12px;
+
+  font-size: 13.5px;
+
+  font-weight: 700;
+}
+
+
+/* =========================================================
+   OVERLAY
+========================================================= */
+
+.overlay {
+  position: fixed;
+
+  inset: 0;
+
+  background: rgba(10, 12, 40, 0.45);
+
+  display: none;
+
+  align-items: center;
+
+  justify-content: center;
+
+  z-index: 100;
+
+  padding: 20px;
+}
+
+.overlay.show {
+  display: flex;
+}
+
+.overlay-box {
+  background: white;
+
+  border-radius: 16px;
+
+  padding: 22px;
+
+  max-width: 320px;
+
+  width: 100%;
+
+  text-align: center;
+
+  box-shadow: var(--sombra-forte);
+}
+
+.overlay-box p {
+  font-weight: 700;
+
+  color: #12142b;
+
+  margin-bottom: 16px;
+}
+
+.overlay-botoes {
+  display: flex;
+
+  gap: 10px;
+}
+
+.btn-primario,
+.btn-secundario {
+  flex: 1;
+
+  padding: 10px;
+
+  border-radius: 10px;
+
+  border: none;
+
+  font-weight: 700;
+
+  cursor: pointer;
+
+  font-size: 13.5px;
+}
+
+.btn-primario {
+  background: var(--bg-color1);
+
+  color: white;
+}
+
+.btn-secundario {
+  background: #eef0f5;
+
+  color: #444;
+}
+
+
+/* =========================================================
+   RESPONSIVIDADE ESPECÍFICA DA PÁGINA
+========================================================= */
+
+@media (min-width: 700px) {
 
   .conteudo {
     padding: 40px 44px;
@@ -803,52 +1345,61 @@ a {
   .secao {
     flex: 1;
   }
-
-  .nav-mobile {
-    left: 280px;
-  }
 }
 
-@media (min-width: 560px) and (max-width: 899px) {
+@media (min-width: 560px) and (max-width: 699px) {
+
   .acesso-rapido {
     grid-template-columns: repeat(4, 1fr);
   }
 }
+
+
 /* =========================================================
-   AUTENTICAÇÃO — LOGIN / CADASTRO
-   (substitui todo o bloco antigo de #authOverlay pra baixo
-   no seu style.css)
+   BOTÃO "SAIR DA CONTA"
+   ---------------------------------------------------------
+   Espaço extra para ele não ficar atrás da barra inferior
+   no celular.
 ========================================================= */
 
-/* Fundo que bloqueia toda a aplicação */
+@media (max-width: 699px) {
+
+  .btn-sair {
+    margin-bottom: 90px;
+  }
+}
+
+
+/* =========================================================
+   AUTENTICAÇÃO — LOGIN / CADASTRO
+========================================================= */
+
 .auth-overlay {
   position: fixed;
+
   inset: 0;
+
   z-index: 9999;
 
   display: flex;
+
   align-items: center;
+
   justify-content: center;
 
   padding: 20px;
 
   background:
-    radial-gradient(
-      circle at 20% 20%,
+    radial-gradient(circle at 20% 20%,
       rgba(77, 163, 255, 0.35),
-      transparent 35%
-    ),
-    radial-gradient(
-      circle at 80% 80%,
+      transparent 35%),
+    radial-gradient(circle at 80% 80%,
       rgba(52, 211, 153, 0.18),
-      transparent 30%
-    ),
-    linear-gradient(
-      135deg,
+      transparent 30%),
+    linear-gradient(135deg,
       #0015d6 0%,
       #000fb0 55%,
-      #07147d 100%
-    );
+      #07147d 100%);
 
   overflow-y: auto;
 }
@@ -857,14 +1408,16 @@ body:not(.auth-aberto) .auth-overlay {
   display: none;
 }
 
-/* =========================================
-   CARD PRINCIPAL
-========================================= */
+
+/* =========================================================
+   CARD PRINCIPAL DE AUTENTICAÇÃO
+========================================================= */
 
 .auth-modal {
   position: relative;
 
   width: 100%;
+
   max-width: 430px;
 
   background: #ffffff;
@@ -883,24 +1436,34 @@ body:not(.auth-aberto) .auth-overlay {
 }
 
 @keyframes authEntrada {
+
   from {
     opacity: 0;
-    transform: translateY(18px) scale(0.97);
+
+    transform:
+      translateY(18px) scale(0.97);
   }
+
   to {
     opacity: 1;
-    transform: translateY(0) scale(1);
+
+    transform:
+      translateY(0) scale(1);
   }
 }
 
-/* =========================================
-   LOGO
-========================================= */
+
+/* =========================================================
+   LOGO DA AUTENTICAÇÃO
+========================================================= */
 
 .auth-modal .auth-logo {
   display: flex;
+
   flex-direction: column;
+
   align-items: center;
+
   gap: 8px;
 
   margin-bottom: 18px;
@@ -908,22 +1471,31 @@ body:not(.auth-aberto) .auth-overlay {
 
 .auth-modal .auth-logo img {
   width: 64px;
+
   height: 64px;
+
   object-fit: cover;
+
   border-radius: 16px;
-  box-shadow: 0 8px 20px rgba(0, 15, 176, 0.2);
+
+  box-shadow:
+    0 8px 20px rgba(0, 15, 176, 0.2);
 }
 
 .auth-modal .auth-logo span {
   font-size: 1.1rem;
+
   font-weight: 800;
+
   color: #12142b;
+
   letter-spacing: -0.3px;
 }
 
-/* =========================================
+
+/* =========================================================
    TÍTULO E DESCRIÇÃO
-========================================= */
+========================================================= */
 
 .auth-topo {
   margin-bottom: 22px;
@@ -931,30 +1503,42 @@ body:not(.auth-aberto) .auth-overlay {
 
 .auth-topo h1 {
   color: #12142b;
+
   font-weight: 800;
+
   letter-spacing: -0.5px;
+
   font-size: 1.5rem;
+
   margin: 0;
 }
 
 .auth-topo p {
   color: #888;
+
   font-size: 13.5px;
+
   line-height: 1.6;
+
   margin: 8px auto 0;
+
   max-width: 330px;
 }
 
-/* =========================================
-   ABAS (LOGIN / CRIAR CONTA)
-========================================= */
+
+/* =========================================================
+   ABAS
+========================================================= */
 
 .auth-tabs {
   display: flex;
+
   gap: 6px;
 
   background: #f2f3fa;
+
   border-radius: 12px;
+
   padding: 4px;
 
   margin-bottom: 22px;
@@ -964,17 +1548,23 @@ body:not(.auth-aberto) .auth-overlay {
   flex: 1;
 
   border: none;
+
   background: transparent;
 
   padding: 10px 12px;
+
   border-radius: 9px;
 
   font-family: "Manrope", Arial, sans-serif;
+
   font-size: 13px;
+
   font-weight: 700;
+
   color: #666;
 
   cursor: pointer;
+
   transition: all 0.2s ease;
 }
 
@@ -984,48 +1574,65 @@ body:not(.auth-aberto) .auth-overlay {
 
 .auth-tab.ativo {
   background: #ffffff;
+
   color: #000fb0;
-  box-shadow: 0 3px 10px rgba(0, 15, 176, 0.12);
+
+  box-shadow:
+    0 3px 10px rgba(0, 15, 176, 0.12);
 }
 
-/* =========================================
+
+/* =========================================================
    FORMULÁRIOS
-========================================= */
+========================================================= */
 
 .auth-form {
   display: flex;
+
   flex-direction: column;
+
   gap: 14px;
+
   width: 100%;
+
   text-align: left;
 }
 
 .campo-auth {
   display: flex;
+
   flex-direction: column;
+
   gap: 6px;
 }
 
 .campo-auth label {
   color: #333;
+
   font-size: 12px;
+
   font-weight: 700;
 }
 
 .campo-auth input {
   width: 100%;
+
   height: 48px;
 
   padding: 0 15px;
 
   border: 1px solid #e0e4ff;
+
   border-radius: 12px;
+
   outline: none;
 
   background: #fafaff;
+
   color: #12142b;
 
   font-family: "Manrope", Arial, sans-serif;
+
   font-size: 13.5px;
 
   transition:
@@ -1040,19 +1647,29 @@ body:not(.auth-aberto) .auth-overlay {
 
 .campo-auth input:focus {
   border-color: #1466ff;
+
   background: #ffffff;
-  box-shadow: 0 0 0 3px rgba(20, 102, 255, 0.1);
+
+  box-shadow:
+    0 0 0 3px rgba(20, 102, 255, 0.1);
 }
 
-/* Checkbox de termos (cadastro) */
+
+/* =========================================================
+   CHECKBOX DE TERMOS
+========================================================= */
 
 .auth-termos-check {
   display: flex;
+
   align-items: flex-start;
+
   gap: 8px;
 
   font-size: 11.5px;
+
   color: #666;
+
   line-height: 1.5;
 
   cursor: pointer;
@@ -1060,33 +1677,45 @@ body:not(.auth-aberto) .auth-overlay {
 
 .auth-termos-check input {
   margin-top: 2px;
+
   accent-color: #000fb0;
+
   flex-shrink: 0;
 }
 
-/* =========================================
+
+/* =========================================================
    BOTÃO PRINCIPAL
-========================================= */
+========================================================= */
 
 .auth-btn {
   width: 100%;
+
   min-height: 48px;
+
   margin-top: 5px;
 
   border: none;
+
   border-radius: 12px;
 
-  background: linear-gradient(135deg, #0015d6, #1466ff);
+  background:
+    linear-gradient(135deg,
+      #0015d6,
+      #1466ff);
 
   color: #ffffff;
 
   font-family: "Manrope", Arial, sans-serif;
+
   font-size: 14px;
+
   font-weight: 800;
 
   cursor: pointer;
 
-  box-shadow: 0 7px 18px rgba(0, 15, 176, 0.25);
+  box-shadow:
+    0 7px 18px rgba(0, 15, 176, 0.25);
 
   transition:
     transform 0.2s ease,
@@ -1095,76 +1724,97 @@ body:not(.auth-aberto) .auth-overlay {
 
 .auth-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 10px 24px rgba(0, 15, 176, 0.32);
+
+  box-shadow:
+    0 10px 24px rgba(0, 15, 176, 0.32);
 }
 
 .auth-btn:active {
   transform: translateY(0);
 }
 
-/* =========================================
+
+/* =========================================================
    DIVISOR "OU"
-========================================= */
+========================================================= */
 
 .auth-ou {
   display: flex;
+
   align-items: center;
+
   gap: 12px;
 
   margin: 24px 0;
 
   color: #999;
+
   font-size: 11px;
+
   font-weight: 700;
+
   text-transform: uppercase;
 }
 
 .auth-ou span {
   flex: 1;
+
   height: 1px;
+
   background: #e8eaf2;
 }
 
-/* =========================================
+
+/* =========================================================
    LOGIN COM GOOGLE
-========================================= */
+========================================================= */
 
 .google-login {
   width: 100%;
+
   display: flex;
+
   justify-content: center;
 }
 
 #googleBtn {
   width: 100%;
+
   display: flex;
+
   justify-content: center;
 }
 
-#googleBtn > div {
+#googleBtn>div {
   width: 100% !important;
 }
 
-/* =========================================
+
+/* =========================================================
    MENSAGEM DE ERRO
-========================================= */
+========================================================= */
 
 .auth-erro {
   display: none;
 
   width: 100%;
+
   margin-top: 14px;
 
   padding: 11px 13px;
+
   border-radius: 10px;
 
   background: #ffe8eb;
+
   border: 1px solid #ffc5cc;
 
   color: #d92d4f;
 
   font-size: 12px;
+
   font-weight: 700;
+
   line-height: 1.5;
 }
 
@@ -1172,61 +1822,66 @@ body:not(.auth-aberto) .auth-overlay {
   display: block;
 }
 
-/* =========================================
-   TEXTO INFERIOR DE PRIVACIDADE
-========================================= */
+
+/* =========================================================
+   PRIVACIDADE
+========================================================= */
 
 .auth-privacidade {
   margin-top: 22px;
 
   color: #999;
+
   font-size: 10.5px;
+
   line-height: 1.5;
 }
 
 .auth-privacidade::before {
   content: "🔒 ";
+
   font-size: 11px;
 }
 
-/* =========================================
-   BODY BLOQUEADO
-========================================= */
 
-/*
-   O JavaScript adiciona .auth-aberto
-   enquanto o usuário não estiver autenticado.
-*/
+/* =========================================================
+   BODY BLOQUEADO
+========================================================= */
 
 body.auth-aberto {
   overflow: hidden;
 }
 
-/* Impede interação com o conteúdo atrás do login */
-
-body.auth-aberto > *:not(.auth-overlay) {
+body.auth-aberto>*:not(.auth-overlay) {
   pointer-events: none;
+
   user-select: none;
 }
 
-/* =========================================
-   RESPONSIVIDADE
-========================================= */
+
+/* =========================================================
+   RESPONSIVIDADE DA AUTENTICAÇÃO
+========================================================= */
 
 @media (max-width: 560px) {
+
   .auth-overlay {
     padding: 16px;
   }
 
   .auth-modal {
     max-width: 100%;
+
     padding: 30px 22px 25px;
+
     border-radius: 20px;
   }
 
   .auth-modal .auth-logo img {
     width: 54px;
+
     height: 54px;
+
     border-radius: 14px;
   }
 
@@ -1240,19 +1895,24 @@ body.auth-aberto > *:not(.auth-overlay) {
 }
 
 @media (max-height: 650px) {
+
   .auth-overlay {
     align-items: flex-start;
+
     padding-top: 25px;
+
     padding-bottom: 25px;
   }
 
   .auth-modal {
     padding-top: 25px;
+
     padding-bottom: 22px;
   }
 
   .auth-modal .auth-logo img {
     width: 48px;
+
     height: 48px;
   }
 
@@ -1265,21 +1925,25 @@ body.auth-aberto > *:not(.auth-overlay) {
   }
 }
 
-/* =========================================
+
+/* =========================================================
    ACESSIBILIDADE
-========================================= */
+========================================================= */
 
 .auth-modal button:focus-visible,
 .auth-modal input:focus-visible {
   outline: 3px solid var(--bg-color4);
+
   outline-offset: 3px;
 }
 
-/* =========================================
-   GOOGLE LOGIN - AJUSTE RESPONSIVO
-========================================= */
+
+/* =========================================================
+   GOOGLE LOGIN — AJUSTE RESPONSIVO
+========================================================= */
 
 @media (max-width: 400px) {
+
   #googleBtn {
     overflow: hidden;
   }
@@ -1290,12 +1954,14 @@ body.auth-aberto > *:not(.auth-overlay) {
 
   .auth-modal {
     padding-left: 18px;
+
     padding-right: 18px;
   }
 }
 
+
 /* =========================================================
-   MOSTRAR / OCULTAR SENHA (olhinho)
+   MOSTRAR / OCULTAR SENHA
 ========================================================= */
 
 .campo-senha-wrapper {
@@ -1306,13 +1972,24 @@ body.auth-aberto > *:not(.auth-overlay) {
 
 .campo-senha-wrapper input {
   width: 100%;
-  padding-right: 44px; /* espaço pro botão do olho */
+  padding-right: 44px;
 }
 
+/* Remove o olho nativo do navegador */
+.campo-senha-wrapper input::-ms-reveal,
+.campo-senha-wrapper input::-ms-clear {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+/* Botão do nosso olho */
 .toggle-senha {
   position: absolute;
+
   right: 6px;
   top: 50%;
+
   transform: translateY(-50%);
 
   width: 34px;
@@ -1325,10 +2002,16 @@ body.auth-aberto > *:not(.auth-overlay) {
   background: none;
   border: none;
   border-radius: 8px;
+
   cursor: pointer;
 
   color: var(--bg-color5);
-  transition: color 0.2s ease, background 0.2s ease;
+
+  transition:
+    color 0.2s ease,
+    background 0.2s ease;
+
+  z-index: 2;
 }
 
 .toggle-senha:hover {
@@ -1352,177 +2035,240 @@ body.auth-aberto > *:not(.auth-overlay) {
 }
 
 /* =========================================================
-   RECUPERAÇÃO DE SENHA — PASSOS EXTRAS
-   (código, nova senha, textos e links auxiliares)
+   RECUPERAÇÃO DE SENHA
 ========================================================= */
-
-/* -----------------------------------------------------
-   TEXTO AUXILIAR (ex: "Enviamos um código para...")
------------------------------------------------------ */
 
 .auth-texto-auxiliar {
   color: #666;
+
   font-size: 13px;
+
   line-height: 1.6;
+
   text-align: left;
+
   margin-bottom: 2px;
 }
 
 .auth-texto-auxiliar strong {
   color: #000fb0;
+
   font-weight: 800;
+
   word-break: break-all;
 }
 
-/* -----------------------------------------------------
+
+/* =========================================================
    LINKS / BOTÕES SECUNDÁRIOS
-   (Esqueceu a senha? / Voltar para o login / Reenviar)
------------------------------------------------------ */
+========================================================= */
 
 .auth-link-secundario {
   display: inline-block;
+
   align-self: center;
 
   border: none;
+
   background: none;
+
   padding: 4px 6px;
+
   margin-top: 2px;
 
   font-family: "Manrope", Arial, sans-serif;
+
   font-size: 12.5px;
+
   font-weight: 700;
+
   color: var(--bg-color1);
 
   text-decoration: none;
+
   cursor: pointer;
 
   border-radius: 6px;
-  transition: color 0.2s ease, background 0.2s ease;
+
+  transition:
+    color 0.2s ease,
+    background 0.2s ease;
 }
 
 .auth-link-secundario:hover {
   color: #1466ff;
+
   background: var(--lilas-suave);
 }
 
 .auth-link-secundario:focus-visible {
   outline: 2px solid var(--bg-color4);
+
   outline-offset: 2px;
 }
 
-/* O link "Esqueceu a senha?" fica alinhado à direita,
-   colado no campo de senha do login */
 #linkEsqueciSenha {
   align-self: flex-end;
+
   margin-top: -4px;
 }
 
-/* "Voltar para o login" e "Reenviar código" ficam
-   centralizados, como ações secundárias do passo */
 #voltarParaLoginDeRecuperar,
 #reenviarCodigoRecuperacao {
   align-self: center;
+
   text-align: center;
 }
 
-/* -----------------------------------------------------
-   CAMPO DO CÓDIGO (estilo OTP)
------------------------------------------------------ */
+
+/* =========================================================
+   CAMPO DO CÓDIGO
+========================================================= */
 
 #campoCodigoRecuperacao {
   text-align: center;
 
   font-size: 1.6rem;
+
   font-weight: 800;
+
   letter-spacing: 10px;
 
   color: #000fb0;
 
   background: var(--lilas-suave);
+
   border: 1.5px solid var(--lilas-borda);
 }
 
 #campoCodigoRecuperacao::placeholder {
   letter-spacing: 10px;
+
   color: #c3c8f5;
+
   font-weight: 700;
 }
 
 #campoCodigoRecuperacao:focus {
   background: #ffffff;
+
   border-color: #1466ff;
-  box-shadow: 0 0 0 4px rgba(20, 102, 255, 0.12);
+
+  box-shadow:
+    0 0 0 4px rgba(20, 102, 255, 0.12);
 }
 
-/* -----------------------------------------------------
-   BOTÃO "SALVAR NOVA SENHA" — leve destaque de sucesso
------------------------------------------------------ */
+
+/* =========================================================
+   BOTÃO "SALVAR NOVA SENHA"
+========================================================= */
 
 #salvarNovaSenhaBtn {
-  background: linear-gradient(135deg, #0015d6, #1466ff, var(--acento-menta) 180%);
+  background:
+    linear-gradient(135deg,
+      #0015d6,
+      #1466ff,
+      var(--acento-menta) 180%);
 }
 
-/* -----------------------------------------------------
-   MENSAGEM DE SUCESSO (reaproveita .auth-erro,
-   mas quando o JS troca a cor pra verde via style.color,
-   isso aqui garante que o fundo/borda acompanhem)
------------------------------------------------------ */
+
+/* =========================================================
+   MENSAGEM DE SUCESSO
+========================================================= */
 
 .auth-erro[style*="rgb(26, 156, 92)"],
 #authErro[style*="#1a9c5c"] {
   background: #e6faf0 !important;
+
   border-color: #b7f0d3 !important;
 }
 
-/* -----------------------------------------------------
-   RESPONSIVIDADE — código um pouco menor no mobile
------------------------------------------------------ */
+
+/* =========================================================
+   RESPONSIVIDADE — CÓDIGO
+========================================================= */
 
 @media (max-width: 400px) {
+
   #campoCodigoRecuperacao {
     font-size: 1.3rem;
+
     letter-spacing: 7px;
   }
 }
+
+
 /* =========================================================
    BALÃO "PRECISA DE AJUDA?" — CHATBOT
 ========================================================= */
 
 .balao-suporte {
   position: fixed;
+
   z-index: 9997;
+
   max-width: 190px;
+
   background: #bccef8;
+
   color: #23262b;
+
   padding: 10px 16px;
+
   border-radius: 16px;
+
   font-size: 13px;
+
   font-weight: 700;
+
   line-height: 1.3;
+
   text-align: center;
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.16);
+
+  box-shadow:
+    0 10px 24px rgba(0, 0, 0, 0.16);
+
   opacity: 0;
-  transform: translateY(10px) scale(0.9);
+
+  transform:
+    translateY(10px) scale(0.9);
+
   pointer-events: none;
-  transition: opacity 0.35s ease, transform 0.35s ease;
+
+  transition:
+    opacity 0.35s ease,
+    transform 0.35s ease;
 }
 
 .balao-suporte::after {
   content: "";
+
   position: absolute;
+
   bottom: -6px;
+
   right: 26px;
+
   width: 12px;
+
   height: 12px;
+
   background: #ffffff;
+
   transform: rotate(45deg);
-  box-shadow: 3px 3px 6px rgba(0, 0, 0, 0.06);
+
+  box-shadow:
+    3px 3px 6px rgba(0, 0, 0, 0.06);
 }
 
 .balao-suporte.mostrar {
   opacity: 1;
-  transform: translateY(0) scale(1);
+
+  transform:
+    translateY(0) scale(1);
+
   pointer-events: auto;
+
   cursor: pointer;
 }
 

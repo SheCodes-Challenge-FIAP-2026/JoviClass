@@ -1396,8 +1396,9 @@ button:focus-visible,
 }
 
 /* =========================================================
-   MOSTRAR / OCULTAR SENHA (olhinho)
+   MOSTRAR / OCULTAR SENHA
 ========================================================= */
+
 .campo-senha-wrapper {
   position: relative;
   display: flex;
@@ -1407,13 +1408,23 @@ button:focus-visible,
 .campo-senha-wrapper input {
   width: 100%;
   padding-right: 44px;
-  /* espaço pro botão do olho */
 }
 
+/* Remove o olho nativo do navegador */
+.campo-senha-wrapper input::-ms-reveal,
+.campo-senha-wrapper input::-ms-clear {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+/* Botão do nosso olho */
 .toggle-senha {
   position: absolute;
+
   right: 6px;
   top: 50%;
+
   transform: translateY(-50%);
 
   width: 34px;
@@ -1427,8 +1438,15 @@ button:focus-visible,
   border: none;
   border-radius: 8px;
 
+  cursor: pointer;
+
   color: var(--bg-color5);
-  transition: color 0.2s ease, background 0.2s ease;
+
+  transition:
+    color 0.2s ease,
+    background 0.2s ease;
+
+  z-index: 2;
 }
 
 .toggle-senha:hover {
@@ -1444,6 +1462,11 @@ button:focus-visible,
   width: 20px;
   height: 20px;
   display: block;
+}
+
+.toggle-senha:focus-visible {
+  outline: 2px solid var(--bg-color4);
+  outline-offset: 2px;
 }
 
 .btn-sair {
