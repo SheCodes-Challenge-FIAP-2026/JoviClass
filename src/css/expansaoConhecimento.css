@@ -1,20 +1,3 @@
-/* ============================================================
-   BASE.CSS
-   Estilos GLOBAIS e compartilhados por TODAS as páginas do app
-   (variáveis, reset, cabeçalho/menu, notificações, hambúrguer,
-   nav inferior mobile).
-
-   COMO USAR:
-   Inclua este arquivo ANTES do CSS específico de cada página:
-
-     <link rel="stylesheet" href="base.css">
-     <link rel="stylesheet" href="pagina-inicio.css">
-
-   Depois de incluir este arquivo, REMOVA de cada CSS de página
-   os blocos que já estão aqui, para não haver mais divergência
-   entre as páginas.
-   ============================================================ */
-
 :root {
   --bg-color1: #000fb0;
   --bg-color2: #ffffff;
@@ -60,7 +43,8 @@ body {
   background-color: var(--bg-colorFundo);
   display: flex;
   flex-direction: column;
-  height: 100dvh; /* altura travada no viewport — quem rola é o .conteudo-principal, não o body */
+  height: 100dvh;
+  /* altura travada no viewport — quem rola é o .conteudo-principal, não o body */
   overflow-x: hidden;
   overflow-y: hidden;
   -webkit-font-smoothing: antialiased;
@@ -236,6 +220,7 @@ button:focus-visible,
     opacity: 0;
     transform: translateY(-6px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -276,7 +261,8 @@ button:focus-visible,
 .notif-lista {
   max-height: 340px;
   overflow-y: auto;
-  scrollbar-width: thin; /* Firefox */
+  scrollbar-width: thin;
+  /* Firefox */
   scrollbar-color: var(--bg-color5) transparent;
 }
 
@@ -328,9 +314,17 @@ button:focus-visible,
   font-size: 15px;
 }
 
-.notif-icone.urgente { background: #ffe1e1; }
-.notif-icone.breve   { background: #ffe9d1; }
-.notif-icone.normal  { background: #dbeaff; }
+.notif-icone.urgente {
+  background: #ffe1e1;
+}
+
+.notif-icone.breve {
+  background: #ffe9d1;
+}
+
+.notif-icone.normal {
+  background: #dbeaff;
+}
 
 .notif-corpo {
   flex: 1;
@@ -356,9 +350,17 @@ button:focus-visible,
   display: inline-block;
 }
 
-.notif-prazo.urgente { color: #e0304a; }
-.notif-prazo.breve   { color: #d97706; }
-.notif-prazo.normal  { color: var(--bg-color1); }
+.notif-prazo.urgente {
+  color: #e0304a;
+}
+
+.notif-prazo.breve {
+  color: #d97706;
+}
+
+.notif-prazo.normal {
+  color: var(--bg-color1);
+}
 
 /* =========================
    BOTÃO HAMBÚRGUER
@@ -824,11 +826,25 @@ body {
   height: 16px;
 }
 
-.cat-matematica { background: linear-gradient(135deg, #2f5cff, #1a3fe0); }
-.cat-ciencias   { background: linear-gradient(135deg, #22c98e, #0fa876); }
-.cat-idiomas    { background: linear-gradient(135deg, #ff9f43, #ff7a1a); }
-.cat-tecnologia { background: linear-gradient(135deg, #7c5cff, #5433d6); }
-.cat-historia   { background: linear-gradient(135deg, #ff5c8a, #e0316b); }
+.cat-matematica {
+  background: linear-gradient(135deg, #2f5cff, #1a3fe0);
+}
+
+.cat-ciencias {
+  background: linear-gradient(135deg, #22c98e, #0fa876);
+}
+
+.cat-idiomas {
+  background: linear-gradient(135deg, #ff9f43, #ff7a1a);
+}
+
+.cat-tecnologia {
+  background: linear-gradient(135deg, #7c5cff, #5433d6);
+}
+
+.cat-historia {
+  background: linear-gradient(135deg, #ff5c8a, #e0316b);
+}
 
 .empty-state {
   text-align: center;
@@ -978,8 +994,15 @@ body {
 }
 
 @keyframes slideUp {
-  from { transform: translateY(24px); opacity: 0; }
-  to   { transform: translateY(0);    opacity: 1; }
+  from {
+    transform: translateY(24px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 .modal-handle {
@@ -1066,20 +1089,23 @@ body {
 ========================= */
 .toast {
   position: fixed;
-  left: 50%;
-  bottom: 96px;
-  transform: translate(-50%, 12px);
-  background: var(--ink);
+  /* soma a altura da nav-mobile (que fica sempre fixa embaixo,
+     inclusive no desktop) + a área segura do iOS, senão o toast
+     nasce escondido atrás dela */
+  bottom: calc(var(--nav-mobile-altura) + env(safe-area-inset-bottom) + 40px);
+  right: 24px;
+  background: #222;
   color: #fff;
-  padding: 11px 20px;
-  border-radius: 999px;
-  font-size: 13px;
+  padding: 12px 20px;
+  border-radius: 10px;
+  font-size: 14px;
   font-weight: 600;
   opacity: 0;
+  transform: translateY(10px);
+  transition: all 0.3s ease;
+  /* precisa ficar acima da nav-mobile (z-index: 999) */
+  z-index: 1000;
   pointer-events: none;
-  transition: all .25s ease;
-  z-index: 200;
-  white-space: nowrap;
 }
 
 .toast.show {

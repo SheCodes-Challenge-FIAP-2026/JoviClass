@@ -1,4 +1,3 @@
-
 /* ============================================================
    BASE.CSS
    Estilos GLOBAIS e compartilhados por TODAS as páginas do app
@@ -61,7 +60,8 @@ body {
   background-color: var(--bg-colorFundo);
   display: flex;
   flex-direction: column;
-  height: 100dvh; /* altura travada no viewport — quem rola é o .conteudo-principal, não o body */
+  height: 100dvh;
+  /* altura travada no viewport — quem rola é o .conteudo-principal, não o body */
   overflow-x: hidden;
   overflow-y: hidden;
   -webkit-font-smoothing: antialiased;
@@ -237,6 +237,7 @@ button:focus-visible,
     opacity: 0;
     transform: translateY(-6px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -277,7 +278,8 @@ button:focus-visible,
 .notif-lista {
   max-height: 340px;
   overflow-y: auto;
-  scrollbar-width: thin; /* Firefox */
+  scrollbar-width: thin;
+  /* Firefox */
   scrollbar-color: var(--bg-color5) transparent;
 }
 
@@ -329,9 +331,17 @@ button:focus-visible,
   font-size: 15px;
 }
 
-.notif-icone.urgente { background: #ffe1e1; }
-.notif-icone.breve   { background: #ffe9d1; }
-.notif-icone.normal  { background: #dbeaff; }
+.notif-icone.urgente {
+  background: #ffe1e1;
+}
+
+.notif-icone.breve {
+  background: #ffe9d1;
+}
+
+.notif-icone.normal {
+  background: #dbeaff;
+}
 
 .notif-corpo {
   flex: 1;
@@ -357,9 +367,17 @@ button:focus-visible,
   display: inline-block;
 }
 
-.notif-prazo.urgente { color: #e0304a; }
-.notif-prazo.breve   { color: #d97706; }
-.notif-prazo.normal  { color: var(--bg-color1); }
+.notif-prazo.urgente {
+  color: #e0304a;
+}
+
+.notif-prazo.breve {
+  color: #d97706;
+}
+
+.notif-prazo.normal {
+  color: var(--bg-color1);
+}
 
 /* =========================
    BOTÃO HAMBÚRGUER
@@ -694,7 +712,8 @@ body {
      senão, ao passar da altura da tela, o conteúdo só é cortado
      e não sobe nem desce (o que estava acontecendo). */
   flex: 1;
-  min-height: 0; /* obrigatório num filho flex pra overflow funcionar */
+  min-height: 0;
+  /* obrigatório num filho flex pra overflow funcionar */
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
 }
@@ -707,7 +726,7 @@ body {
   flex-wrap: wrap;
 }
 
-.headerMaterias > div {
+.headerMaterias>div {
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -1423,8 +1442,15 @@ body {
 }
 
 @keyframes fadeInDrop {
-  from { opacity: 0; transform: translateY(-6px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .dropItem {
@@ -1473,10 +1499,25 @@ body {
   letter-spacing: 0.3px;
 }
 
-.badgeTipo.anotacao { background: #fff3cd; color: #8a6200; }
-.badgeTipo.arquivo { background: #eef2ff; color: #3d5af1; }
-.badgeTipo.pdf { background: #fde8e8; color: #c0392b; }
-.badgeTipo.imagem { background: #e8f8f0; color: #1a8a55; }
+.badgeTipo.anotacao {
+  background: #fff3cd;
+  color: #8a6200;
+}
+
+.badgeTipo.arquivo {
+  background: #eef2ff;
+  color: #3d5af1;
+}
+
+.badgeTipo.pdf {
+  background: #fde8e8;
+  color: #c0392b;
+}
+
+.badgeTipo.imagem {
+  background: #e8f8f0;
+  color: #1a8a55;
+}
 
 /* =========================
    MODAL DE VISUALIZAÇÃO (viewer)
@@ -1500,8 +1541,13 @@ body {
 }
 
 @keyframes fadeOverlay {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 
 .viewerModal {
@@ -1518,8 +1564,15 @@ body {
 }
 
 @keyframes slideUpModal {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .viewerHeader {
@@ -1747,8 +1800,15 @@ body {
 }
 
 @keyframes aparecerResultado {
-  from { opacity: 0; transform: translateY(5px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .resultadoIAHeader {
@@ -1849,8 +1909,13 @@ body {
 }
 
 @keyframes rodarIA {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .btnAbrirIAViewer {
@@ -2014,12 +2079,12 @@ body {
   font-size: 14px;
 }
 
-/* =========================
-   TOAST
-========================= */
 .toast {
   position: fixed;
-  bottom: 24px;
+  /* soma a altura da nav-mobile (que fica sempre fixa embaixo,
+     inclusive no desktop) + a área segura do iOS, senão o toast
+     nasce escondido atrás dela */
+  bottom: calc(var(--nav-mobile-altura) + env(safe-area-inset-bottom) + 40px);
   right: 24px;
   background: #222;
   color: #fff;
@@ -2030,7 +2095,8 @@ body {
   opacity: 0;
   transform: translateY(10px);
   transition: all 0.3s ease;
-  z-index: 500;
+  /* precisa ficar acima da nav-mobile (z-index: 999) */
+  z-index: 1000;
   pointer-events: none;
 }
 
@@ -2182,8 +2248,15 @@ body {
 }
 
 @keyframes pulsarGravacaoMp3 {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.55; }
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.55;
+  }
 }
 
 .playerBarraWrapper {
@@ -2214,8 +2287,15 @@ body {
 }
 
 @keyframes pulsarBarra {
-  0%, 100% { opacity: 0.45; }
-  50% { opacity: 1; }
+
+  0%,
+  100% {
+    opacity: 0.45;
+  }
+
+  50% {
+    opacity: 1;
+  }
 }
 
 .playerControles {
