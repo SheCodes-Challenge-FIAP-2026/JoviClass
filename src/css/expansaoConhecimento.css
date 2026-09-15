@@ -1,27 +1,27 @@
-:root{
-  --blue-900:#0d1f8f;
-  --blue-700:#1a3fe0;
-  --blue-500:#2f5cff;
-  --blue-100:#e8edff;
-  --mint:#4fe0b0;
-  --bg:#f3f4f8;
-  --card:#ffffff;
-  --ink:#171a2b;
-  --ink-soft:#5b5f76;
-  --ink-faint:#9096ab;
-  --line:#e9ebf3;
-  --radius-lg:22px;
-  --radius-md:16px;
-  --radius-sm:12px;
-  --shadow-card:0 8px 24px rgba(23,26,43,0.06);
-  --shadow-fab:0 10px 20px rgba(13,31,143,0.35);
-  font-size:16px;
-   --bg-color1: #000fb0;
-    --bg-color2: #ffffff;
-    --bg-color3: rgba(255, 255, 255, 0.18);
-    --bg-color4: #1466ff;
-    --bg-color5: #888;
-    --bg-colorFundo: #f0f0f5;
+/* ============================================================
+   BASE.CSS
+   Estilos GLOBAIS e compartilhados por TODAS as páginas do app
+   (variáveis, reset, cabeçalho/menu, notificações, hambúrguer,
+   nav inferior mobile).
+
+   COMO USAR:
+   Inclua este arquivo ANTES do CSS específico de cada página:
+
+     <link rel="stylesheet" href="base.css">
+     <link rel="stylesheet" href="pagina-inicio.css">
+
+   Depois de incluir este arquivo, REMOVA de cada CSS de página
+   os blocos que já estão aqui, para não haver mais divergência
+   entre as páginas.
+   ============================================================ */
+
+:root {
+  --bg-color1: #000fb0;
+  --bg-color2: #ffffff;
+  --bg-color3: rgba(255, 255, 255, 0.18);
+  --bg-color4: #1466ff;
+  --bg-color5: #888;
+  --bg-colorFundo: #f0f0f5;
   --grad-inicio: #0015d6;
   --grad-fim: #000fb0;
   --acento-menta: #34d399;
@@ -31,17 +31,86 @@
   --sombra: 0 6px 18px rgba(0, 15, 176, 0.08);
   --sombra-forte: 0 10px 30px rgba(0, 15, 176, 0.18);
   --raio: 18px;
+
+  --menu-largura: 320px;
+  --nav-mobile-altura: 78px;
+
+  /* Duração/curva padrão para transições — centralizada aqui
+     para ficar fácil de ajustar o "feel" da interface inteira. */
+  --transicao-rapida: 0.2s ease;
+  --transicao-media: 0.3s ease;
 }
 
-*{box-sizing:border-box;}
-body{
-  margin:0;
+/* =========================
+   RESET
+========================= */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
   font-family: "Manrope", Arial, sans-serif;
-  background:var(--bg);
-  color:var(--ink);
-  -webkit-font-smoothing:antialiased;
 }
 
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--bg-colorFundo);
+  display: flex;
+  flex-direction: column;
+  height: 100dvh; /* altura travada no viewport — quem rola é o .conteudo-principal, não o body */
+  overflow-x: hidden;
+  overflow-y: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+/* Evita o "flash" cinza ao tocar em botões/links no mobile e
+   deixa o feedback de toque consistente com o resto da UI. */
+a,
+button {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Acessibilidade: contorno visível ao navegar por teclado (Tab),
+   sem poluir a interface para quem usa mouse/toque. */
+a:focus-visible,
+button:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--bg-color4);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Respeita quem prefere menos animação no sistema operacional. */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  * {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+/* =========================
+   LOGO
+========================= */
 .logoJovi {
   display: flex;
   align-items: center;
@@ -49,23 +118,19 @@ body{
 }
 
 #logo {
-  width: 30px;
+  width: 40px;
   height: auto;
   border-radius: 10px;
 }
 
-.menu h2 {
-  font-size: 1.0rem;
-  font-weight: 800;
-  color: var(--bg-color2);
-  margin: 0;
-  letter-spacing: -0.3px;
-}
-
+/* =========================
+   MENU / TOPO
+========================= */
 .menu {
   background: linear-gradient(135deg, var(--grad-inicio) 0%, var(--grad-fim) 100%);
   color: white;
   padding: 18px 20px;
+  padding-top: calc(18px + env(safe-area-inset-top));
   display: flex;
   flex-direction: column;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
@@ -74,10 +139,24 @@ body{
   z-index: 30;
 }
 
+.menu h2 {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--bg-color2);
+  margin: 0;
+  letter-spacing: -0.3px;
+}
+
 .menu-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 12px;
+  /* Referência de posicionamento do painel de notificações
+     (ver .notif-panel). Usar o header inteiro em vez do botão
+     evita que o painel "pule" quando o layout do header muda
+     entre mobile (linha) e desktop (coluna). */
+  position: relative;
 }
 
 .menu-actions {
@@ -97,7 +176,16 @@ body{
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
+  flex-shrink: 0;
+  transition: background var(--transicao-rapida), transform var(--transicao-rapida);
+}
+
+.icon-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.icon-btn:active {
+  transform: scale(0.92);
 }
 
 .icon-btn svg {
@@ -122,9 +210,11 @@ body{
   border: 2px solid var(--grad-fim);
 }
 
-.notif-wrapper {
-  position: relative;
-}
+/* =========================
+   PAINEL DE NOTIFICAÇÕES
+========================= */
+/* .notif-wrapper propositalmente SEM position:relative — o
+   painel se ancora no .menu-header (ver acima), não no botão. */
 
 .notif-panel {
   position: absolute;
@@ -133,11 +223,23 @@ body{
   width: 320px;
   max-width: 86vw;
   background: white;
-  border-radius: 16px;
+  border-radius: var(--raio);
   box-shadow: var(--sombra-forte);
   overflow: hidden;
   z-index: 60;
   color: #12142b;
+  animation: notif-entrar var(--transicao-media);
+}
+
+@keyframes notif-entrar {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .notif-panel[hidden] {
@@ -159,15 +261,32 @@ body{
 .notif-marcar {
   background: none;
   border: none;
-  color: #000fb0;
+  color: var(--bg-color1);
   font-size: 11.5px;
   font-weight: 700;
   cursor: pointer;
+  transition: opacity var(--transicao-rapida);
+}
+
+.notif-marcar:hover {
+  opacity: 0.7;
+  text-decoration: underline;
 }
 
 .notif-lista {
   max-height: 340px;
   overflow-y: auto;
+  scrollbar-width: thin; /* Firefox */
+  scrollbar-color: var(--bg-color5) transparent;
+}
+
+.notif-lista::-webkit-scrollbar {
+  width: 6px;
+}
+
+.notif-lista::-webkit-scrollbar-thumb {
+  background-color: #d8d8e2;
+  border-radius: 10px;
 }
 
 .notif-vazio {
@@ -183,10 +302,15 @@ body{
   padding: 12px 16px;
   border-bottom: 1px solid #f5f5fa;
   cursor: pointer;
+  transition: background var(--transicao-rapida);
 }
 
 .notif-item:last-child {
   border-bottom: none;
+}
+
+.notif-item:hover {
+  background: #f0f1fb;
 }
 
 .notif-item.nao-lida {
@@ -205,8 +329,8 @@ body{
 }
 
 .notif-icone.urgente { background: #ffe1e1; }
-.notif-icone.breve { background: #ffe9d1; }
-.notif-icone.normal { background: #dbeaff; }
+.notif-icone.breve   { background: #ffe9d1; }
+.notif-icone.normal  { background: #dbeaff; }
 
 .notif-corpo {
   flex: 1;
@@ -233,15 +357,21 @@ body{
 }
 
 .notif-prazo.urgente { color: #e0304a; }
-.notif-prazo.breve { color: #d97706; }
-.notif-prazo.normal { color: var(--bg-color1); }
+.notif-prazo.breve   { color: #d97706; }
+.notif-prazo.normal  { color: var(--bg-color1); }
 
+/* =========================
+   BOTÃO HAMBÚRGUER
+========================= */
 .hamburger {
   display: flex;
   flex-direction: column;
+  justify-content: center;
   gap: 5px;
   cursor: pointer;
   padding: 6px;
+  width: 36px;
+  height: 36px;
 }
 
 .hamburger span {
@@ -249,9 +379,28 @@ body{
   height: 3px;
   background-color: white;
   border-radius: 3px;
-  transition: 0.3s;
+  transition: transform var(--transicao-media), opacity var(--transicao-media);
+  transform-origin: center;
 }
 
+/* Se o JS adicionar a classe .aberto no .hamburger quando o
+   menu mobile estiver aberto, os 3 traços viram um "X". Não
+   afeta nada se essa classe nunca for usada. */
+.hamburger.aberto span:nth-child(1) {
+  transform: translateY(8px) rotate(45deg);
+}
+
+.hamburger.aberto span:nth-child(2) {
+  opacity: 0;
+}
+
+.hamburger.aberto span:nth-child(3) {
+  transform: translateY(-8px) rotate(-45deg);
+}
+
+/* =========================
+   LINKS DO MENU
+========================= */
 .menu-links {
   display: none;
   flex-direction: column;
@@ -265,7 +414,6 @@ body{
 
 .menu a {
   color: #ffffff;
-  text-decoration: none;
   padding: 13px 18px;
   border-radius: 12px;
   font-size: 14px;
@@ -273,7 +421,7 @@ body{
   background: var(--bg-color3);
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
-  transition: all 0.25s ease;
+  transition: background var(--transicao-media), transform var(--transicao-media), box-shadow var(--transicao-media);
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
   text-align: center;
 }
@@ -288,290 +436,9 @@ body{
   box-shadow: 0 6px 18px rgba(20, 102, 255, 0.4);
 }
 
-.content{
-  flex:1;
-  padding:20px 20px 110px;
-}
-
-.page-intro h1{
-  font-size:22px;
-  margin:4px 0 4px;
-  letter-spacing:-0.3px;
-}
-.page-intro p{
-  margin:0;
-  color:var(--ink-soft);
-  font-size:14px;
-}
-
-.search-bar{
-  margin-top:18px;
-  display:flex;
-  align-items:center;
-  gap:10px;
-  background:var(--card);
-  border:1px solid var(--line);
-  border-radius:var(--radius-sm);
-  padding:12px 14px;
-  box-shadow:var(--shadow-card);
-}
-.search-bar svg{width:18px;height:18px;color:var(--ink-faint);flex-shrink:0;}
-.search-bar input{
-  border:none;outline:none;flex:1;
-  font-size:14.5px;background:transparent;color:var(--ink);
-}
-.search-bar input::placeholder{color:var(--ink-faint);}
-
-.chip-row{
-  display:flex;
-  gap:8px;
-  overflow-x:auto;
-  margin-top:16px;
-  padding-bottom:4px;
-  scrollbar-width:none;
-}
-.chip-row::-webkit-scrollbar{display:none;}
-.chip{
-  flex:0 0 auto;
-  border:1px solid var(--line);
-  background:var(--card);
-  color:var(--ink-soft);
-  font-size:13px;
-  font-weight:600;
-  padding:9px 15px;
-  border-radius:999px;
-  cursor:pointer;
-  white-space:nowrap;
-  transition:all .15s ease;
-}
-.chip.active{
-  background:var(--blue-700);
-  border-color:var(--blue-700);
-  color:#fff;
-}
-
-.resources{
-  margin-top:18px;
-  display:flex;
-  flex-direction:column;
-  gap:12px;
-}
-
-.resource-card{
-  display:flex;
-  align-items:center;
-  gap:13px;
-  background:var(--card);
-  border-radius:var(--radius-md);
-  padding:14px;
-  box-shadow:var(--shadow-card);
-  text-decoration:none;
-  color:inherit;
-  border:1px solid transparent;
-  transition:transform .12s ease, border-color .12s ease;
-}
-.resource-card:active{transform:scale(0.98);}
-
-.resource-icon{
-  width:46px;height:46px;
-  border-radius:14px;
-  display:flex;align-items:center;justify-content:center;
-  flex-shrink:0;
-  font-size:19px;
-  color:#fff;
-}
-.resource-body{flex:1;min-width:0;}
-.resource-body h3{
-  margin:0 0 2px;
-  font-size:15px;
-  font-weight:700;
-}
-.resource-body p{
-  margin:0;
-  font-size:12.5px;
-  color:var(--ink-soft);
-  overflow:hidden;
-  text-overflow:ellipsis;
-  white-space:nowrap;
-}
-.resource-tag{
-  display:inline-block;
-  margin-top:6px;
-  font-size:10.5px;
-  font-weight:700;
-  text-transform:uppercase;
-  letter-spacing:.4px;
-  color:var(--blue-700);
-}
-.resource-arrow{
-  flex-shrink:0;
-  color:var(--ink-faint);
-  width:16px;height:16px;
-}
-
-.cat-matematica{background:linear-gradient(135deg,#2f5cff,#1a3fe0);}
-.cat-ciencias{background:linear-gradient(135deg,#22c98e,#0fa876);}
-.cat-idiomas{background:linear-gradient(135deg,#ff9f43,#ff7a1a);}
-.cat-tecnologia{background:linear-gradient(135deg,#7c5cff,#5433d6);}
-.cat-historia{background:linear-gradient(135deg,#ff5c8a,#e0316b);}
-
-.empty-state{
-  text-align:center;
-  color:var(--ink-faint);
-  font-size:13.5px;
-  margin-top:30px;
-}
-
-.community{margin-top:26px;}
-.community h2{
-  font-size:16px;
-  margin:0 0 12px;
-}
-.community-list{
-  display:flex;
-  flex-direction:column;
-  gap:10px;
-}
-.community-item{
-  background:var(--card);
-  border-radius:var(--radius-md);
-  padding:13px 14px;
-  box-shadow:var(--shadow-card);
-}
-.community-item .meta{
-  display:flex;
-  align-items:center;
-  gap:8px;
-  margin-bottom:4px;
-}
-.author-dot{
-  width:22px;height:22px;border-radius:50%;
-  background:var(--blue-100);
-  color:var(--blue-700);
-  font-size:10px;font-weight:800;
-  display:flex;align-items:center;justify-content:center;
-}
-.community-item .meta span{
-  font-size:11.5px;color:var(--ink-faint);
-}
-.community-item h4{margin:0 0 4px;font-size:14px;}
-.community-item p{margin:0;font-size:12.5px;color:var(--ink-soft);line-height:1.45;}
-
-.publish-card{
-  margin-top:22px;
-  width:100%;
-  display:flex;
-  align-items:center;
-  gap:12px;
-  background:var(--card);
-  border:1px dashed var(--line);
-  border-radius:var(--radius-md);
-  padding:14px;
-  cursor:pointer;
-  text-align:left;
-}
-.publish-icon{
-  width:36px;height:36px;
-  border-radius:50%;
-  background:var(--blue-100);
-  color:var(--blue-700);
-  display:flex;align-items:center;justify-content:center;
-  flex-shrink:0;
-}
-.publish-icon svg{width:16px;height:16px;}
-.publish-text{display:flex;flex-direction:column;gap:2px;}
-.publish-text strong{font-size:13.5px;color:var(--ink);}
-.publish-text span{font-size:11.5px;color:var(--ink-faint);}
-
-.modal-overlay{
-  position:fixed;inset:0;
-  background:rgba(10,12,30,0.45);
-  display:flex;align-items:flex-end;justify-content:center;
-  z-index:100;
-}
-.modal-overlay[hidden]{
-  display:none;
-}
-.modal-sheet{
-  width:100%;max-width:430px;
-  background:var(--card);
-  border-radius:24px 24px 0 0;
-  padding:10px 22px 26px;
-  max-height:88vh;
-  overflow-y:auto;
-  animation:slideUp .22s ease;
-}
-@keyframes slideUp{from{transform:translateY(24px);opacity:0;}to{transform:translateY(0);opacity:1;}}
-.modal-handle{
-  width:38px;height:4px;border-radius:2px;
-  background:var(--line);
-  margin:6px auto 14px;
-}
-.modal-header{
-  display:flex;align-items:center;justify-content:space-between;
-  margin-bottom:14px;
-}
-.modal-header h2{font-size:18px;margin:0;}
-.modal-header .icon-btn{background:var(--bg);color:var(--ink-soft);}
-
-.field{display:block;margin-bottom:14px;}
-.field span{
-  display:block;font-size:12.5px;font-weight:700;
-  color:var(--ink-soft);margin-bottom:6px;
-}
-.field input,.field select,.field textarea{
-  width:100%;
-  border:1px solid var(--line);
-  border-radius:var(--radius-sm);
-  padding:11px 12px;
-  font-size:14px;
-  font-family:inherit;
-  color:var(--ink);
-  background:var(--bg);
-  resize:vertical;
-}
-.field input:focus,.field select:focus,.field textarea:focus{
-  outline:2px solid var(--blue-500);
-  outline-offset:1px;
-  background:#fff;
-}
-
-.btn-primary{
-  width:100%;
-  border:none;
-  padding:14px;
-  border-radius:var(--radius-sm);
-  background:linear-gradient(120deg,var(--blue-900),var(--blue-500));
-  color:#fff;
-  font-size:15px;
-  font-weight:700;
-  cursor:pointer;
-  margin-top:4px;
-}
-.btn-primary:active{opacity:.9;}
-
-.toast{
-  position:fixed;
-  left:50%;
-  bottom:96px;
-  transform:translate(-50%,12px);
-  background:var(--ink);
-  color:#fff;
-  padding:11px 20px;
-  border-radius:999px;
-  font-size:13px;
-  font-weight:600;
-  opacity:0;
-  pointer-events:none;
-  transition:all .25s ease;
-  z-index:200;
-  white-space:nowrap;
-}
-.toast.show{
-  opacity:1;
-  transform:translate(-50%,0);
-}
-
+/* =========================
+   NAV INFERIOR (MOBILE + DESKTOP)
+========================= */
 .nav-mobile {
   position: fixed;
   bottom: 0;
@@ -581,9 +448,15 @@ body{
   display: flex;
   align-items: center;
   justify-content: space-around;
-  padding: 8px 6px 10px;
+  padding: 8px 6px calc(10px + env(safe-area-inset-bottom));
   box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.08);
-  z-index: 40;
+  z-index: 999;
+  /* Sem isso, alguns navegadores mobile (principalmente Safari
+     no iOS) fazem o elemento fixo sumir ou piscar durante o
+     scroll, porque não ativam a aceleração por GPU nele. */
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+  will-change: transform;
 }
 
 .nav-mobile a {
@@ -594,8 +467,10 @@ body{
   font-size: 10.5px;
   font-weight: 700;
   color: var(--bg-color5);
+  transition: color var(--transicao-rapida);
 }
 
+.nav-mobile a:hover,
 .nav-mobile a.ativo {
   color: var(--bg-color1);
 }
@@ -614,16 +489,28 @@ body{
   justify-content: center;
   margin-top: -26px;
   box-shadow: 0 8px 18px rgba(0, 15, 176, 0.4);
+  transition: transform var(--transicao-rapida);
+}
+
+.nav-camera:hover {
+  transform: scale(1.06);
 }
 
 .nav-icone-camera {
   font-size: 20px;
 }
 
+/* ============================================================
+   RESPONSIVIDADE — PADRÃO ÚNICO PARA TODAS AS PÁGINAS
+   Um único ponto de corte (699px / 700px) e um único
+   comportamento para menu, hambúrguer e nav inferior.
+   ============================================================ */
+
 @media (max-width: 699px) {
-   .menu {
+  .menu {
     width: 100%;
     padding: 18px;
+    padding-top: calc(18px + env(safe-area-inset-top));
   }
 
   #logo {
@@ -656,5 +543,546 @@ body{
     padding: 12px;
     font-size: 15px;
   }
-    
+}
+
+@media (min-width: 700px) {
+  body {
+    flex-direction: row;
+  }
+
+  .menu {
+    width: var(--menu-largura);
+    min-height: 100vh;
+    padding: 30px 20px;
+    flex-shrink: 0;
+  }
+
+  .menu-header {
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+
+  #logo {
+    width: 96px;
+  }
+
+  .menu h2 {
+    font-size: 1.9rem;
+    text-align: center;
+  }
+
+  .hamburger {
+    display: none;
+  }
+
+  .menu-links {
+    display: flex !important;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 60px;
+    margin-left: 10px;
+    margin-right: 10px;
+  }
+
+  .menu a {
+    border-radius: 12px;
+    padding: 14px;
+    font-size: 15px;
+  }
+
+  /* A barra inferior fica visível e fixa embaixo tanto no
+     mobile quanto no desktop, ao lado do menu lateral. */
+  .nav-mobile {
+    left: var(--menu-largura);
+  }
+
+  /* No desktop o .menu-header é estreito (largura da sidebar),
+     menor que o painel (320px). Abrir para a direita, saindo
+     por cima do conteúdo, em vez de para a esquerda, evita que
+     o painel estoure pra fora da tela. */
+  .notif-panel {
+    left: 0;
+    right: auto;
+  }
+}
+
+/* Telas bem largas (desktop grande / monitor): menu um pouco
+   mais largo para não ficar apertado ao lado de conteúdos com
+   grid de 4 colunas. */
+@media (min-width: 1440px) {
+  .menu {
+    width: 340px;
+  }
+
+  .nav-mobile {
+    left: 340px;
+  }
+}
+
+/* ============================================================
+   PAGINA-EXPANSAOCONHECIMENTO.CSS
+   Estilos específicos da página de Expansão do Conhecimento
+   (busca de recursos, filtros por categoria, comunidade,
+   modal de publicar, toast). Inclua DEPOIS do base.css:
+
+     <link rel="stylesheet" href="base.css">
+     <link rel="stylesheet" href="pagina-expansaoConhecimento.css">
+   ============================================================ */
+
+:root {
+  /* Variáveis exclusivas desta página — as de layout/menu
+     (--bg-color1, --grad-inicio, --raio etc.) já vêm do
+     base.css, então não são repetidas aqui. */
+  --blue-900: #0d1f8f;
+  --blue-700: #1a3fe0;
+  --blue-500: #2f5cff;
+  --blue-100: #e8edff;
+  --mint: #4fe0b0;
+  --bg: #f3f4f8;
+  --card: #ffffff;
+  --ink: #171a2b;
+  --ink-soft: #5b5f76;
+  --ink-faint: #9096ab;
+  --line: #e9ebf3;
+  --radius-lg: 22px;
+  --radius-md: 16px;
+  --radius-sm: 12px;
+  --shadow-card: 0 8px 24px rgba(23, 26, 43, 0.06);
+  --shadow-fab: 0 10px 20px rgba(13, 31, 143, 0.35);
+}
+
+/* Fundo e cor de texto específicos desta página — o resto do
+   body (flex, altura, etc.) já vem do base.css. */
+body {
+  background: var(--bg);
+  color: var(--ink);
+}
+
+.content {
+  flex: 1;
+  padding: 20px 20px 110px;
+  /* O body agora tem altura travada no viewport (ver base.css);
+     quem rola é este container, não a página inteira. */
+  overflow-y: auto;
+}
+
+.page-intro h1 {
+  font-size: 22px;
+  margin: 4px 0 4px;
+  letter-spacing: -0.3px;
+}
+
+.page-intro p {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 14px;
+}
+
+/* =========================
+   BUSCA E FILTROS
+========================= */
+.search-bar {
+  margin-top: 18px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  box-shadow: var(--shadow-card);
+}
+
+.search-bar svg {
+  width: 18px;
+  height: 18px;
+  color: var(--ink-faint);
+  flex-shrink: 0;
+}
+
+.search-bar input {
+  border: none;
+  outline: none;
+  flex: 1;
+  font-size: 14.5px;
+  background: transparent;
+  color: var(--ink);
+}
+
+.search-bar input::placeholder {
+  color: var(--ink-faint);
+}
+
+.chip-row {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  margin-top: 16px;
+  padding-bottom: 4px;
+  scrollbar-width: none;
+}
+
+.chip-row::-webkit-scrollbar {
+  display: none;
+}
+
+.chip {
+  flex: 0 0 auto;
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: var(--ink-soft);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 9px 15px;
+  border-radius: 999px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all .15s ease;
+}
+
+.chip.active {
+  background: var(--blue-700);
+  border-color: var(--blue-700);
+  color: #fff;
+}
+
+/* =========================
+   LISTA DE RECURSOS
+========================= */
+.resources {
+  margin-top: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.resource-card {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  background: var(--card);
+  border-radius: var(--radius-md);
+  padding: 14px;
+  box-shadow: var(--shadow-card);
+  text-decoration: none;
+  color: inherit;
+  border: 1px solid transparent;
+  transition: transform .12s ease, border-color .12s ease;
+}
+
+.resource-card:active {
+  transform: scale(0.98);
+}
+
+.resource-icon {
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 19px;
+  color: #fff;
+}
+
+.resource-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.resource-body h3 {
+  margin: 0 0 2px;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.resource-body p {
+  margin: 0;
+  font-size: 12.5px;
+  color: var(--ink-soft);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.resource-tag {
+  display: inline-block;
+  margin-top: 6px;
+  font-size: 10.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .4px;
+  color: var(--blue-700);
+}
+
+.resource-arrow {
+  flex-shrink: 0;
+  color: var(--ink-faint);
+  width: 16px;
+  height: 16px;
+}
+
+.cat-matematica { background: linear-gradient(135deg, #2f5cff, #1a3fe0); }
+.cat-ciencias   { background: linear-gradient(135deg, #22c98e, #0fa876); }
+.cat-idiomas    { background: linear-gradient(135deg, #ff9f43, #ff7a1a); }
+.cat-tecnologia { background: linear-gradient(135deg, #7c5cff, #5433d6); }
+.cat-historia   { background: linear-gradient(135deg, #ff5c8a, #e0316b); }
+
+.empty-state {
+  text-align: center;
+  color: var(--ink-faint);
+  font-size: 13.5px;
+  margin-top: 30px;
+}
+
+/* =========================
+   COMUNIDADE (destaques)
+========================= */
+.community {
+  margin-top: 26px;
+}
+
+.community h2 {
+  font-size: 16px;
+  margin: 0 0 12px;
+}
+
+.community-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.community-item {
+  background: var(--card);
+  border-radius: var(--radius-md);
+  padding: 13px 14px;
+  box-shadow: var(--shadow-card);
+}
+
+.community-item .meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.author-dot {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--blue-100);
+  color: var(--blue-700);
+  font-size: 10px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.community-item .meta span {
+  font-size: 11.5px;
+  color: var(--ink-faint);
+}
+
+.community-item h4 {
+  margin: 0 0 4px;
+  font-size: 14px;
+}
+
+.community-item p {
+  margin: 0;
+  font-size: 12.5px;
+  color: var(--ink-soft);
+  line-height: 1.45;
+}
+
+/* =========================
+   PUBLICAR
+========================= */
+.publish-card {
+  margin-top: 22px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--card);
+  border: 1px dashed var(--line);
+  border-radius: var(--radius-md);
+  padding: 14px;
+  cursor: pointer;
+  text-align: left;
+}
+
+.publish-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--blue-100);
+  color: var(--blue-700);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.publish-icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+.publish-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.publish-text strong {
+  font-size: 13.5px;
+  color: var(--ink);
+}
+
+.publish-text span {
+  font-size: 11.5px;
+  color: var(--ink-faint);
+}
+
+/* =========================
+   MODAL (folha inferior)
+========================= */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 12, 30, 0.45);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  z-index: 100;
+}
+
+.modal-overlay[hidden] {
+  display: none;
+}
+
+.modal-sheet {
+  width: 100%;
+  max-width: 430px;
+  background: var(--card);
+  border-radius: 24px 24px 0 0;
+  padding: 10px 22px 26px;
+  max-height: 88vh;
+  overflow-y: auto;
+  animation: slideUp .22s ease;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(24px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+.modal-handle {
+  width: 38px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--line);
+  margin: 6px auto 14px;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.modal-header h2 {
+  font-size: 18px;
+  margin: 0;
+}
+
+/* Sobrescreve o .icon-btn do base.css só dentro do modal,
+   que aqui usa fundo claro em vez do azul do cabeçalho. */
+.modal-header .icon-btn {
+  background: var(--bg);
+  color: var(--ink-soft);
+}
+
+.field {
+  display: block;
+  margin-bottom: 14px;
+}
+
+.field span {
+  display: block;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--ink-soft);
+  margin-bottom: 6px;
+}
+
+.field input,
+.field select,
+.field textarea {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 11px 12px;
+  font-size: 14px;
+  font-family: inherit;
+  color: var(--ink);
+  background: var(--bg);
+  resize: vertical;
+}
+
+.field input:focus,
+.field select:focus,
+.field textarea:focus {
+  outline: 2px solid var(--blue-500);
+  outline-offset: 1px;
+  background: #fff;
+}
+
+.btn-primary {
+  width: 100%;
+  border: none;
+  padding: 14px;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(120deg, var(--blue-900), var(--blue-500));
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 4px;
+}
+
+.btn-primary:active {
+  opacity: .9;
+}
+
+/* =========================
+   TOAST
+========================= */
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 96px;
+  transform: translate(-50%, 12px);
+  background: var(--ink);
+  color: #fff;
+  padding: 11px 20px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  opacity: 0;
+  pointer-events: none;
+  transition: all .25s ease;
+  z-index: 200;
+  white-space: nowrap;
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translate(-50%, 0);
 }

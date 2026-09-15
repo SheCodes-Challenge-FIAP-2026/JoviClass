@@ -1,3 +1,20 @@
+/* ============================================================
+   BASE.CSS
+   Estilos GLOBAIS e compartilhados por TODAS as páginas do app
+   (variáveis, reset, cabeçalho/menu, notificações, hambúrguer,
+   nav inferior mobile).
+
+   COMO USAR:
+   Inclua este arquivo ANTES do CSS específico de cada página:
+
+     <link rel="stylesheet" href="base.css">
+     <link rel="stylesheet" href="pagina-inicio.css">
+
+   Depois de incluir este arquivo, REMOVA de cada CSS de página
+   os blocos que já estão aqui, para não haver mais divergência
+   entre as páginas.
+   ============================================================ */
+
 :root {
   --bg-color1: #000fb0;
   --bg-color2: #ffffff;
@@ -14,8 +31,19 @@
   --sombra: 0 6px 18px rgba(0, 15, 176, 0.08);
   --sombra-forte: 0 10px 30px rgba(0, 15, 176, 0.18);
   --raio: 18px;
+
+  --menu-largura: 320px;
+  --nav-mobile-altura: 78px;
+
+  /* Duração/curva padrão para transições — centralizada aqui
+     para ficar fácil de ajustar o "feel" da interface inteira. */
+  --transicao-rapida: 0.2s ease;
+  --transicao-media: 0.3s ease;
 }
 
+/* =========================
+   RESET
+========================= */
 * {
   margin: 0;
   padding: 0;
@@ -23,19 +51,66 @@
   font-family: "Manrope", Arial, sans-serif;
 }
 
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+}
+
 body {
   background-color: var(--bg-colorFundo);
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
-  padding-bottom: 78px; 
+  height: 100dvh; /* altura travada no viewport — quem rola é o .conteudo-principal, não o body */
+  overflow-x: hidden;
+  overflow-y: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 a {
   text-decoration: none;
+  color: inherit;
 }
 
+button {
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
 
+/* Evita o "flash" cinza ao tocar em botões/links no mobile e
+   deixa o feedback de toque consistente com o resto da UI. */
+a,
+button {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Acessibilidade: contorno visível ao navegar por teclado (Tab),
+   sem poluir a interface para quem usa mouse/toque. */
+a:focus-visible,
+button:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--bg-color4);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Respeita quem prefere menos animação no sistema operacional. */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  * {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+/* =========================
+   LOGO
+========================= */
 .logoJovi {
   display: flex;
   align-items: center;
@@ -48,19 +123,14 @@ a {
   border-radius: 10px;
 }
 
-.menu h2 {
-  font-size: 1.5rem;
-  font-weight: 800;
-  color: var(--bg-color2);
-  margin: 0;
-  letter-spacing: -0.3px;
-}
-
-
+/* =========================
+   MENU / TOPO
+========================= */
 .menu {
   background: linear-gradient(135deg, var(--grad-inicio) 0%, var(--grad-fim) 100%);
   color: white;
   padding: 18px 20px;
+  padding-top: calc(18px + env(safe-area-inset-top));
   display: flex;
   flex-direction: column;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
@@ -69,16 +139,30 @@ a {
   z-index: 30;
 }
 
+.menu h2 {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--bg-color2);
+  margin: 0;
+  letter-spacing: -0.3px;
+}
+
 .menu-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 12px;
+  /* Referência de posicionamento do painel de notificações
+     (ver .notif-panel). Usar o header inteiro em vez do botão
+     evita que o painel "pule" quando o layout do header muda
+     entre mobile (linha) e desktop (coluna). */
+  position: relative;
 }
 
 .menu-actions {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
 }
 
 .icon-btn {
@@ -92,7 +176,16 @@ a {
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
+  flex-shrink: 0;
+  transition: background var(--transicao-rapida), transform var(--transicao-rapida);
+}
+
+.icon-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.icon-btn:active {
+  transform: scale(0.92);
 }
 
 .icon-btn svg {
@@ -117,9 +210,11 @@ a {
   border: 2px solid var(--grad-fim);
 }
 
-.notif-wrapper {
-  position: relative;
-}
+/* =========================
+   PAINEL DE NOTIFICAÇÕES
+========================= */
+/* .notif-wrapper propositalmente SEM position:relative — o
+   painel se ancora no .menu-header (ver acima), não no botão. */
 
 .notif-panel {
   position: absolute;
@@ -128,11 +223,23 @@ a {
   width: 320px;
   max-width: 86vw;
   background: white;
-  border-radius: 16px;
+  border-radius: var(--raio);
   box-shadow: var(--sombra-forte);
   overflow: hidden;
   z-index: 60;
   color: #12142b;
+  animation: notif-entrar var(--transicao-media);
+}
+
+@keyframes notif-entrar {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .notif-panel[hidden] {
@@ -158,11 +265,28 @@ a {
   font-size: 11.5px;
   font-weight: 700;
   cursor: pointer;
+  transition: opacity var(--transicao-rapida);
+}
+
+.notif-marcar:hover {
+  opacity: 0.7;
+  text-decoration: underline;
 }
 
 .notif-lista {
   max-height: 340px;
   overflow-y: auto;
+  scrollbar-width: thin; /* Firefox */
+  scrollbar-color: var(--bg-color5) transparent;
+}
+
+.notif-lista::-webkit-scrollbar {
+  width: 6px;
+}
+
+.notif-lista::-webkit-scrollbar-thumb {
+  background-color: #d8d8e2;
+  border-radius: 10px;
 }
 
 .notif-vazio {
@@ -178,10 +302,15 @@ a {
   padding: 12px 16px;
   border-bottom: 1px solid #f5f5fa;
   cursor: pointer;
+  transition: background var(--transicao-rapida);
 }
 
 .notif-item:last-child {
   border-bottom: none;
+}
+
+.notif-item:hover {
+  background: #f0f1fb;
 }
 
 .notif-item.nao-lida {
@@ -200,8 +329,8 @@ a {
 }
 
 .notif-icone.urgente { background: #ffe1e1; }
-.notif-icone.breve { background: #ffe9d1; }
-.notif-icone.normal { background: #dbeaff; }
+.notif-icone.breve   { background: #ffe9d1; }
+.notif-icone.normal  { background: #dbeaff; }
 
 .notif-corpo {
   flex: 1;
@@ -228,16 +357,21 @@ a {
 }
 
 .notif-prazo.urgente { color: #e0304a; }
-.notif-prazo.breve { color: #d97706; }
-.notif-prazo.normal { color: var(--bg-color1); }
+.notif-prazo.breve   { color: #d97706; }
+.notif-prazo.normal  { color: var(--bg-color1); }
 
-
+/* =========================
+   BOTÃO HAMBÚRGUER
+========================= */
 .hamburger {
   display: flex;
   flex-direction: column;
+  justify-content: center;
   gap: 5px;
   cursor: pointer;
   padding: 6px;
+  width: 36px;
+  height: 36px;
 }
 
 .hamburger span {
@@ -245,9 +379,28 @@ a {
   height: 3px;
   background-color: white;
   border-radius: 3px;
-  transition: 0.3s;
+  transition: transform var(--transicao-media), opacity var(--transicao-media);
+  transform-origin: center;
 }
 
+/* Se o JS adicionar a classe .aberto no .hamburger quando o
+   menu mobile estiver aberto, os 3 traços viram um "X". Não
+   afeta nada se essa classe nunca for usada. */
+.hamburger.aberto span:nth-child(1) {
+  transform: translateY(8px) rotate(45deg);
+}
+
+.hamburger.aberto span:nth-child(2) {
+  opacity: 0;
+}
+
+.hamburger.aberto span:nth-child(3) {
+  transform: translateY(-8px) rotate(-45deg);
+}
+
+/* =========================
+   LINKS DO MENU
+========================= */
 .menu-links {
   display: none;
   flex-direction: column;
@@ -261,7 +414,6 @@ a {
 
 .menu a {
   color: #ffffff;
-  text-decoration: none;
   padding: 13px 18px;
   border-radius: 12px;
   font-size: 14px;
@@ -269,7 +421,7 @@ a {
   background: var(--bg-color3);
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
-  transition: all 0.25s ease;
+  transition: background var(--transicao-media), transform var(--transicao-media), box-shadow var(--transicao-media);
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
   text-align: center;
 }
@@ -284,238 +436,81 @@ a {
   box-shadow: 0 6px 18px rgba(20, 102, 255, 0.4);
 }
 
-
-.conteudo-principal {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    overflow-y: auto;
-    padding: 0;
-}
-
-
-.pagina-titulo {
-    background: linear-gradient(135deg, #000fb0 0%, #1466ff 100%);
-    color: white;
-    padding: 32px 30px 28px;
-}
-
-.pagina-titulo h1 {
-    font-size: 2rem;
-    font-weight: 800;
-    margin-bottom: 4px;
-    letter-spacing: -0.5px;
-}
-
-.pagina-titulo p {
-    font-size: 0.9rem;
-    opacity: 0.8;
-    font-weight: 500;
-}
-
-
-.calendario{
-    display: grid;
-    place-items: center;
-    align-items: center;
-    background-color: var(--bg-color2);
-    width: 100%;
-    padding: 30px;
-    margin: auto;
-}
-
-.header{
-    width: 100%;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 30px;
-}
-
-.btn{
-    cursor: pointer;
-}
-
-#mes-ano{
-    font-weight: bold;
-    font-size: 28px;
-    color: black;
-}
-
-.dias-semana, .dias{
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    width: 100%;
-    gap: 10px;
-    margin-bottom: 15px;
-}
-
-.dias-semana span{
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 50px;
-    color: black;
-    font-weight: bold;
-}
-
-.dias{
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    width: 100%;
-    gap: 10px;
-}
-
-.dias div{
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    height: 90px;
-    border-radius: 10px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-    color: black;
-    background-color: var(--bg-colorFundo);
-}
-
-.dias div:hover{
-    background-color: var(--bg-color4);
-    color: white;
-}
-
-.dias .today{
-    background-color: var(--bg-color1);
-    color: var(--bg-color2);
-}
-
-.fade{
-    color: #999 !important;
-    background-color: #ececec !important;
-}
-
-.arrow-mes{
-    width: 30px;
-    height: 30px;
-}
-
-@media (max-width: 699px){
-
-    .calendario{
-        padding: 15px;
-    }
-
-    #mes-ano{
-        font-size: 20px;
-    }
-
-    .dias div{
-        height: 45px;
-        font-size: 14px;
-        transition: all 0.3s ease;
-    }
-
-    .dias-semana span{
-        height: 35px;
-        font-size: 11px;
-    }
-
-    .arrow-mes{
-        width: 22px;
-        height: 22px;
-    }
-}
-
-
-.logoJovi {
+/* =========================
+   NAV INFERIOR (MOBILE + DESKTOP)
+========================= */
+.nav-mobile {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: white;
   display: flex;
   align-items: center;
-  gap: 12px;
-}
-
-#logo {
-  width: 40px;
-  height: auto;
-}
-
-.menu h2 {
-  font-size: 1.5rem;
-  font-weight: 800;
-  color: var(--bg-color2);
-  margin: 0;
-}
-
-
-.menu {
-  background: linear-gradient(180deg, #0015d6 0%, #000fb0 100%);
-  color: white;
-  padding: 25px;
-  display: flex;
-  flex-direction: column;
-  box-shadow: 4px 0 20px rgba(0, 0, 0, 0.15);
-}
-
-.menu-header {
-  display: flex;
   justify-content: space-around;
-  align-items: center;
+  padding: 8px 6px calc(10px + env(safe-area-inset-bottom));
+  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.08);
+  z-index: 999;
+  /* Sem isso, alguns navegadores mobile (principalmente Safari
+     no iOS) fazem o elemento fixo sumir ou piscar durante o
+     scroll, porque não ativam a aceleração por GPU nele. */
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+  will-change: transform;
 }
 
-.hamburger {
-  display: none;
-  flex-direction: column;
-  gap: 5px;
-  cursor: pointer;
-}
-
-.hamburger span {
-  width: 28px;
-  height: 3px;
-  background-color: white;
-  border-radius: 3px;
-  transition: 0.3s;
-}
-
-
-.menu-links {
+.nav-mobile a {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  margin-top: 30px;
+  align-items: center;
+  gap: 3px;
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--bg-color5);
+  transition: color var(--transicao-rapida);
 }
 
-.menu a {
-  color: #ffffff;
-  text-decoration: none;
-  padding: 14px 18px;
-  border-radius: 12px;
-  font-size: 15px;
-  font-weight: 600;
-  background: var(--bg-color3);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
-  text-align: center;
+.nav-mobile a:hover,
+.nav-mobile a.ativo {
+  color: var(--bg-color1);
 }
 
-.menu a:hover {
-  background: rgba(255, 255, 255, 0.28);
-  transform: translateX(5px);
-  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.2);
+.nav-icone {
+  font-size: 18px;
 }
 
-.menu a.ativo {
-  background: linear-gradient(135deg, #1466ff, #4da3ff);
-  box-shadow: 0 6px 18px rgba(20, 102, 255, 0.4);
+.nav-camera {
+  background: var(--bg-color1);
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: -26px;
+  box-shadow: 0 8px 18px rgba(0, 15, 176, 0.4);
+  transition: transform var(--transicao-rapida);
 }
 
+.nav-camera:hover {
+  transform: scale(1.06);
+}
+
+.nav-icone-camera {
+  font-size: 20px;
+}
+
+/* ============================================================
+   RESPONSIVIDADE — PADRÃO ÚNICO PARA TODAS AS PÁGINAS
+   Um único ponto de corte (699px / 700px) e um único
+   comportamento para menu, hambúrguer e nav inferior.
+   ============================================================ */
 
 @media (max-width: 699px) {
-
   .menu {
     width: 100%;
     padding: 18px;
+    padding-top: calc(18px + env(safe-area-inset-top));
   }
 
   #logo {
@@ -548,37 +543,15 @@ a {
     padding: 12px;
     font-size: 15px;
   }
-  
-  .calendario{
-    padding: 20px;
-  }
-
-  .dias div{
-    height: 55px;
-  }
-
-  .dias-semana span{
-    font-size: 12px;
-  }
-
-  .pagina-titulo {
-    padding: 22px 20px 18px;
-  }
-
-  .pagina-titulo h1 {
-    font-size: 1.5rem;
-  }
 }
 
-
 @media (min-width: 700px) {
-
   body {
     flex-direction: row;
   }
 
   .menu {
-    width: 320px;
+    width: var(--menu-largura);
     min-height: 100vh;
     padding: 30px 20px;
     flex-shrink: 0;
@@ -591,7 +564,7 @@ a {
   }
 
   #logo {
-    width: 110px;
+    width: 96px;
   }
 
   .menu h2 {
@@ -607,9 +580,9 @@ a {
     display: flex !important;
     flex-direction: column;
     gap: 12px;
-    margin-top: 120px;
-    margin-right: 30px;
-    margin-left: 30px;
+    margin-top: 60px;
+    margin-left: 10px;
+    margin-right: 10px;
   }
 
   .menu a {
@@ -617,176 +590,330 @@ a {
     padding: 14px;
     font-size: 15px;
   }
+
+  /* A barra inferior fica visível e fixa embaixo tanto no
+     mobile quanto no desktop, ao lado do menu lateral. */
+  .nav-mobile {
+    left: var(--menu-largura);
+  }
+
+  /* No desktop o .menu-header é estreito (largura da sidebar),
+     menor que o painel (320px). Abrir para a direita, saindo
+     por cima do conteúdo, em vez de para a esquerda, evita que
+     o painel estoure pra fora da tela. */
+  .notif-panel {
+    left: 0;
+    right: auto;
+  }
 }
 
+/* Telas bem largas (desktop grande / monitor): menu um pouco
+   mais largo para não ficar apertado ao lado de conteúdos com
+   grid de 4 colunas. */
+@media (min-width: 1440px) {
+  .menu {
+    width: 340px;
+  }
+
+  .nav-mobile {
+    left: 340px;
+  }
+}
+
+/* ============================================================
+   PAGINA-CALENDARIO.CSS
+   Estilos específicos da página de calendário / entregas /
+   checklist. Inclua DEPOIS do base.css:
+
+     <link rel="stylesheet" href="base.css">
+     <link rel="stylesheet" href="pagina-calendario.css">
+   ============================================================ */
+
+.conteudo-principal {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  /* O espaço para a barra inferior fixa fica reservado AQUI
+     dentro (na área que rola), não no body — assim o último
+     item da página não fica escondido atrás da nav, e a barra
+     lateral (.menu) continua preenchendo 100% da altura. */
+  padding: 0 0 var(--nav-mobile-altura) 0;
+}
+
+.pagina-titulo {
+  background: linear-gradient(135deg, #000fb0 0%, #1466ff 100%);
+  color: white;
+  padding: 32px 30px 28px;
+}
+
+.pagina-titulo h1 {
+  font-size: 2rem;
+  font-weight: 800;
+  margin-bottom: 4px;
+  letter-spacing: -0.5px;
+}
+
+.pagina-titulo p {
+  font-size: 0.9rem;
+  opacity: 0.8;
+  font-weight: 500;
+}
+
+/* =========================
+   CALENDÁRIO
+========================= */
+.calendario {
+  display: grid;
+  place-items: center;
+  align-items: center;
+  background-color: var(--bg-color2);
+  width: 100%;
+  padding: 30px;
+  margin: auto;
+}
+
+.header {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.btn {
+  cursor: pointer;
+}
+
+#mes-ano {
+  font-weight: bold;
+  font-size: 28px;
+  color: black;
+}
+
+.dias-semana,
+.dias {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  width: 100%;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.dias-semana span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 50px;
+  color: black;
+  font-weight: bold;
+}
+
+.dias div {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 90px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  color: black;
+  background-color: var(--bg-colorFundo);
+}
+
+.dias div:hover {
+  background-color: var(--bg-color4);
+  color: white;
+}
+
+.dias .today {
+  background-color: var(--bg-color1);
+  color: var(--bg-color2);
+}
+
+.fade {
+  color: #999 !important;
+  background-color: #ececec !important;
+}
+
+.arrow-mes {
+  width: 30px;
+  height: 30px;
+}
 
 .dia-card {
-    display: flex !important;
-    flex-direction: column;
-    align-items: flex-start !important;
-    justify-content: flex-start !important;
-    padding: 8px;
-    position: relative;
-    overflow: hidden; 
-    height: 90px;
+  display: flex !important;
+  flex-direction: column;
+  align-items: flex-start !important;
+  justify-content: flex-start !important;
+  padding: 8px;
+  position: relative;
+  overflow: hidden;
+  height: 90px;
 }
 
-.numero-dia{
-    font-weight: bold;
-    margin-bottom: 5px;
+.numero-dia {
+  font-weight: bold;
+  margin-bottom: 5px;
 }
 
-.evento{
-    width: 100%;
-    background-color: var(--bg-color4);
-    color: white;
-    border-radius: 6px;
-    padding: 4px;
-    font-size: 10px;
-    margin-top: 4px;
-    word-break: break-word;
+.evento {
+  width: 100%;
+  background-color: var(--bg-color4);
+  color: white;
+  border-radius: 6px;
+  padding: 4px;
+  font-size: 10px;
+  margin-top: 4px;
+  word-break: break-word;
 }
 
-.evento p{
-    font-size: 9px;
-    margin-top: 2px;
+.evento p {
+  font-size: 9px;
+  margin-top: 2px;
 }
 
 .today .evento {
-    background-color: var(--bg-color4);
-    color: var(--bg-color2);
+  background-color: var(--bg-color4);
+  color: var(--bg-color2);
 }
 
 .bolinha-evento {
-    position: absolute;
-    bottom: 8px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-    background-color: var(--bg-color4);
+  position: absolute;
+  bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background-color: var(--bg-color4);
 }
 
 .today .bolinha-evento {
-    background-color: #ffffff;
+  background-color: #ffffff;
 }
 
+/* =========================
+   LISTA DE EVENTOS DO DIA
+========================= */
 .eventos-dia-lista {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    max-height: 200px;
-    overflow-y: auto;
-    margin-bottom: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 200px;
+  overflow-y: auto;
+  margin-bottom: 4px;
 }
 
 .eventos-dia-titulo {
-    font-size: 0.72rem;
-    font-weight: 800;
-    color: var(--bg-color1);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: var(--bg-color1);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .evento-dia-card {
-    background-color: var(--lilas-suave);
-    border: 1px solid var(--lilas-borda);
-    border-radius: 10px;
-    padding: 10px 12px;
+  background-color: var(--lilas-suave);
+  border: 1px solid var(--lilas-borda);
+  border-radius: 10px;
+  padding: 10px 12px;
 }
 
 .evento-dia-card-topo {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    color: #12142b;
-    font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #12142b;
+  font-size: 0.9rem;
 }
 
 .evento-dia-bolinha {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background-color: var(--bg-color4);
-    flex-shrink: 0;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--bg-color4);
+  flex-shrink: 0;
 }
 
 .evento-dia-hora {
-    display: block;
-    font-size: 0.75rem;
-    color: var(--bg-color5);
-    margin: 2px 0 4px 16px;
+  display: block;
+  font-size: 0.75rem;
+  color: var(--bg-color5);
+  margin: 2px 0 4px 16px;
 }
 
 .evento-dia-descricao {
-    font-size: 0.82rem;
-    color: #333;
-    margin-left: 16px;
-    white-space: pre-wrap;
+  font-size: 0.82rem;
+  color: #333;
+  margin-left: 16px;
+  white-space: pre-wrap;
 }
- 
+
 .google-status {
-    width: 100%;
-    background-color: var(--lilas-suave);
-    border: 1px solid var(--lilas-borda);
-    color: var(--bg-color1);
-    font-size: 0.85rem;
-    font-weight: 600;
-    text-align: center;
-    padding: 12px 16px;
-    border-radius: 10px;
-    margin-bottom: 18px;
+  width: 100%;
+  background-color: var(--lilas-suave);
+  border: 1px solid var(--lilas-borda);
+  color: var(--bg-color1);
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-align: center;
+  padding: 12px 16px;
+  border-radius: 10px;
+  margin-bottom: 18px;
 }
 
 .google-status a {
-    color: var(--bg-color1);
-    text-decoration: underline;
-    font-weight: 700;
+  color: var(--bg-color1);
+  text-decoration: underline;
+  font-weight: 700;
 }
 
-
+/* =========================
+   MODAIS (evento / entrega / tarefa)
+========================= */
 #formularioEvento,
 #formularioEntrega,
 #formularioTarefa {
-    display: none;
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 400px;
-    background-color: white;
-    padding: 15px;
-    border-radius: 15px;
-    box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.2);
-    z-index: 1000;
+  display: none;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 400px;
+  background-color: white;
+  padding: 15px;
+  border-radius: 15px;
+  box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
 }
 
 #formularioEvento form,
 #formularioEntrega form,
 #formularioTarefa form {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
 }
 
 #formularioEvento form h2,
 #formularioEntrega form h2,
 #formularioTarefa form h2 {
-    color: black;
-    font-size: 1.3rem;
-    font-weight: 700;
-    margin-bottom: 4px;
+  color: black;
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-bottom: 4px;
 }
 
 #formularioEvento label,
 #formularioEntrega label,
 #formularioTarefa label {
-    color: #333;
-    font-size: 0.85rem;
-    font-weight: 600;
-    margin-bottom: -6px; 
+  color: #333;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: -6px;
 }
 
 #formularioEvento input,
@@ -798,14 +925,14 @@ a {
 #formularioTarefa input,
 #formularioTarefa select,
 #formularioTarefa textarea {
-    padding: 10px;
-    border-radius: 8px;
-    border: 1px solid #ccc;
-    font-size: 0.9rem;
-    outline: none;
-    width: 100%;
-    box-sizing: border-box;
-    background-color: white;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 0.9rem;
+  outline: none;
+  width: 100%;
+  box-sizing: border-box;
+  background-color: white;
 }
 
 #formularioEvento input:focus,
@@ -817,198 +944,199 @@ a {
 #formularioTarefa input:focus,
 #formularioTarefa select:focus,
 #formularioTarefa textarea:focus {
-    border-color: var(--bg-color4);
+  border-color: var(--bg-color4);
 }
 
 #formularioEvento textarea {
-    resize: none;
-    height: 90px;
+  resize: none;
+  height: 90px;
 }
 
 #formularioEvento form > button:last-child,
 #formularioEntrega form > button:last-child,
 #formularioTarefa form > button:last-child {
-    padding: 12px;
-    border: none;
-    border-radius: 8px;
-    background-color: var(--bg-color4);
-    color: white;
-    font-size: 0.95rem;
-    font-weight: 600;
-    cursor: pointer;
-    margin-top: 4px;
-    transition: background-color 0.2s;
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  background-color: var(--bg-color4);
+  color: white;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 4px;
+  transition: background-color 0.2s;
 }
 
 #formularioEvento form > button:last-child:hover,
 #formularioEntrega form > button:last-child:hover,
 #formularioTarefa form > button:last-child:hover {
-    background-color: var(--bg-color1);
+  background-color: var(--bg-color1);
 }
 
 #fecharEvento,
 #fecharEntrega,
 #fecharTarefa {
-    width: 30px;
-    height: 30px;
-    border-radius: 8px;
-    border: none;
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background-color: var(--bg-color4);
-    color: white;
-    font-weight: bold;
-    font-size: 13px;
-    cursor: pointer;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  border: none;
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: var(--bg-color4);
+  color: white;
+  font-weight: bold;
+  font-size: 13px;
+  cursor: pointer;
 }
 
-
+/* =========================
+   ENTREGAS E CHECKLIST
+========================= */
 .secao-entregas,
 .secao-checklist {
-    background-color: var(--bg-color2);
-    margin-top: 16px;
-    padding: 28px 30px;
+  background-color: var(--bg-color2);
+  margin-top: 16px;
+  padding: 28px 30px;
 }
 
 .secao-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-    flex-wrap: wrap;
-    gap: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 12px;
 }
 
 .secao-titulo {
-    font-size: 1.2rem;
-    font-weight: 700;
-    color: #111;
-    display: flex;
-    align-items: center;
-    gap: 8px;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #111;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .secao-icone {
-    font-size: 1.1rem;
+  font-size: 1.1rem;
 }
 
 .btn-add-entrega,
 .btn-add-tarefa {
-    background-color: var(--bg-color4);
-    color: white;
-    border: none;
-    border-radius: 8px;
-    padding: 9px 16px;
-    font-size: 0.85rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background-color 0.2s;
-    white-space: nowrap;
+  background-color: var(--bg-color4);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 9px 16px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  white-space: nowrap;
 }
 
 .btn-add-entrega:hover,
 .btn-add-tarefa:hover {
-    background-color: var(--bg-color1);
+  background-color: var(--bg-color1);
 }
 
 .checklist-acoes {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    flex-wrap: wrap;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
 .checklist-acoes label {
-    color: #666;
-    font-size: 0.8rem;
-    font-weight: 600;
+  color: #666;
+  font-size: 0.8rem;
+  font-weight: 600;
 }
 
 #ordenacaoChecklist {
-    padding: 8px 10px;
-    border: 1px solid #d8d8e2;
-    border-radius: 8px;
-    background-color: white;
-    color: #333;
-    font-family: inherit;
-    cursor: pointer;
+  padding: 8px 10px;
+  border: 1px solid #d8d8e2;
+  border-radius: 8px;
+  background-color: white;
+  color: #333;
+  font-family: inherit;
+  cursor: pointer;
 }
 
 .lista-vazia {
-    color: #999;
-    font-size: 0.9rem;
-    text-align: center;
-    padding: 24px 0;
+  color: #999;
+  font-size: 0.9rem;
+  text-align: center;
+  padding: 24px 0;
 }
 
-
 .entregas-lista {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 .entrega-item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background-color: var(--bg-colorFundo);
-    border-radius: 10px;
-    padding: 14px 16px;
-    gap: 12px;
-    flex-wrap: wrap;
-    border-left: 4px solid var(--bg-color4);
-    transition: box-shadow 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: var(--bg-colorFundo);
+  border-radius: 10px;
+  padding: 14px 16px;
+  gap: 12px;
+  flex-wrap: wrap;
+  border-left: 4px solid var(--bg-color4);
+  transition: box-shadow 0.2s;
 }
 
 .entrega-item:hover {
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
 }
 
 .entrega-item.prioridade-alta {
-    border-left-color: #e53935;
+  border-left-color: #e53935;
 }
 
 .entrega-item.prioridade-media {
-    border-left-color: #fb8c00;
+  border-left-color: #fb8c00;
 }
 
 .entrega-item.prioridade-baixa {
-    border-left-color: #43a047;
+  border-left-color: #43a047;
 }
 
 .entrega-info {
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-    flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex: 1;
 }
 
 .entrega-titulo-texto {
-    font-weight: 700;
-    font-size: 0.95rem;
-    color: #111;
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: #111;
 }
 
 .entrega-meta {
-    font-size: 0.8rem;
-    color: #666;
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
+  font-size: 0.8rem;
+  color: #666;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
 .tag-prioridade {
-    font-size: 0.72rem;
-    font-weight: 700;
-    padding: 2px 8px;
-    border-radius: 20px;
-    text-transform: uppercase;
-    letter-spacing: 0.4px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 20px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
 }
 
 .tag-alta  { background-color: #fde8e8; color: #c62828; }
@@ -1017,230 +1145,208 @@ a {
 
 .btn-remover-entrega,
 .btn-remover-tarefa {
-    background: none;
-    border: none;
-    color: #bbb;
-    font-size: 1.1rem;
-    cursor: pointer;
-    padding: 4px 6px;
-    border-radius: 6px;
-    transition: color 0.2s, background-color 0.2s;
-    flex-shrink: 0;
+  background: none;
+  border: none;
+  color: #bbb;
+  font-size: 1.1rem;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 6px;
+  transition: color 0.2s, background-color 0.2s;
+  flex-shrink: 0;
 }
 
 .btn-remover-entrega:hover,
 .btn-remover-tarefa:hover {
-    color: #e53935;
-    background-color: #fde8e8;
+  color: #e53935;
+  background-color: #fde8e8;
 }
 
-
 .checklist-barra-progresso {
-    margin-bottom: 18px;
+  margin-bottom: 18px;
 }
 
 .progresso-texto {
-    font-size: 0.82rem;
-    color: #666;
-    font-weight: 600;
-    margin-bottom: 8px;
+  font-size: 0.82rem;
+  color: #666;
+  font-weight: 600;
+  margin-bottom: 8px;
 }
 
 .barra-fundo {
-    background-color: #e0e0e0;
-    border-radius: 20px;
-    height: 8px;
-    overflow: hidden;
+  background-color: #e0e0e0;
+  border-radius: 20px;
+  height: 8px;
+  overflow: hidden;
 }
 
 .barra-preenchida {
-    background: linear-gradient(90deg, var(--bg-color1), var(--bg-color4));
-    height: 100%;
-    border-radius: 20px;
-    transition: width 0.4s ease;
+  background: linear-gradient(90deg, var(--bg-color1), var(--bg-color4));
+  height: 100%;
+  border-radius: 20px;
+  transition: width 0.4s ease;
 }
 
 .checklist-lista {
-    list-style: none;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .tarefa-item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    background-color: var(--bg-colorFundo);
-    border-radius: 10px;
-    padding: 12px 16px;
-    transition: opacity 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background-color: var(--bg-colorFundo);
+  border-radius: 10px;
+  padding: 12px 16px;
+  transition: opacity 0.2s;
 }
 
 .tarefa-item.concluida {
-    opacity: 0.55;
+  opacity: 0.55;
 }
 
 .tarefa-item.concluida .tarefa-texto {
-    text-decoration: line-through;
-    color: #999;
+  text-decoration: line-through;
+  color: #999;
 }
 
 .tarefa-item.vencida {
-    border-left: 4px solid #e53935;
-    background-color: #fff7f7;
+  border-left: 4px solid #e53935;
+  background-color: #fff7f7;
 }
 
 .tarefa-item.vencida .tarefa-data {
-    color: #c62828;
-    font-weight: 700;
+  color: #c62828;
+  font-weight: 700;
 }
 
 .tag-vencida {
-    padding: 3px 9px;
-    border-radius: 20px;
-    background-color: #fde8e8;
-    color: #c62828;
-    font-size: 0.72rem;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.4px;
+  padding: 3px 9px;
+  border-radius: 20px;
+  background-color: #fde8e8;
+  color: #c62828;
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
 }
 
 .tarefa-checkbox {
-    width: 20px;
-    height: 20px;
-    accent-color: var(--bg-color4);
-    cursor: pointer;
-    flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  accent-color: var(--bg-color4);
+  cursor: pointer;
+  flex-shrink: 0;
 }
 
 .tarefa-info {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
 .tarefa-texto {
-    font-size: 0.92rem;
-    font-weight: 600;
-    color: #111;
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: #111;
 }
 
 .tarefa-materia {
-    font-size: 0.78rem;
-    color: #888;
+  font-size: 0.78rem;
+  color: #888;
 }
 
 .tarefa-data {
-    font-size: 0.76rem;
-    color: #777;
+  font-size: 0.76rem;
+  color: #777;
 }
 
+/* =========================
+   RESPONSIVO (mobile)
+========================= */
 @media (max-width: 699px) {
-    .checklist-acoes {
-        width: 100%;
-    }
-
-    .tarefa-item {
-        flex-wrap: wrap;
-    }
-
-    .tarefa-info {
-        min-width: calc(100% - 44px);
-    }
-    .dia-card {
-        height: 55px;
-        padding: 5px;
-    }
-
-    .numero-dia {
-        font-size: 10px;
-    }
-
-    .evento {
-        font-size: 8px;
-        padding: 2px 3px;
-        border-radius: 4px;
-    }
-
-    #formularioEvento,
-    #formularioEntrega,
-    #formularioTarefa {
-        width: 95%;
-        max-height: 90vh;
-        overflow-y: auto;
-        padding: 12px;
-    }
-
-    .eventos-dia-lista {
-        max-height: 140px;
-    }
-
-    .secao-entregas,
-    .secao-checklist {
-        padding: 20px 16px;
-    }
-
-    .secao-titulo {
-        font-size: 1.05rem;
-    }
-     .nav-mobile {
-    display: none;
+  .calendario {
+    padding: 15px;
   }
-}
 
+  #mes-ano {
+    font-size: 20px;
+  }
 
-.nav-mobile {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: white;
-  display: flex;
-  align-items: center;
-  justify-content: space-around;
-  padding: 8px 6px 10px;
-  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.08);
-  z-index: 40;
-}
+  .dias div {
+    height: 45px;
+    font-size: 14px;
+    transition: all 0.3s ease;
+  }
 
-.nav-mobile a {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 3px;
-  font-size: 10.5px;
-  font-weight: 700;
-  color: var(--bg-color5);
-}
+  .dias-semana span {
+    height: 35px;
+    font-size: 11px;
+  }
 
-.nav-mobile a.ativo {
-  color: var(--bg-color1);
-}
+  .arrow-mes {
+    width: 22px;
+    height: 22px;
+  }
 
-.nav-icone {
-  font-size: 18px;
-}
+  .dia-card {
+    height: 55px;
+    padding: 5px;
+  }
 
-.nav-camera {
-  background: var(--bg-color1);
-  width: 52px;
-  height: 52px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-top: -26px;
-  box-shadow: 0 8px 18px rgba(0, 15, 176, 0.4);
-}
+  .numero-dia {
+    font-size: 10px;
+  }
 
-.nav-icone-camera {
-  font-size: 20px;
-}
+  .evento {
+    font-size: 8px;
+    padding: 2px 3px;
+    border-radius: 4px;
+  }
 
-#btnAddEvento {
-    justify-self: end;
-    margin-top: 16px;
+  #formularioEvento,
+  #formularioEntrega,
+  #formularioTarefa {
+    width: 95%;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 12px;
+  }
+
+  .eventos-dia-lista {
+    max-height: 140px;
+  }
+
+  .secao-entregas,
+  .secao-checklist {
+    padding: 20px 16px;
+  }
+
+  .secao-titulo {
+    font-size: 1.05rem;
+  }
+
+  .checklist-acoes {
+    width: 100%;
+  }
+
+  .tarefa-item {
+    flex-wrap: wrap;
+  }
+
+  .tarefa-info {
+    min-width: calc(100% - 44px);
+  }
+
+  .pagina-titulo {
+    padding: 22px 20px 18px;
+  }
+
+  .pagina-titulo h1 {
+    font-size: 1.5rem;
+  }
 }
