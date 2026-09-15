@@ -247,6 +247,18 @@ async function entrarNaComunidadePorLink(
         return null;
     }
 
+    const comunidade = documento.data();
+
+    if (
+        String(comunidade.privacidade)
+            .trim()
+            .toLowerCase() !== "pública"
+    ) {
+        return {
+            privada: true
+        };
+    }
+
     await referencia.update({
         membros: FieldValue.arrayUnion(
             String(usuarioId)

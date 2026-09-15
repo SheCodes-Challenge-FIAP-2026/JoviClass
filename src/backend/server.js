@@ -16,7 +16,7 @@ const { salvarPerfilNoFirestore, buscarPerfilNoFirestore } = require("./services
 const { listarMateriasDoUsuario, criarMateriaNoFirestore, atualizarMateriaNoFirestore, excluirMateriaNoFirestore, atualizarCompartilhamentoNoFirestore } = require("./services/materiasFirestore");
 const { listarTarefasDoUsuario, criarTarefaNoFirestore, atualizarTarefaNoFirestore, excluirTarefaNoFirestore } = require("./services/tarefasFirestore");
 const { listarEventosDoUsuario, criarEventoNoFirestore, atualizarEventoNoFirestore, excluirEventoNoFirestore } = require("./services/eventosFirestore");
-const { listarComunidadesDoUsuario, criarComunidadeNoFirestore, atualizarComunidadeNoFirestore, excluirComunidadeNoFirestore, entrarNaComunidadePorLink, listarMembrosDaComunidade, removerMembroDaComunidade, sairDaComunidade, nomearAdministrador, removerAdministrador } = require("./services/comunidadesFirestore");
+const { listarComunidadesDoUsuario, criarComunidadeNoFirestore, atualizarComunidadeNoFirestore, excluirComunidadeNoFirestore, adicionarMembroPorEmail, entrarNaComunidadePorLink, listarMembrosDaComunidade, removerMembroDaComunidade, sairDaComunidade, nomearAdministrador, removerAdministrador } = require("./services/comunidadesFirestore"); 
 const { listarAnotacoesDaMateria, criarAnotacaoNoFirestore, atualizarAnotacaoNoFirestore, excluirAnotacaoNoFirestore } = require("./services/anotacoesFirestore");
 const { listarArquivosDaMateria, salvarArquivoDaMateria, buscarArquivoDaMateria, renomearArquivoDaMateria, excluirArquivoDaMateria } = require("./services/arquivosMateria");
 const { OAuth2Client } = require("google-auth-library");
@@ -3334,8 +3334,7 @@ app.delete(
 // COMUNIDADES — ENTRAR PELO LINK COMPARTILHADO
 // ======================================================
 
-app.post(
-    "/comunidades/:id/entrar",
+app.post("/comunidades/:id/entrar",
     exigirLogin,
     async (req, res) => {
         try {
@@ -3344,6 +3343,13 @@ app.post(
                     req.session.usuario.id,
                     req.params.id
                 );
+
+            if (comunidade?.privada) {
+                return res.status(403).json({
+                    sucesso: false,
+                    erro: "Esta comunidade é privada."
+                });
+            }
 
             if (!comunidade) {
                 return res.status(404).json({
@@ -3365,6 +3371,74 @@ app.post(
             return res.status(500).json({
                 sucesso: false,
                 erro: "Erro interno ao entrar na comunidade."
+            });
+        }
+    }
+);
+
+// ======================================================
+// COMUNIDADES — ADICIONAR MEMBRO POR E-MAIL
+// ======================================================
+
+app.post(
+    "/comunidades/:id/membros",
+    exigirLogin,
+    async (req, res) => {
+        try {
+            const email = String(
+                req.body.email || ""
+            )
+                .trim()
+                .toLowerCase();
+
+            if (!email || !email.includes("@")) {
+                return res.status(400).json({
+                    sucesso: false,
+                    erro: "Informe um e-mail válido."
+                });
+            }
+
+            const membro =
+                await adicionarMembroPorEmail(
+                    req.session.usuario.id,
+                    req.params.id,
+                    email
+                );
+
+            if (!membro) {
+                return res.status(403).json({
+                    sucesso: false,
+                    erro: "Somente administradores podem adicionar membros."
+                });
+            }
+
+            if (membro.usuarioNaoEncontrado) {
+                return res.status(404).json({
+                    sucesso: false,
+                    erro: "Esse e-mail não possui uma conta no JoviClass."
+                });
+            }
+
+            if (membro.duplicado) {
+                return res.status(409).json({
+                    sucesso: false,
+                    erro: "Esse usuário já faz parte da comunidade."
+                });
+            }
+
+            return res.status(201).json({
+                sucesso: true,
+                membro
+            });
+        } catch (erro) {
+            console.error(
+                "❌ Erro ao adicionar membro:",
+                erro
+            );
+
+            return res.status(500).json({
+                sucesso: false,
+                erro: "Erro interno ao adicionar membro."
             });
         }
     }
