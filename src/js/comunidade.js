@@ -970,72 +970,236 @@ async function sairDaComunidade(id) {
 
 
 
-function alternarCompartilharPasta(comId, checked) {
-    const dados = dadosSalas[comId] && dadosSalas[comId]["Arquivos"];
-    if (!dados) return;
+async function carregarPastasCompartilhadas(comId) {
+    const lista = document.getElementById("listaPastasCompartilhadas");
+    if (!lista) return;
 
-    dados.compartilhada = checked;
-    salvarNoStorage();
-
-    const opcoes = document.getElementById("opcoesCompartilharPasta");
-    if (opcoes) opcoes.style.display = checked ? "block" : "none";
-
-    if (checked) {
-        prepararCompartilhamentoPasta(comId);
-    }
-}
-
-function prepararCompartilhamentoPasta(comId) {
-    const link = `https://joviclass.app/convite/${comId}`;
-    const inputLink = document.getElementById("inputLinkPasta");
-    if (inputLink) inputLink.value = link;
-
-    const status = document.getElementById("statusCopiarPasta");
-    if (status) status.textContent = "";
-
-    const emailInput = document.getElementById("emailConvitePasta");
-    if (emailInput) emailInput.value = "";
-
-    renderizarConvidadosPasta(comId);
-}
-
-function copiarLinkPasta() {
-    const input = document.getElementById("inputLinkPasta");
-    if (!input) return;
-
-    input.select();
-    input.setSelectionRange(0, 99999);
+    lista.innerHTML = "<p>Carregando pastas...</p>";
 
     try {
-        navigator.clipboard.writeText(input.value).then(() => {
-            mostrarStatusCopiarPasta("✅ Link copiado!");
-        }).catch(() => {
-            document.execCommand("copy");
-            mostrarStatusCopiarPasta("✅ Link copiado!");
+        const resposta = await fetch(`${API_BASE}/comunidades/${encodeURIComponent(comId)}/pastas`, {
+            credentials: "include"
         });
-    } catch (e) {
-        document.execCommand("copy");
-        mostrarStatusCopiarPasta("✅ Link copiado!");
+        const dados = await resposta.json();
+
+        if (!resposta.ok) throw new Error(dados.erro || "Não foi possível carregar as pastas.");
+
+        lista.innerHTML = "";
+
+        if (!dados.pastas.length) {
+            lista.innerHTML = "<p>Ainda não há pastas compartilhadas nesta comunidade.</p>";
+            return;
+        }
+
+        dados.pastas.forEach(pasta => {
+            const item = document.createElement("div");
+            item.className = "arquivoItem pastaCompartilhadaItem";
+
+            const abrir = document.createElement("button");
+            abrir.type = "button";
+            abrir.className = "btnAbrirPastaCompartilhada";
+            abrir.textContent = `📁 ${pasta.nome} · ${pasta.arquivos} arquivo(s)`;
+            abrir.onclick = () => carregarArquivosDaPasta(comId, pasta);
+            item.appendChild(abrir);
+
+            if (pasta.podeRemover) {
+                const remover = document.createElement("button");
+                remover.type = "button";
+                remover.className = "btnRemoverConvite";
+                remover.textContent = "Remover";
+                remover.onclick = () => removerPastaDaComunidade(comId, pasta.id);
+                item.appendChild(remover);
+            }
+
+            lista.appendChild(item);
+        });
+    } catch (erro) {
+        console.error("Erro ao carregar pastas compartilhadas:", erro);
+        lista.innerHTML = `<p>${erro.message}</p>`;
     }
 }
 
-function mostrarStatusCopiarPasta(msg) {
-    const status = document.getElementById("statusCopiarPasta");
-    if (!status) return;
-    status.textContent = msg;
-    setTimeout(() => { status.textContent = ""; }, 3000);
+async function carregarMateriasParaCompartilhar() {
+    const seletor = document.getElementById("selectMateriaCompartilhar");
+    if (!seletor) return;
+
+    try {
+        const resposta = await fetch(`${API_BASE}/materias`, { credentials: "include" });
+        const dados = await resposta.json();
+
+        if (!resposta.ok) throw new Error(dados.erro || "Não foi possível carregar suas matérias.");
+
+        const materiasCompartilhaveis = (dados.materias || []).filter(
+            materia => materia.compartilhada === true
+        );
+
+        seletor.innerHTML = '<option value="">Selecione uma matéria compartilhada</option>';
+        seletor.disabled = false;
+
+        materiasCompartilhaveis.forEach(materia => {
+            const opcao = document.createElement("option");
+            opcao.value = materia.id;
+            opcao.textContent = materia.nome;
+            seletor.appendChild(opcao);
+        });
+
+        if (!materiasCompartilhaveis.length) {
+            seletor.innerHTML = '<option value="">Nenhuma matéria disponível para compartilhar</option>';
+            seletor.disabled = true;
+
+            const botaoAdicionar = seletor.parentElement.querySelector("button");
+            if (botaoAdicionar) botaoAdicionar.disabled = true;
+        } else {
+            const botaoAdicionar = seletor.parentElement.querySelector("button");
+            if (botaoAdicionar) botaoAdicionar.disabled = false;
+        }
+    } catch (erro) {
+        console.error("Erro ao carregar matérias compartilháveis:", erro);
+    }
 }
 
-function enviarConvitePastaEmail(comId) {
-    alert("A gestão da pasta compartilhada será configurada separadamente.");
+async function adicionarPastaNaComunidade(comId) {
+    const seletor = document.getElementById("selectMateriaCompartilhar");
+    const materiaId = seletor && seletor.value;
+
+    if (!materiaId) {
+        alert("Selecione uma matéria compartilhada.");
+        return;
+    }
+
+    try {
+        const resposta = await fetch(`${API_BASE}/comunidades/${encodeURIComponent(comId)}/pastas`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify({ materiaId })
+        });
+        const dados = await resposta.json();
+
+        if (!resposta.ok) throw new Error(dados.erro || "Não foi possível compartilhar a pasta.");
+
+        seletor.value = "";
+        await carregarPastasCompartilhadas(comId);
+    } catch (erro) {
+        console.error("Erro ao compartilhar pasta:", erro);
+        alert(erro.message);
+    }
 }
 
-function renderizarConvidadosPasta(comId) {
-    const container = document.getElementById("convidadosItensPasta");
-    const lista = document.getElementById("listaConvidadosPasta");
+async function removerPastaDaComunidade(comId, materiaId) {
+    if (!confirm("Remover esta pasta da comunidade? Os arquivos originais não serão excluídos.")) return;
 
-    if (container) container.innerHTML = "";
-    if (lista) lista.style.display = "none";
+    try {
+        const resposta = await fetch(`${API_BASE}/comunidades/${encodeURIComponent(comId)}/pastas/${encodeURIComponent(materiaId)}`, {
+            method: "DELETE",
+            credentials: "include"
+        });
+        const dados = await resposta.json();
+
+        if (!resposta.ok) throw new Error(dados.erro || "Não foi possível remover a pasta.");
+
+        await carregarPastasCompartilhadas(comId);
+
+        const area = document.getElementById("arquivosDaPastaCompartilhada");
+        if (area) area.innerHTML = "";
+    } catch (erro) {
+        console.error("Erro ao remover pasta:", erro);
+        alert(erro.message);
+    }
+}
+
+async function carregarArquivosDaPasta(comId, pasta) {
+    const area = document.getElementById("arquivosDaPastaCompartilhada");
+    if (!area) return;
+
+    area.innerHTML = `<h3>📁 ${pasta.nome}</h3><p>Carregando arquivos...</p>`;
+
+    try {
+        const resposta = await fetch(`${API_BASE}/comunidades/${encodeURIComponent(comId)}/pastas/${encodeURIComponent(pasta.id)}/arquivos`, {
+            credentials: "include"
+        });
+        const dados = await resposta.json();
+
+        if (!resposta.ok) throw new Error(dados.erro || "Não foi possível abrir a pasta.");
+
+        area.innerHTML = `<h3>📁 ${pasta.nome}</h3>`;
+
+        if (pasta.podeAdicionar) {
+            const upload = document.createElement("div");
+            upload.className = "uploadBox uploadPastaCompartilhada";
+            upload.innerHTML = `
+                <label for="uploadArquivoCompartilhado">Adicionar arquivo à pasta:</label>
+                <input type="file" id="uploadArquivoCompartilhado">
+                <button type="button" id="btnEnviarArquivoCompartilhado">Enviar arquivo</button>
+            `;
+            area.appendChild(upload);
+
+            upload.querySelector("#btnEnviarArquivoCompartilhado").onclick = () =>
+                enviarArquivoParaPasta(comId, pasta);
+        }
+
+        if (!dados.arquivos.length) {
+            area.insertAdjacentHTML("beforeend", "<p>Esta pasta ainda não possui arquivos.</p>");
+            return;
+        }
+
+        dados.arquivos.forEach(arquivo => {
+            const link = document.createElement("a");
+            link.className = "arquivoItem";
+            link.textContent = `📄 ${arquivo.nome}`;
+            link.href = `${API_BASE}/comunidades/${encodeURIComponent(comId)}/pastas/${encodeURIComponent(pasta.id)}/arquivos/${encodeURIComponent(arquivo.id)}`;
+            link.target = "_blank";
+            link.rel = "noopener";
+            area.appendChild(link);
+        });
+    } catch (erro) {
+        console.error("Erro ao abrir pasta compartilhada:", erro);
+        area.innerHTML = `<p>${erro.message}</p>`;
+    }
+}
+
+async function enviarArquivoParaPasta(comId, pasta) {
+    const input = document.getElementById("uploadArquivoCompartilhado");
+    const botao = document.getElementById("btnEnviarArquivoCompartilhado");
+    const arquivo = input && input.files[0];
+
+    if (!arquivo) {
+        alert("Selecione um arquivo.");
+        return;
+    }
+
+    const formulario = new FormData();
+    formulario.append("arquivo", arquivo);
+
+    try {
+        if (botao) {
+            botao.disabled = true;
+            botao.textContent = "Enviando...";
+        }
+
+        const resposta = await fetch(
+            `${API_BASE}/comunidades/${encodeURIComponent(comId)}/pastas/${encodeURIComponent(pasta.id)}/arquivos`,
+            {
+                method: "POST",
+                credentials: "include",
+                body: formulario
+            }
+        );
+        const dados = await resposta.json();
+
+        if (!resposta.ok) throw new Error(dados.erro || "Não foi possível enviar o arquivo.");
+
+        await carregarArquivosDaPasta(comId, pasta);
+        await carregarPastasCompartilhadas(comId);
+    } catch (erro) {
+        console.error("Erro ao enviar arquivo compartilhado:", erro);
+        alert(erro.message);
+
+        if (botao) {
+            botao.disabled = false;
+            botao.textContent = "Enviar arquivo";
+        }
+    }
 }
 
 /* =========================================================
@@ -1240,85 +1404,32 @@ function abrirSala(comId, sala) {
     if (sala.tipo === "arquivos") {
         document.getElementById("chatArea").style.display = "none";
 
-        const compartilhada = !!dados.compartilhada;
-
         const arquivoArea = document.getElementById("arquivoArea");
         arquivoArea.innerHTML = `
-            <h2 class="tituloArquivos">📁 Arquivos</h2>
+            <h2 class="tituloArquivos">📁 Pastas compartilhadas</h2>
 
             <div class="compartilharPastaBox">
                 <div class="compartilharPastaTopo">
                     <div>
-                        <span class="compartilharPastaTitulo">Pasta compartilhada</span>
-                        <p class="compartilharPastaDesc">Permita que outras pessoas acessem esta pasta via link ou convite por e-mail.</p>
+                        <span class="compartilharPastaTitulo">Adicionar uma pasta</span>
+                        <p class="compartilharPastaDesc">Escolha uma matéria que você marcou como compartilhada. Todos os membros da comunidade poderão abrir os arquivos.</p>
                     </div>
-                    <label class="toggleSwitch">
-                        <input type="checkbox" id="toggleCompartilharPasta" ${compartilhada ? "checked" : ""}>
-                        <span class="toggleSlider"></span>
-                    </label>
                 </div>
 
-                <div id="opcoesCompartilharPasta" style="display:${compartilhada ? "block" : "none"}">
-                    <div class="linkConvite">
-                        <input type="text" id="inputLinkPasta" readonly>
-                        <button type="button" onclick="copiarLinkPasta()">Copiar</button>
-                    </div>
-                    <div id="statusCopiarPasta"></div>
-
-                    <div class="divisorConvidar">
-                        <span>ou convide por e-mail</span>
-                    </div>
-
-                    <div class="emailRow">
-                        <input type="email" id="emailConvitePasta" placeholder="exemplo@email.com">
-                        <button type="button" onclick="enviarConvitePastaEmail('${comId}')">Enviar convite</button>
-                    </div>
-
-                    <div id="listaConvidadosPasta">
-                        <p class="labelConvidados">Convites enviados:</p>
-                        <div id="convidadosItensPasta"></div>
-                    </div>
+                <div class="emailRow">
+                    <select id="selectMateriaCompartilhar" aria-label="Matéria para compartilhar">
+                        <option value="">Carregando suas matérias...</option>
+                    </select>
+                    <button type="button" onclick="adicionarPastaNaComunidade('${comId}')">Adicionar</button>
                 </div>
             </div>
 
-            <div class="uploadBox">
-                <label style="font-size:14px;font-weight:600;color:#333;">Enviar arquivo:</label>
-                <input type="file" id="uploadArquivo" style="margin-top:8px;">
-            </div>
-            <div id="listaArquivos"></div>
+            <div id="listaPastasCompartilhadas"></div>
+            <div id="arquivosDaPastaCompartilhada"></div>
         `;
 
-        if (compartilhada) {
-            prepararCompartilhamentoPasta(comId);
-        }
-
-        document.getElementById("toggleCompartilharPasta").addEventListener("change", function () {
-            alternarCompartilharPasta(comId, this.checked);
-        });
-
-        const listaArquivos = document.getElementById("listaArquivos");
-        dados.arquivos.forEach(nome => {
-            const item = document.createElement("div");
-            item.classList.add("arquivoItem");
-            item.innerText = "📄 " + nome;
-            listaArquivos.appendChild(item);
-        });
-
-        document.getElementById("uploadArquivo").addEventListener("change", function () {
-            const arquivo = this.files[0];
-            if (!arquivo) return;
-
-            dados.arquivos.push(arquivo.name);
-            salvarNoStorage();
-
-            const item = document.createElement("div");
-            item.classList.add("arquivoItem");
-            item.innerText = "📄 " + arquivo.name;
-            document.getElementById("listaArquivos").appendChild(item);
-
-            alert("Arquivo enviado com sucesso!");
-            this.value = "";
-        });
+        carregarMateriasParaCompartilhar();
+        carregarPastasCompartilhadas(comId);
     } else {
         document.getElementById("chatArea").style.display = "block";
 

@@ -1832,3 +1832,318 @@ button:focus-visible,
         width: 100%;
     }
 }
+#modalConvidar {
+    width: min(520px, calc(100vw - 32px));
+    max-width: none;
+    padding: 0;
+    overflow: hidden;
+}
+
+#conteudoConvidar {
+    width: 100%;
+    max-height: 88dvh;
+    padding: 28px;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+#areaLinkComunidade,
+#areaAdicionarMembro,
+#listaMembros,
+#membrosItens {
+    width: 100%;
+    min-width: 0;
+}
+
+#modalConvidar .linkConvite,
+#modalConvidar .emailRow {
+    width: 100%;
+    min-width: 0;
+}
+
+#modalConvidar .linkConvite input,
+#modalConvidar .emailRow input {
+    width: 100%;
+    min-width: 0;
+}
+
+.convidadoItem {
+    width: 100%;
+    min-width: 0;
+    gap: 12px;
+}
+
+.convidadoEmail {
+    flex: 1;
+    min-width: 0;
+}
+
+.convidadoEmail > div,
+.convidadoEmail strong,
+.convidadoEmail div {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.convidadoAcoes {
+    flex-shrink: 0;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 6px;
+}
+
+.compartilharPastaBox {
+    width: 100%;
+    padding: 20px;
+}
+
+.compartilharPastaTopo {
+    width: 100%;
+    margin-bottom: 18px;
+}
+
+.compartilharPastaDesc {
+    margin-top: 6px;
+    line-height: 1.5;
+}
+
+.compartilharPastaBox .emailRow {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: stretch;
+    gap: 10px;
+    width: 100%;
+    margin-top: 4px;
+    margin-bottom: 0;
+}
+
+#selectMateriaCompartilhar {
+    width: 100%;
+    min-width: 0;
+    height: 46px;
+    padding: 0 42px 0 14px;
+    border: 1px solid #d9dfeb;
+    border-radius: 10px;
+    background-color: #fafbfe;
+    color: #25283c;
+    font-family: inherit;
+    font-size: 14px;
+    outline: none;
+    cursor: pointer;
+    transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+}
+
+#selectMateriaCompartilhar:hover {
+    border-color: #b9c4d8;
+    background-color: #fff;
+}
+
+#selectMateriaCompartilhar:focus {
+    border-color: #1466ff;
+    background-color: #fff;
+    box-shadow: 0 0 0 3px rgba(20, 102, 255, 0.12);
+}
+
+.compartilharPastaBox .emailRow button {
+    height: 46px;
+    min-height: 46px;
+    margin: 0;
+    padding: 0 20px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.pastaCompartilhadaItem,
+.uploadPastaCompartilhada,
+#listaPastasCompartilhadas,
+#arquivosDaPastaCompartilhada {
+    width: 100%;
+    min-width: 0;
+}
+
+.pastaCompartilhadaItem {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+#comunidade .btnAbrirPastaCompartilhada {
+    flex: 1;
+    min-width: 0;
+    margin: 0;
+    padding: 6px 4px;
+    border: 0;
+    background: transparent;
+    color: #1a1a2e;
+    text-align: left;
+    overflow-wrap: anywhere;
+}
+
+.uploadPastaCompartilhada input[type="file"] {
+    max-width: 100%;
+}
+
+@media (max-width: 699px) {
+    #modalConvidar {
+        width: calc(100vw - 24px);
+        max-height: calc(100dvh - 24px);
+    }
+
+    #conteudoConvidar {
+        max-height: calc(100dvh - 24px);
+        padding: 24px 16px 20px;
+    }
+
+    .convidadoItem {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .convidadoEmail,
+    .convidadoAcoes {
+        width: 100%;
+    }
+
+    .convidadoAcoes {
+        justify-content: flex-start;
+    }
+
+    .compartilharPastaBox {
+        padding: 16px;
+    }
+
+    .compartilharPastaBox .emailRow {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 9px;
+    }
+
+    #selectMateriaCompartilhar,
+    .compartilharPastaBox .emailRow button {
+        width: 100%;
+    }
+
+    .pastaCompartilhadaItem,
+    .uploadPastaCompartilhada {
+        align-items: stretch;
+        flex-direction: column;
+    }
+}
+#listaPastasCompartilhadas {
+    display: grid;
+    gap: 10px;
+    margin-top: 18px;
+}
+
+.pastaCompartilhadaItem {
+    margin: 0;
+    padding: 10px 12px;
+    border: 1px solid #e3e7f0;
+    border-radius: 12px;
+    background: #fff;
+}
+
+#comunidade .btnAbrirPastaCompartilhada {
+    min-height: 38px;
+    border: 0;
+    border-radius: 8px;
+    outline: none;
+    background: transparent;
+    color: #202338;
+    box-shadow: none;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+#comunidade .btnAbrirPastaCompartilhada:hover {
+    background: #f1f5ff;
+    color: #1466ff;
+}
+
+#comunidade .btnAbrirPastaCompartilhada:focus-visible {
+    outline: none;
+    background: #eef3ff;
+    box-shadow: 0 0 0 2px rgba(20, 102, 255, 0.22);
+}
+
+#arquivosDaPastaCompartilhada {
+    margin-top: 22px;
+    padding: 18px;
+    border: 1px solid #e3e7f0;
+    border-radius: 14px;
+    background: #f8f9fc;
+}
+
+#arquivosDaPastaCompartilhada:empty {
+    display: none;
+}
+
+#arquivosDaPastaCompartilhada h3 {
+    margin: 0 0 14px;
+    color: #1a1d32;
+    font-size: 17px;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
+}
+
+#arquivosDaPastaCompartilhada a.arquivoItem {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    min-height: 46px;
+    margin: 0 0 9px;
+    padding: 12px 14px;
+    border: 1px solid #e5e8f1;
+    border-radius: 11px;
+    background: #fff;
+    color: #272a3d;
+    text-decoration: none;
+    overflow-wrap: anywhere;
+    transition: border-color 0.2s, color 0.2s, transform 0.2s;
+}
+
+#arquivosDaPastaCompartilhada h3 + a.arquivoItem {
+    margin-top: 18px;
+}
+
+#arquivosDaPastaCompartilhada a.arquivoItem:last-child {
+    margin-bottom: 0;
+}
+
+#arquivosDaPastaCompartilhada a.arquivoItem:hover {
+    border-color: #b9c9ee;
+    color: #1466ff;
+    transform: translateY(-1px);
+}
+
+@media (max-width: 699px) {
+    #arquivosDaPastaCompartilhada {
+        margin-top: 16px;
+        padding: 14px;
+    }
+
+    #arquivosDaPastaCompartilhada h3 {
+        font-size: 16px;
+    }
+
+    #arquivosDaPastaCompartilhada a.arquivoItem {
+        padding: 11px 12px;
+        font-size: 13px;
+    }
+}
+
+#selectMateriaCompartilhar:disabled {
+    border-color: #e1e4ec;
+    background: #f3f4f7;
+    color: #85889a;
+    cursor: not-allowed;
+}
+
+.compartilharPastaBox .emailRow button:disabled {
+    background: #c8cede;
+    color: #fff;
+    cursor: not-allowed;
+    opacity: 1;
+}

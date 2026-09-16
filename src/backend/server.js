@@ -19,6 +19,7 @@ const { listarEventosDoUsuario, criarEventoNoFirestore, atualizarEventoNoFiresto
 const { listarComunidadesDoUsuario, criarComunidadeNoFirestore, atualizarComunidadeNoFirestore, excluirComunidadeNoFirestore, adicionarMembroPorEmail, entrarNaComunidadePorLink, listarMembrosDaComunidade, removerMembroDaComunidade, sairDaComunidade, nomearAdministrador, removerAdministrador } = require("./services/comunidadesFirestore"); 
 const { listarAnotacoesDaMateria, criarAnotacaoNoFirestore, atualizarAnotacaoNoFirestore, excluirAnotacaoNoFirestore } = require("./services/anotacoesFirestore");
 const { listarArquivosDaMateria, salvarArquivoDaMateria, buscarArquivoDaMateria, renomearArquivoDaMateria, excluirArquivoDaMateria } = require("./services/arquivosMateria");
+const { listarPastasDaComunidade, adicionarPastaNaComunidade, removerPastaDaComunidade, listarArquivosDaPastaCompartilhada, buscarArquivoDaPastaCompartilhada, salvarArquivoNaPastaCompartilhada } = require("./services/pastasComunidade");
 const { OAuth2Client } = require("google-auth-library");
 const { GoogleGenAI } = require("@google/genai");
 
@@ -3645,6 +3646,154 @@ app.delete(
     }
 );
 
+
+// ======================================================
+// COMUNIDADES — PASTAS COMPARTILHADAS
+// ======================================================
+
+app.get("/comunidades/:id/pastas", exigirLogin, async (req, res) => {
+    try {
+        const pastas = await listarPastasDaComunidade(req.session.usuario.id, req.params.id);
+
+        if (pastas === null) {
+            return res.status(403).json({ sucesso: false, erro: "Comunidade não encontrada ou sem permissão." });
+        }
+
+        return res.json({ sucesso: true, pastas });
+    } catch (erro) {
+        console.error("❌ Erro ao listar pastas da comunidade:", erro);
+        return res.status(500).json({ sucesso: false, erro: "Erro interno ao listar pastas." });
+    }
+});
+
+app.post("/comunidades/:id/pastas", exigirLogin, async (req, res) => {
+    try {
+        const materiaId = String(req.body.materiaId || "").trim();
+
+        if (!materiaId) {
+            return res.status(400).json({ sucesso: false, erro: "Selecione uma matéria." });
+        }
+
+        const pasta = await adicionarPastaNaComunidade(
+            req.session.usuario.id,
+            req.params.id,
+            materiaId
+        );
+
+        if (pasta.semPermissao) {
+            return res.status(403).json({ sucesso: false, erro: "Você não faz parte desta comunidade." });
+        }
+
+        if (pasta.materiaNaoEncontrada) {
+            return res.status(404).json({ sucesso: false, erro: "Matéria não encontrada ou não pertence a você." });
+        }
+
+        if (pasta.naoCompartilhada) {
+            return res.status(409).json({ sucesso: false, erro: "Marque a matéria como compartilhada antes de adicioná-la." });
+        }
+
+        return res.status(201).json({ sucesso: true, pasta });
+    } catch (erro) {
+        console.error("❌ Erro ao compartilhar pasta:", erro);
+        return res.status(500).json({ sucesso: false, erro: "Erro interno ao compartilhar pasta." });
+    }
+});
+
+app.delete("/comunidades/:id/pastas/:materiaId", exigirLogin, async (req, res) => {
+    try {
+        const removida = await removerPastaDaComunidade(
+            req.session.usuario.id,
+            req.params.id,
+            req.params.materiaId
+        );
+
+        if (!removida) {
+            return res.status(403).json({ sucesso: false, erro: "Pasta não encontrada ou sem permissão para remover." });
+        }
+
+        return res.json({ sucesso: true });
+    } catch (erro) {
+        console.error("❌ Erro ao remover pasta da comunidade:", erro);
+        return res.status(500).json({ sucesso: false, erro: "Erro interno ao remover pasta." });
+    }
+});
+
+app.get("/comunidades/:id/pastas/:materiaId/arquivos", exigirLogin, async (req, res) => {
+    try {
+        const arquivos = await listarArquivosDaPastaCompartilhada(
+            req.session.usuario.id,
+            req.params.id,
+            req.params.materiaId
+        );
+
+        if (arquivos === null) {
+            return res.status(403).json({ sucesso: false, erro: "Pasta não encontrada ou sem permissão." });
+        }
+
+        return res.json({ sucesso: true, arquivos });
+    } catch (erro) {
+        console.error("❌ Erro ao listar arquivos compartilhados:", erro);
+        return res.status(500).json({ sucesso: false, erro: "Erro interno ao listar arquivos." });
+    }
+});
+
+app.post(
+    "/comunidades/:id/pastas/:materiaId/arquivos",
+    exigirLogin,
+    uploadArquivo.single("arquivo"),
+    async (req, res) => {
+        try {
+            if (!req.file) {
+                return res.status(400).json({ sucesso: false, erro: "Selecione um arquivo." });
+            }
+
+            const arquivo = await salvarArquivoNaPastaCompartilhada(
+                req.session.usuario.id,
+                req.params.id,
+                req.params.materiaId,
+                req.file
+            );
+
+            if (arquivo.semPermissao) {
+                return res.status(403).json({ sucesso: false, erro: "Somente administradores podem adicionar arquivos." });
+            }
+
+            if (arquivo.pastaNaoEncontrada) {
+                return res.status(404).json({ sucesso: false, erro: "Pasta compartilhada não encontrada." });
+            }
+
+            return res.status(201).json({ sucesso: true, arquivo });
+        } catch (erro) {
+            console.error("❌ Erro ao enviar arquivo para pasta compartilhada:", erro);
+            return res.status(500).json({ sucesso: false, erro: "Erro interno ao enviar arquivo." });
+        }
+    }
+);
+
+app.get("/comunidades/:id/pastas/:materiaId/arquivos/:arquivoId", exigirLogin, async (req, res) => {
+    try {
+        const arquivo = await buscarArquivoDaPastaCompartilhada(
+            req.session.usuario.id,
+            req.params.id,
+            req.params.materiaId,
+            req.params.arquivoId
+        );
+
+        if (!arquivo) {
+            return res.status(404).json({ sucesso: false, erro: "Arquivo não encontrado ou sem permissão." });
+        }
+
+        res.setHeader("Content-Type", arquivo.tipo || "application/octet-stream");
+        res.setHeader("Content-Disposition", `inline; filename*=UTF-8''${encodeURIComponent(arquivo.nome)}`);
+        arquivo.conteudo.pipe(res);
+    } catch (erro) {
+        console.error("❌ Erro ao abrir arquivo compartilhado:", erro);
+
+        if (!res.headersSent) {
+            return res.status(500).json({ sucesso: false, erro: "Erro interno ao abrir arquivo." });
+        }
+    }
+});
 
 // ======================================================
 // ANOTAÇÕES DA MATÉRIA
