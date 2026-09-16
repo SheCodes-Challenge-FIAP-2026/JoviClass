@@ -7,7 +7,7 @@ hamburger.addEventListener("click", () => {
 
 document.addEventListener('DOMContentLoaded', function () {
 
-
+    
     const mesAno = document.getElementById('mes-ano');
     const diasContainer = document.getElementById('dias');
     const voltarButton = document.getElementById('voltar');
@@ -1089,7 +1089,7 @@ async function salvarTarefa() {
     window.salvarTarefa = salvarTarefa;
 
     carregarTarefas();
-
+    iniciarSistemaDeNotificacoes();
 });
 
 // ==========================================================================
@@ -1328,5 +1328,3 @@ function iniciarSistemaDeNotificacoes() {
     verificarAlertasDoSistema();
   }, 5 * 60 * 1000);
 }
-
-iniciarSistemaDeNotificacoes();

@@ -563,25 +563,21 @@ function iniciarSistemaDeNotificacoes() {
     ----------------------------------------------------- */
 
     if (notifMarcarLidas) {
+        notifMarcarLidas.addEventListener("click", function (e) {
+            e.preventDefault();
+            e.stopPropagation();
 
-        notifMarcarLidas.addEventListener(
-            "click",
-            () => {
+            const notificacoes = gerarNotificacoes();
 
-                gerarNotificacoes().forEach(
-                    (n) => lidas.add(n.id)
-                );
+            notificacoes.forEach((n) => {
+                lidas.add(n.id);
+            });
 
-                salvarSet(
-                    CHAVE_LIDAS,
-                    lidas
-                );
+            salvarSet(CHAVE_LIDAS, lidas);
 
-                renderizarPainel();
-            }
-        );
+            renderizarPainel();
+        });
     }
-
 
     /* -----------------------------------------------------
        ATUALIZA A CADA 5 MINUTOS
@@ -1817,7 +1813,7 @@ function inicializarConfirmacaoCadastro() {
     usando google-auth-library.
 */
 
-const GOOGLE_CLIENT_ID="361150214707-dbmjk3nhpf86pt21r1p3qkuj3ipv23tf.apps.googleusercontent.com";
+const GOOGLE_CLIENT_ID = "361150214707-dbmjk3nhpf86pt21r1p3qkuj3ipv23tf.apps.googleusercontent.com";
 
 
 /* =========================================================
