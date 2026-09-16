@@ -8,10 +8,9 @@ const {
   getFirestore
 } = require("firebase-admin/firestore");
 
-const serviceAccount = require("../serviceAccountKey.json");
 const serviceAccount = process.env.FIREBASE_SERVICE_ACCOUNT
   ? JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT)
-  : require('../serviceAccountKey.json');
+  : require("../serviceAccountKey.json");
 
 const app = getApps().length
   ? getApps()[0]
