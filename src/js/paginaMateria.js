@@ -54,199 +54,55 @@ if (hamburger && menuLinks) {
   });
 }
 
-const DB_NAME = 'JoviClassDB';
-const DB_VERSION = 1;
-const STORE_NAME = 'arquivos';
 
-let db = null;
 
-function abrirDB() {
-  return new Promise((resolve, reject) => {
-    const req = indexedDB.open(DB_NAME, DB_VERSION);
+const chave = `arquivos_${materiaId}`;
+const chaveConteudo = (id) => `arquivoConteudo_${materiaId}_${id}`;
+const LIMITE_ARQUIVO = 2 * 1024 * 1024;
 
-    req.onupgradeneeded = (e) => {
-      const d = e.target.result;
-
-      if (!d.objectStoreNames.contains(STORE_NAME)) {
-        d.createObjectStore(STORE_NAME, { keyPath: 'chaveId' });
-      }
-    };
-
-    req.onsuccess = (e) => {
-      db = e.target.result;
-      resolve(db);
-    };
-
-    req.onerror = () => reject(req.error);
-  });
+function lsSet(k, v) {
+  try {
+    localStorage.setItem(k, v);
+    return true;
+  } catch {
+    mostrarToast('⚠️ Armazenamento cheio.');
+    return false;
+  }
 }
 
-function dbPut(obj) {
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(STORE_NAME, 'readwrite');
-    const request = tx.objectStore(STORE_NAME).put(obj);
-
-    request.onsuccess = resolve;
-    tx.onerror = () => reject(tx.error);
-  });
+function salvarConteudoArquivo(id, dataURL, mimeType) {
+  return lsSet(chaveConteudo(id), JSON.stringify({ dataURL, mimeType }));
 }
 
-function dbGet(chaveId) {
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(STORE_NAME, 'readonly');
-    const req = tx.objectStore(STORE_NAME).get(chaveId);
+let itens = (() => {
+  try {
+    return (JSON.parse(localStorage.getItem(chave)) || []).filter(i => !i.nuvem);
+  } catch {
+    return [];
+  }
+})();
 
-    req.onsuccess = () => resolve(req.result);
-    req.onerror = () => reject(req.error);
-  });
-}
-
-function converterBlobParaDataURL(blob) {
-  return new Promise((resolve, reject) => {
-    const leitor = new FileReader();
-
-    leitor.onload = () => resolve(leitor.result);
-    leitor.onerror = () => reject(leitor.error);
-
-    leitor.readAsDataURL(blob);
-  });
+function salvar() {
+  const ok = lsSet(chave, JSON.stringify(itens));
+  const materias = JSON.parse(localStorage.getItem('materias') || '[]');
+  const m = materias.find(x => x.id == materiaId);
+  if (m) {
+    m.arquivos = itens.length;
+    localStorage.setItem('materias', JSON.stringify(materias));
+  }
+  return ok;
 }
 
 async function obterArquivoArmazenado(item) {
-  if (!item.nuvem) {
-    return await dbGet(`${materiaId}_${item.id}`);
+  try {
+    return JSON.parse(localStorage.getItem(chaveConteudo(item.id)));
+  } catch {
+    return null;
   }
-
-  const resposta = await fetch(
-    `${API_BASE}/materias/${materiaId}/arquivos/${item.id}`,
-    {
-      credentials: 'include'
-    }
-  );
-
-  if (!resposta.ok) {
-    throw new Error('Não foi possível carregar o arquivo da nuvem.');
-  }
-
-  const blob = await resposta.blob();
-  const dataURL = await converterBlobParaDataURL(blob);
-
-  return {
-    dataURL,
-    mimeType: blob.type || item.mimeType
-  };
-}
-
-function dbDelete(chaveId) {
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(STORE_NAME, 'readwrite');
-    const request = tx.objectStore(STORE_NAME).delete(chaveId);
-
-    request.onsuccess = resolve;
-    tx.onerror = () => reject(tx.error);
-  });
-}
-
-const chave = `arquivos_${materiaId}`;
-
-let itens = JSON
-  .parse(localStorage.getItem(chave) || '[]')
-  .filter(item =>
-    item.tipo === 'arquivo' &&
-    !item.nuvem &&
-    item.data !== 'Salvo na nuvem'
-  );
-
-async function carregarAnotacoesDoFirestore() {
-  const resposta = await fetch(
-    `${API_BASE}/materias/${materiaId}/anotacoes`,
-    {
-      credentials: 'include'
-    }
-  );
-
-  const dados = await resposta.json();
-
-  if (!resposta.ok) {
-    throw new Error(
-      dados.erro || 'Não foi possível carregar as anotações.'
-    );
-  }
-
-  const anotacoes = dados.anotacoes.map(anotacao => ({
-    id: anotacao.id,
-    nome: anotacao.titulo,
-    tipo: 'anotacao',
-    ext: null,
-    conteudo: anotacao.texto,
-    data: 'Salva na nuvem'
-  }));
-
-  itens.push(...anotacoes);
-}
-
-async function carregarArquivosDoFirestore() {
-  const resposta = await fetch(
-    `${API_BASE}/materias/${materiaId}/arquivos`,
-    {
-      credentials: 'include'
-    }
-  );
-
-  const dados = await resposta.json();
-
-  if (!resposta.ok) {
-    throw new Error(
-      dados.erro ||
-      'Não foi possível carregar os arquivos.'
-    );
-  }
-
-  const arquivosDaNuvem = dados.arquivos.map(
-    arquivo => ({
-      id: arquivo.id,
-      nome: arquivo.nome,
-      tipo: 'arquivo',
-      ext: arquivo.nome.includes('.')
-        ? arquivo.nome.split('.').pop().toUpperCase()
-        : 'ARQUIVO',
-      mimeType: arquivo.tipo,
-      tamanho: arquivo.tamanho,
-      nuvem: true,
-      data: 'Salvo na nuvem'
-    })
-  );
-
-  itens = itens.filter(
-    item => item.tipo !== 'arquivo' || !item.nuvem
-  );
-
-  itens.push(...arquivosDaNuvem);
 }
 
 async function excluirArquivoArmazenado(item) {
-  if (item.nuvem) {
-    const resposta = await fetch(
-      `${API_BASE}/materias/${materiaId}/arquivos/${item.id}`,
-      {
-        method: 'DELETE',
-        credentials: 'include'
-      }
-    );
-
-    const dados = await resposta.json();
-
-    if (!resposta.ok) {
-      throw new Error(
-        dados.erro ||
-        'Não foi possível excluir o arquivo.'
-      );
-    }
-
-    return;
-  }
-
-  await dbDelete(`${materiaId}_${item.id}`);
+  localStorage.removeItem(chaveConteudo(item.id));
 }
 
 let dropdownAlvoIndex = null;
@@ -2271,67 +2127,37 @@ btnAddArquivo.addEventListener('click', () => inputArquivo.click());
 
 inputArquivo.addEventListener('change', async () => {
   const files = Array.from(inputArquivo.files);
+  let ok = 0;
 
-  if (!files.length) return;
-
-  try {
-    for (const file of files) {
-      if (file.size > 10 * 1024 * 1024) {
-        throw new Error(
-          `O arquivo "${file.name}" ultrapassa 10 MB.`
-        );
-      }
-
-      const formulario = new FormData();
-
-      formulario.append('arquivo', file);
-
-      const resposta = await fetch(
-        `${API_BASE}/materias/${materiaId}/arquivos`,
-        {
-          method: 'POST',
-          credentials: 'include',
-          body: formulario
-        }
-      );
-
-      const dados = await resposta.json();
-
-      if (!resposta.ok) {
-        throw new Error(
-          dados.erro ||
-          `Não foi possível enviar "${file.name}".`
-        );
-      }
-
-      const extensao = file.name
-        .split('.')
-        .pop()
-        .toUpperCase();
-
-      itens.push({
-        id: dados.arquivo.id,
-        nome: dados.arquivo.nome,
-        tipo: 'arquivo',
-        ext: extensao,
-        mimeType: dados.arquivo.tipo,
-        tamanho: dados.arquivo.tamanho,
-        nuvem: true,
-        data: 'Salvo na nuvem'
-      });
+  for (const file of files) {
+    if (file.size > LIMITE_ARQUIVO) {
+      mostrarToast(`⚠️ "${file.name}" ultrapassa 2 MB.`);
+      continue;
     }
 
-    salvar();
-    renderizar();
+    const dataURL = await lerArquivoComoDataURL(file);
+    const id = Date.now() + Math.random();
+    const mimeType = file.type || 'application/octet-stream';
 
-    mostrarToast(
-      `📎 ${files.length} arquivo(s) enviado(s)`
-    );
-  } catch (erro) {
-    console.error('Erro ao adicionar arquivo:', erro);
-    mostrarToast(`⚠️ ${erro.message}`);
+    if (!lsSet(chaveConteudo(id), JSON.stringify({ dataURL, mimeType }))) continue;
+
+    itens.push({
+      id,
+      nome: file.name,
+      tipo: 'arquivo',
+      ext: file.name.split('.').pop().toUpperCase(),
+      mimeType,
+      tamanho: file.size,
+      data: new Date().toLocaleDateString('pt-BR')
+    });
+    ok++;
   }
 
+  if (ok) {
+    salvar();
+    renderizar();
+    mostrarToast(`📎 ${ok} arquivo(s) adicionado(s)`);
+  }
   inputArquivo.value = '';
 });
 
@@ -2360,31 +2186,10 @@ dropdownArquivo.querySelectorAll('.dropItem').forEach(btn => {
     if (!item) return;
 
     if (acao === 'excluir') {
-      if (!confirm(`Excluir "${item.nome}"? Essa ação não pode ser desfeita.`)) {
-        return;
-      }
+      if (!confirm(`Excluir "${item.nome}"? Essa ação não pode ser desfeita.`)) return;
 
       if (item.tipo === 'arquivo') {
         await excluirArquivoArmazenado(item);
-      }
-
-      if (item.tipo === 'anotacao') {
-        const resposta = await fetch(
-          `${API_BASE}/materias/${materiaId}/anotacoes/${item.id}`,
-          {
-            method: 'DELETE',
-            credentials: 'include'
-          }
-        );
-
-        const dados = await resposta.json();
-
-        if (!resposta.ok) {
-          throw new Error(
-            dados.erro ||
-            'Não foi possível excluir a anotação.'
-          );
-        }
       }
 
       const origemResumoDoItem = `resumo_${item.id}`;
@@ -2397,14 +2202,10 @@ dropdownArquivo.querySelectorAll('.dropItem').forEach(btn => {
       }
 
       itens.splice(dropdownAlvoIndex, 1);
-
       salvar();
       renderizar();
-
       mostrarToast('🗑️ Item excluído');
-
       dropdownAlvoIndex = null;
-
       return;
     }
 
@@ -2490,20 +2291,28 @@ dropdownArquivo.querySelectorAll('.dropItem').forEach(btn => {
       return;
     }
 
-    if (item.tipo === 'anotacao') {
-      const blob = new Blob([item.conteudo || ''], { type: 'text/plain' });
+    if (acao === 'excluir') {
+      if (!confirm(`Excluir "${item.nome}"? Essa ação não pode ser desfeita.`)) return;
 
-      baixar(URL.createObjectURL(blob), item.nome + '.txt');
-
-    } else {
-      const registro = await obterArquivoArmazenado(item);
-
-      if (registro) {
-        baixar(registro.dataURL, item.nome);
-      } else {
-        mostrarToast('⚠️ Arquivo não encontrado no armazenamento');
-        return;
+      if (item.tipo === 'arquivo') {
+        await excluirArquivoArmazenado(item);
       }
+
+      const origemResumoDoItem = `resumo_${item.id}`;
+
+      if (
+        estadoPlayer.ativo &&
+        (estadoPlayer.origemId === item.id || estadoPlayer.origemId === origemResumoDoItem)
+      ) {
+        fecharPlayer();
+      }
+
+      itens.splice(dropdownAlvoIndex, 1);
+      salvar();
+      renderizar();
+      mostrarToast('🗑️ Item excluído');
+      dropdownAlvoIndex = null;
+      return;
     }
 
     mostrarToast('💾 Download iniciado');
@@ -2562,123 +2371,36 @@ function fecharAnotacao() {
 btnFecharAnotacao.addEventListener('click', fecharAnotacao);
 btnCancelarAnotacao.addEventListener('click', fecharAnotacao);
 
-btnSalvarAnotacao.addEventListener('click', async () => {
-  const titulo =
-    tituloAnotacao.value.trim() || 'Anotação';
-
+btnSalvarAnotacao.addEventListener('click', () => {
+  const titulo = tituloAnotacao.value.trim() || 'Anotação';
   const texto = textoAnotacao.value.trim();
+  if (!texto) return textoAnotacao.focus();
 
-  if (!texto) {
-    textoAnotacao.focus();
-    return;
+  const editIdx = areaAnotacao.dataset.editandoIndex;
+
+  if (editIdx !== undefined) {
+    const item = itens[parseInt(editIdx)];
+    if (!item) return;
+    item.nome = titulo;
+    item.conteudo = texto;
+    delete item.textoExtraido;
+  } else {
+    itens.push({
+      id: Date.now(),
+      nome: titulo,
+      tipo: 'anotacao',
+      ext: null,
+      conteudo: texto,
+      data: new Date().toLocaleDateString('pt-BR')
+    });
   }
 
-  const editIdx =
-    areaAnotacao.dataset.editandoIndex;
-
-  try {
-    if (editIdx !== undefined) {
-      const index = parseInt(editIdx);
-      const item = itens[index];
-
-      if (!item) {
-        mostrarToast('⚠️ Anotação não encontrada.');
-        return;
-      }
-
-      const resposta = await fetch(
-        `${API_BASE}/materias/${materiaId}/anotacoes/${item.id}`,
-        {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          credentials: 'include',
-          body: JSON.stringify({
-            titulo,
-            texto
-          })
-        }
-      );
-
-      const dados = await resposta.json();
-
-      if (!resposta.ok) {
-        throw new Error(
-          dados.erro ||
-          'Não foi possível editar a anotação.'
-        );
-      }
-
-      item.nome = dados.anotacao.titulo;
-      item.conteudo = dados.anotacao.texto;
-
-      mostrarToast('✏️ Anotação atualizada!');
-    } else {
-      const resposta = await fetch(
-        `${API_BASE}/materias/${materiaId}/anotacoes`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          credentials: 'include',
-          body: JSON.stringify({
-            titulo,
-            texto
-          })
-        }
-      );
-
-      const dados = await resposta.json();
-
-      if (!resposta.ok) {
-        throw new Error(
-          dados.erro ||
-          'Não foi possível salvar a anotação.'
-        );
-      }
-
-      itens.push({
-        id: dados.anotacao.id,
-        nome: dados.anotacao.titulo,
-        tipo: 'anotacao',
-        ext: null,
-        conteudo: dados.anotacao.texto,
-        data: 'Salva na nuvem'
-      });
-
-      mostrarToast('📝 Anotação salva!');
-    }
-
-    renderizar();
-    fecharAnotacao();
-  } catch (erro) {
-    console.error('Erro ao salvar anotação:', erro);
-    mostrarToast(`⚠️ ${erro.message}`);
-  }
+  if (!salvar()) return;
+  mostrarToast('📝 Anotação salva!');
+  renderizar();
+  fecharAnotacao();
 });
 
-function salvar() {
-  const arquivosLocais = itens.filter(
-  item =>
-    item.tipo === 'arquivo' &&
-    !item.nuvem
-  );
-
-  localStorage.setItem(
-    chave,
-    JSON.stringify(arquivosLocais)
-  );
-
-  const materias = JSON.parse(localStorage.getItem('materias') || '[]');
-  const m = materias.find(x => x.id == materiaId);
-
-  if (m) {
-    m.arquivos = itens.length;
-    localStorage.setItem('materias', JSON.stringify(materias));
-  }
-}
 
 function mostrarToast(msg) {
   let toast = document.getElementById('toastGlobal');
@@ -3175,49 +2897,17 @@ async function adicionarIAAnotacaoViewer(index) {
   const novoTexto =
     atual + separador + ultimoResultadoIAViewer;
 
-  try {
-    const resposta = await fetch(
-      `${API_BASE}/materias/${materiaId}/anotacoes/${item.id}`,
-      {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        credentials: 'include',
-        body: JSON.stringify({
-          titulo: item.nome,
-          texto: novoTexto
-        })
-      }
-    );
+  const antigo = item.conteudo;
+  item.conteudo = novoTexto;
 
-    const dados = await resposta.json();
-
-    if (!resposta.ok) {
-      throw new Error(
-        dados.erro ||
-        'Não foi possível atualizar a anotação.'
-      );
-    }
-
-    item.nome = dados.anotacao.titulo;
-    item.conteudo = dados.anotacao.texto;
-
-    renderizar();
-
-    mostrarToast(
-      '✨ Resultado da IA adicionado à anotação!'
-    );
-
-    abrirViewer(index);
-  } catch (erro) {
-    console.error(
-      'Erro ao atualizar anotação com IA:',
-      erro
-    );
-
-    mostrarToast(`⚠️ ${erro.message}`);
+  if (!salvar()) {
+    item.conteudo = antigo;
+    return;
   }
+
+  renderizar();
+  mostrarToast('✨ Resultado da IA adicionado à anotação!');
+  abrirViewer(index);
 }
 
 function usarIA(acao) {
@@ -3309,8 +2999,9 @@ async function importarArquivoDrive(fileId) {
     const id = Date.now() + Math.random();
     const ext = nome.split('.').pop().toUpperCase();
 
-    await dbPut({ chaveId: `${materiaId}_${id}`, dataURL, mimeType });
-
+    if (!salvarConteudoArquivo(id, dataURL, mimeType)) {
+      throw new Error('Sem espaço para salvar este arquivo.');
+    }
     itens.push({
       id,
       nome,
@@ -3503,9 +3194,6 @@ if (btnImportarNotion) {
 
 async function inicializarPaginaMateria() {
   try {
-    await abrirDB();
-    await carregarAnotacoesDoFirestore();
-    await carregarArquivosDoFirestore();
 
     renderizarIconePlayPause();
     aplicarVelocidadeBotao();
